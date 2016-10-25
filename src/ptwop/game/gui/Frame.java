@@ -3,11 +3,12 @@ package ptwop.game.gui;
 import java.awt.Dimension;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 public class Frame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
-	MenuBar menubar;
+	private MenuBar menubar;
 
 	public Frame() {
 		setTitle("Ptwop - dev");
@@ -19,5 +20,9 @@ public class Frame extends JFrame {
 
 		setVisible(true);
 		setLocationRelativeTo(null);
+	}
+	
+	public void setMainPanel(JPanel panel){
+		this.setContentPane(panel);
 	}
 }

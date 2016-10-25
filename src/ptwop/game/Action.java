@@ -14,6 +14,9 @@ public class Action implements ActionListener, ItemListener {
 	public static final String ACTION_CTRL = "control";
 
 	private static Action instance;
+	
+	private Action(){
+	}
 
 	public static Action getInstance() {
 		if (instance == null)
@@ -23,14 +26,18 @@ public class Action implements ActionListener, ItemListener {
 
 	@Override
 	public void actionPerformed(ActionEvent ev) {
-		System.out.println("Action : " + ev.getActionCommand());
-		if (ev.getActionCommand() == ACTION_QUIT)
+		String action = ev.getActionCommand();
+		System.out.println("Action : " + action);
+		if (action == ACTION_QUIT)
 			System.exit(0);
+		else if(action == ACTION_CONNECT)
+			Game.getInstance().connect();
+		else if(action == ACTION_DISCONNECT)
+			Game.getInstance().disconnect();
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent ev) {
 
 	}
-
 }
