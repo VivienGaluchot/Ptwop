@@ -37,11 +37,16 @@ public class Player implements Animable {
 		position.x = x;
 		position.y = y;
 	}
+	
+	public void setPosition(Point2D.Float pos) {
+		this.position = pos;
+	}
 
 	@Override
 	public void paint(Graphics2D g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
+		// Shape
 		Ellipse2D circle = new Ellipse2D.Float(position.x - drawSize / 2, position.y - drawSize / 2, drawSize,
 				drawSize);
 
@@ -51,12 +56,10 @@ public class Player implements Animable {
 		g2d.setColor(Color.darkGray);
 		g2d.draw(circle);
 
-		Font currentFont = g2d.getFont();
-		Font newFont = currentFont.deriveFont(0.6f);
-		g2d.setFont(newFont);
+		// Name		
 		String dispName = name.substring(0, 3);
-		int width = g2d.getFontMetrics().stringWidth(dispName);
-		g2d.drawString(dispName, position.x - width / 2f, position.y - drawSize/1.5f);
+		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
+		g2d.drawString(dispName, position.x - (float) (bound.getWidth() / 2), position.y - drawSize/1.5f);
 
 		g2d.dispose();
 	}
