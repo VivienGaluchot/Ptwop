@@ -66,7 +66,7 @@ public class Map implements Animable {
 	}
 
 	@Override
-	public void animate(int timeStep) {
+	public void animate(long timeStep) {
 		// TODO Auto-generated method stub
 
 	}

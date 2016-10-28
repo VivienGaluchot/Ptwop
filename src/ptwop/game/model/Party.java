@@ -16,14 +16,15 @@ public class Party implements Animable {
 		players = new ArrayList<>();
 	}
 
-	public void addPlayer(Player p) {
-		addPlayer(p, false);
+	public synchronized void addPlayer(Player p) {
+		if (p.isYou())
+			you = p;
+		else
+			players.add(p);
 	}
 
-	public synchronized void addPlayer(Player p, boolean you) {
-		players.add(p);
-		if (you)
-			this.you = p;
+	public synchronized Player getYou() {
+		return you;
 	}
 
 	@Override
@@ -39,19 +40,17 @@ public class Party implements Animable {
 		for (Player p : players) {
 			p.paint(g2d);
 		}
+		you.paint(g2d);
 		g2d.dispose();
 	}
 
 	@Override
-	public synchronized void animate(int timeStep) {
+	public synchronized void animate(long timeStep) {
 		map.animate(timeStep);
 
 		for (Player p : players) {
 			p.animate(timeStep);
 		}
-	}
-
-	public Player getYou() {
-		return you;
+		you.animate(timeStep);
 	}
 }

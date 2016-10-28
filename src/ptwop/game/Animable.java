@@ -6,6 +6,6 @@ public interface Animable {
 	
 	public void paint(Graphics2D g);
 	
-	public void animate(int timeStep);
+	public void animate(long timeStep);
 	
 }
