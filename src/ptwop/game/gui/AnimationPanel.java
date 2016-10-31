@@ -79,6 +79,7 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 
 	public synchronized void setAnimable(Animable animable) {
 		this.animable = animable;
+		revalidate();
 		repaint();
 	}
 

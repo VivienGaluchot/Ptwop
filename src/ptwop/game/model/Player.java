@@ -18,7 +18,8 @@ public class Player implements Animable {
 	private Point2D.Double pos;
 	private Point2D.Double speed;
 	private Point2D.Double moveTo;
-
+	
+	// u / ms
 	private double maxSpeed;
 
 	// Display
@@ -44,7 +45,7 @@ public class Player implements Animable {
 		speed = new Point2D.Double(0, 0);
 		moveTo = new Point2D.Double(0, 0);
 
-		maxSpeed = 0.001;
+		maxSpeed = 0.005;
 	}
 
 	public synchronized void moveToward(Point2D.Double p) {
@@ -77,7 +78,7 @@ public class Player implements Animable {
 		speed.x = moveTo.x - pos.x;
 		speed.y = moveTo.y - pos.y;
 		double absSpeed = Math.sqrt(speed.x * speed.x + speed.y * speed.y);
-		double correctedSpeed = (-1 * Math.exp(-1 * absSpeed) + 1) * maxSpeed;
+		double correctedSpeed = (-1 * Math.exp(-1 * absSpeed) + 1) * maxSpeed / absSpeed;
 		speed.x = (float) (speed.x * correctedSpeed);
 		speed.y = (float) (speed.y * correctedSpeed);
 

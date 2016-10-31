@@ -37,7 +37,7 @@ public class Game {
 		frame = new Frame();
 		panel = new AnimationPanel();
 		frame.setMainPanel(panel);
-		panel.repaint();
+		panel.setAnimable(null);
 	}
 
 	public void mouseMoved(Point mousePosition) {
