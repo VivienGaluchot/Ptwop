@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 
 import ptwop.game.gui.AnimationPanel;
+import ptwop.game.gui.AnimationThread;
 import ptwop.game.gui.Frame;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
@@ -17,6 +18,7 @@ public class Game {
 	protected State state;
 
 	protected Frame frame;
+	protected AnimationThread thread;
 	protected AnimationPanel panel;
 	protected Party party;
 	protected Map map;
@@ -40,7 +42,7 @@ public class Game {
 
 	public void mouseMoved(Point mousePosition) {
 		if(state == State.CONNECTED){
-			Point2D.Float pos = panel.transformMousePosition(mousePosition);
+			Point2D.Double pos = panel.transformMousePosition(mousePosition);
 			party.getYou().moveToward(pos);
 		}
 	}
@@ -53,7 +55,8 @@ public class Game {
 
 		map = new Map(Map.Type.DEFAULT_MAP);
 		party = new Party(map);
-
+		thread = new AnimationThread(panel, party);
+		
 		panel.setAnimable(party);
 		panel.setGraphicSize(map.getGraphicSize());
 
@@ -70,9 +73,8 @@ public class Game {
 		player = new Player("Steve", true);
 		player.setPos(0, 2);
 		party.addPlayer(player);
-
-		panel.repaint();
-		panel.startAnimationThread();
+		
+		thread.startAnimation();
 	}
 
 	public synchronized void disconnect() {
@@ -81,7 +83,7 @@ public class Game {
 		else
 			state = State.DISCONNECTED;
 
-		panel.stopAnimationThread();
+		thread.stopAnimation();
 		panel.setAnimable(null);
 	}
 }

@@ -12,13 +12,18 @@ public class Player implements Animable {
 	private String name;
 	private boolean you;
 
+	private Map map;
+
 	// Movement
-	private Point2D.Float pos;
-	private Point2D.Float speed;
-	private Point2D.Float moveTo;
+	private Point2D.Double pos;
+	private Point2D.Double speed;
+	private Point2D.Double moveTo;
+
+	private double maxSpeed;
 
 	// Display
 	private float drawSize;
+	private float demiDrawSize;
 	private Color fillColor;
 
 	public Player(String name) {
@@ -33,13 +38,16 @@ public class Player implements Animable {
 		else
 			fillColor = Color.gray;
 		drawSize = 0.7f;
+		demiDrawSize = drawSize / 2;
 
-		pos = new Point2D.Float(0, 0);
-		speed = new Point2D.Float(0, 0);
-		moveTo = new Point2D.Float(0, 0);
+		pos = new Point2D.Double(0, 0);
+		speed = new Point2D.Double(0, 0);
+		moveTo = new Point2D.Double(0, 0);
+
+		maxSpeed = 0.001;
 	}
 
-	public synchronized void moveToward(Point2D.Float p) {
+	public synchronized void moveToward(Point2D.Double p) {
 		moveTo = p;
 	}
 
@@ -48,7 +56,7 @@ public class Player implements Animable {
 		Graphics2D g2d = (Graphics2D) g.create();
 
 		// Shape
-		Ellipse2D circle = new Ellipse2D.Float(pos.x - drawSize / 2, pos.y - drawSize / 2, drawSize, drawSize);
+		Ellipse2D circle = new Ellipse2D.Double(pos.x - demiDrawSize, pos.y - demiDrawSize, drawSize, drawSize);
 
 		g2d.setColor(fillColor);
 		g2d.fill(circle);
@@ -59,18 +67,28 @@ public class Player implements Animable {
 		// Name
 		String dispName = name.substring(0, 3);
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
-		g2d.drawString(dispName, pos.x - (float) (bound.getWidth() / 2), pos.y - drawSize / 1.5f);
+		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - drawSize / 1.5f);
 
 		g2d.dispose();
 	}
 
 	@Override
 	public synchronized void animate(long timeStep) {
-		speed.x = (moveTo.x - pos.x)*0.001f;
-		speed.y = (moveTo.y - pos.y)*0.001f;
-		
-		pos.x = pos.x + speed.x*timeStep;
-		pos.y = pos.y + speed.y*timeStep;		
+		speed.x = moveTo.x - pos.x;
+		speed.y = moveTo.y - pos.y;
+		double absSpeed = Math.sqrt(speed.x * speed.x + speed.y * speed.y);
+		double correctedSpeed = (-1 * Math.exp(-1 * absSpeed) + 1) * maxSpeed;
+		speed.x = (float) (speed.x * correctedSpeed);
+		speed.y = (float) (speed.y * correctedSpeed);
+
+		pos.x = pos.x + speed.x * timeStep;
+		pos.y = pos.y + speed.y * timeStep;
+
+		Rectangle2D rectMap = map.getMapShape();
+		pos.x = (float) Math.min(pos.x, rectMap.getMaxX() - demiDrawSize);
+		pos.y = (float) Math.min(pos.y, rectMap.getMaxY() - demiDrawSize);
+		pos.x = (float) Math.max(pos.x, rectMap.getMinY() + demiDrawSize);
+		pos.y = (float) Math.max(pos.y, rectMap.getMinY() + demiDrawSize);
 	}
 
 	public void setPos(float x, float y) {
@@ -78,11 +96,15 @@ public class Player implements Animable {
 		pos.y = y;
 	}
 
-	public void setPos(Point2D.Float pos) {
+	public void setPos(Point2D.Double pos) {
 		this.pos = pos;
 	}
 
 	public boolean isYou() {
 		return you;
+	}
+
+	public void setMap(Map map) {
+		this.map = map;
 	}
 }

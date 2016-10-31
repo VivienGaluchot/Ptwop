@@ -16,9 +16,9 @@ public class Map implements Animable {
 	private Rectangle2D mapShape;
 	private Rectangle2D blueCamp;
 	private Rectangle2D redCamp;
-	
-	private static Color blueCampColor = new Color(200,210,255);
-	private static Color redCampColor = new Color(255,210,200);
+
+	private static Color blueCampColor = new Color(200, 210, 255);
+	private static Color redCampColor = new Color(255, 210, 200);
 
 	public Map(Type type) {
 		this.type = type;
@@ -52,7 +52,7 @@ public class Map implements Animable {
 
 		g2d.setColor(blueCampColor);
 		g2d.fill(blueCamp);
-		
+
 		g2d.setColor(redCampColor);
 		g2d.fill(redCamp);
 
@@ -69,5 +69,9 @@ public class Map implements Animable {
 	public void animate(long timeStep) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public Rectangle2D getMapShape() {
+		return mapShape;
 	}
 }

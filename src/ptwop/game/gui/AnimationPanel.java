@@ -23,8 +23,6 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 	private Animable animable;
 	private int graphicSize;
 	
-	private boolean runAnimation;
-	
 	private AffineTransform currentTransform;
 
 	public AnimationPanel() {
@@ -94,9 +92,9 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 		repaint();
 	}
 	
-	public Point2D.Float transformMousePosition(Point position){
+	public Point2D.Double transformMousePosition(Point position){
 		try {
-			Point2D.Float p = new Point2D.Float(position.x, position.y);
+			Point2D.Double p = new Point2D.Double(position.x, position.y);
 			currentTransform.inverseTransform(p, p);
 			return p;
 		} catch (NoninvertibleTransformException e) {
@@ -107,29 +105,6 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 
 	public int getGraphicSize() {
 		return graphicSize;
-	}
-	
-	public void startAnimationThread(){
-		runAnimation = true;
-		
-		Thread thread = new Thread(){
-			public void run(){
-				long lastMs = System.currentTimeMillis();
-				
-				while(runAnimation){
-					long now = System.currentTimeMillis();
-					animable.animate(now-lastMs);
-					repaint();
-					lastMs = now;
-				}
-			}
-		};
-		
-		thread.start();
-	}
-	
-	public void stopAnimationThread(){
-		runAnimation = false;
 	}
 	
 	// Component Listener
