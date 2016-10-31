@@ -18,7 +18,7 @@ public class Party implements Animable {
 
 	public synchronized void addPlayer(Player p) {
 		p.setMap(map);
-		
+
 		if (p.isYou())
 			you = p;
 		else

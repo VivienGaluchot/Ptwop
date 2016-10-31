@@ -1,42 +1,54 @@
 package ptwop.game.gui;
 
 import java.awt.Component;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
 
 import ptwop.game.Animable;
 
-public class AnimationThread{
+public class AnimationThread {
 	private boolean runAnimation;
-	
-	private Component component;
-	private Animable animable;
-	
+
+	private final Component component;
+	private final Animable animable;
+
 	private Thread thread;
-	
-	public AnimationThread(Component compo, Animable anim){
+
+	public AnimationThread(Component compo, Animable anim) {
 		this.component = compo;
 		this.animable = anim;
-		
-		thread = new Thread(){
+
+		thread = new Thread() {
 			@Override
-			public void run(){
+			public void run() {
 				long lastMs = System.currentTimeMillis();
 				runAnimation = true;
-				
-				while(runAnimation){
+
+				while (runAnimation) {
 					long now = System.currentTimeMillis();
-					animable.animate(now-lastMs);
-					component.repaint();
+					animable.animate(now - lastMs);
 					lastMs = now;
+					try {
+						SwingUtilities.invokeAndWait(new Runnable() {
+							@Override
+							public void run() {
+								component.repaint();
+							}
+						});
+					} catch (InvocationTargetException | InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		};
 	}
-	
-	public void startAnimation(){
+
+	public void startAnimation() {
 		thread.start();
 	}
-	
-	public void stopAnimation(){
+
+	public void stopAnimation() {
 		runAnimation = false;
 		try {
 			thread.join();

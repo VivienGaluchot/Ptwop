@@ -20,6 +20,10 @@ public class Map implements Animable {
 	private static Color blueCampColor = new Color(200, 210, 255);
 	private static Color redCampColor = new Color(255, 210, 200);
 
+	long lastFpsMesure = 0;
+	long fpsCounter = 0;
+	long fps = 0;
+
 	public Map(Type type) {
 		this.type = type;
 		if (type == Type.DEFAULT_MAP) {
@@ -62,13 +66,20 @@ public class Map implements Animable {
 		int width = g2d.getFontMetrics().stringWidth(name);
 		g2d.drawString(name, -width / 2, (int) mapShape.getY() - 0.5f);
 
+		g2d.drawString(fps + " fps", (int) mapShape.getY(), (int) mapShape.getMinX() - 0.5f);
+
 		g2d.dispose();
 	}
 
 	@Override
 	public void animate(long timeStep) {
-		// TODO Auto-generated method stub
-
+		if (System.currentTimeMillis() - lastFpsMesure > 500) {
+			lastFpsMesure = System.currentTimeMillis();
+			fps = fpsCounter*2;
+			fpsCounter = 0;
+		} else {
+			fpsCounter++;
+		}
 	}
 
 	public Rectangle2D getMapShape() {
