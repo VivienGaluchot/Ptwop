@@ -2,13 +2,20 @@ package ptwop.game.model;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
+import java.awt.geom.Rectangle2D;
 
 import ptwop.game.Animable;
 
 public abstract class Mobile implements Animable {
+
+	protected Shape mobileShape;
+	protected Rectangle2D mobileBounds;
+
 	// Movement
 	protected Point2D.Double pos;
 	protected Point2D.Double speed;
@@ -28,6 +35,10 @@ public abstract class Mobile implements Animable {
 
 		maxSpeed = 5;
 		maxAcc = 10;
+
+		this.mobileShape = new Ellipse2D.Double(pos.x - 0.5, pos.y - 0.5, 1, 1);
+		;
+		this.mobileBounds = null;
 	}
 
 	public synchronized void moveToward(Point2D.Double p) {
@@ -43,7 +54,29 @@ public abstract class Mobile implements Animable {
 		this.pos = pos;
 	}
 
-	protected abstract void rectifyPosition();
+	public synchronized void setBounds(Rectangle2D bounds) {
+		this.mobileBounds = bounds;
+	}
+
+	public synchronized void setShape(Ellipse2D shape) {
+		this.mobileShape = shape;
+	}
+
+	public Shape getTranslatedShape() {
+		AffineTransform transformShape = new AffineTransform();
+		transformShape.translate(pos.x, pos.y);
+		return transformShape.createTransformedShape(mobileShape);
+	}
+
+	protected void rectifyPosition() {
+		if (mobileBounds != null) {
+			Rectangle2D bounds = mobileShape.getBounds2D();
+			pos.x = (float) Math.min(pos.x, mobileBounds.getMaxX() + bounds.getMinX());
+			pos.y = (float) Math.min(pos.y, mobileBounds.getMaxY() + bounds.getMinY());
+			pos.x = (float) Math.max(pos.x, mobileBounds.getMinY() + bounds.getMaxX());
+			pos.y = (float) Math.max(pos.y, mobileBounds.getMinY() + bounds.getMaxY());
+		}
+	}
 
 	@Override
 	public synchronized void animate(long timeStep) {
@@ -82,9 +115,12 @@ public abstract class Mobile implements Animable {
 	public synchronized void paint(Graphics2D g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
-		Ellipse2D circle = new Ellipse2D.Double(pos.x - 0.5, pos.y - 0.5, 1, 1);
-		g2d.setColor(Color.darkGray);
-		g2d.draw(circle);
+		g2d.setColor(Color.red);
+		Line2D speedVect = new Line2D.Double(pos.x, pos.y, speed.x + pos.x, speed.y + pos.y);
+		g2d.draw(speedVect);
+		g2d.setColor(Color.blue);
+		Line2D accVect = new Line2D.Double(pos.x, pos.y, acc.x + pos.x, acc.y + pos.y);
+		g2d.draw(accVect);
 
 		g2d.dispose();
 	}

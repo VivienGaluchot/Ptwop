@@ -50,10 +50,5 @@ public class AnimationThread {
 
 	public void stopAnimation() {
 		runAnimation = false;
-		try {
-			thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 }
