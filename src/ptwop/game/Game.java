@@ -82,7 +82,10 @@ public class Game {
 		player.setPos(0.2f, 2);
 		party.addPlayer(player);
 
+		for (int i = -10; i <= 10; i++) {
+			for (int j = -10; j <= 10; j++) {
 				player = new Player("Bob");
+				player.setPos(i, j);
 				party.addPlayer(player);
 			}
 		}
