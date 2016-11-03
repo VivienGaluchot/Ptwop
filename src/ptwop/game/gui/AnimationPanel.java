@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 
 import ptwop.game.Action;
 import ptwop.game.Animable;
+import ptwop.game.physic.Vector2D;
 
 public class AnimationPanel extends JPanel implements ComponentListener {
 	private static final long serialVersionUID = 1L;
@@ -93,11 +94,11 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 		repaint();
 	}
 	
-	public Point2D.Double transformMousePosition(Point position){
+	public Vector2D transformMousePosition(Point position){
 		try {
 			Point2D.Double p = new Point2D.Double(position.x, position.y);
 			currentTransform.inverseTransform(p, p);
-			return p;
+			return new Vector2D(p);
 		} catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}

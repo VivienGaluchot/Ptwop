@@ -1,4 +1,4 @@
-package ptwop.game.model;
+package ptwop.game.physic;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -14,34 +14,31 @@ import ptwop.game.Animable;
 public abstract class Mobile implements Animable {
 
 	protected Shape mobileShape;
+	protected double radius;
 	protected Rectangle2D mobileBounds;
 
 	// Movement
-	protected Point2D.Double pos;
-	protected Point2D.Double speed;
-	protected Point2D.Double acc;
-	protected Point2D.Double moveTo;
+	protected Vector2D pos;
+	protected Vector2D speed;
+	protected Vector2D acc;
+	protected Vector2D moveTo;
 
-	// u / s
-	protected double maxSpeed;
-	// u / s²
-	protected double maxAcc;
+	protected double mass;
 
-	public Mobile() {
-		pos = new Point2D.Double(0, 0);
-		speed = new Point2D.Double(0, 0);
-		acc = new Point2D.Double(0, 0);
-		moveTo = new Point2D.Double(0, 0);
+	public Mobile(double mass, double radius) {
+		pos = new Vector2D(0, 0);
+		speed = new Vector2D(0, 0);
+		acc = new Vector2D(0, 0);
+		moveTo = new Vector2D(0, 0);
 
-		maxSpeed = 5;
-		maxAcc = 10;
+		this.mass = mass;
+		this.radius = radius;
 
-		this.mobileShape = new Ellipse2D.Double(pos.x - 0.5, pos.y - 0.5, 1, 1);
-		;
+		this.mobileShape = new Ellipse2D.Double(pos.x - radius / 2, pos.y - radius / 2, radius, radius);
 		this.mobileBounds = null;
 	}
 
-	public synchronized void moveToward(Point2D.Double p) {
+	public synchronized void moveToward(Vector2D p) {
 		moveTo = p;
 	}
 
@@ -50,7 +47,7 @@ public abstract class Mobile implements Animable {
 		pos.y = y;
 	}
 
-	public synchronized void setPos(Point2D.Double pos) {
+	public synchronized void setPos(Vector2D pos) {
 		this.pos = pos;
 	}
 
@@ -94,13 +91,13 @@ public abstract class Mobile implements Animable {
 		A.y = (-speed.y - 2 * B.y * T) / (3 * T * T);
 		acc.x = A.x * time + B.x;
 		acc.y = A.y * time + B.y;
-		capModule(acc, maxAcc);
+		capModule(acc, Constants.maxPower / mass);
 
 		speed.x = speed.x + acc.x * time;
 		speed.y = speed.y + acc.y * time;
-		capModule(speed, maxSpeed);
+		capModule(speed, Constants.maxSpeed);
 
-		Point2D.Double oldPos = (Point2D.Double) pos.clone();
+		Vector2D oldPos = pos.clone();
 
 		pos.x = pos.x + speed.x * time;
 		pos.y = pos.y + speed.y * time;
@@ -109,6 +106,59 @@ public abstract class Mobile implements Animable {
 		// true speed, after computing real position
 		speed.x = (pos.x - oldPos.x) / time;
 		speed.y = (pos.y - oldPos.y) / time;
+	}
+
+	public boolean colliding(Mobile mobile) {
+		double xd = pos.x - mobile.pos.x;
+		double yd = pos.y - mobile.pos.y;
+
+		double sumRadius = radius + mobile.radius;
+		double sqrRadius = sumRadius * sumRadius;
+
+		double distSqr = (xd * xd) + (yd * yd);
+
+		if (distSqr <= sqrRadius) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public void resolveCollision(Mobile mobile) {
+		// get the mtd
+		Vector2D delta = (pos.subtract(mobile.pos));
+		double d = delta.getLength();
+		// minimum translation distance to push balls apart after intersecting
+		Vector2D mtd = delta.multiply(((radius + mobile.radius) - d) / d);
+		
+		if(mtd.isNull())
+			return;
+
+		// resolve intersection --
+		// inverse mass quantities
+		double im1 = 1 / mass;
+		double im2 = 1 / mobile.mass;
+
+		// push-pull them apart based off their mass
+		pos = pos.add(mtd.multiply(im1 / (im1 + im2)));
+		mobile.pos = mobile.pos.subtract(mtd.multiply(im2 / (im1 + im2)));
+
+		// impact speed
+		Vector2D v = (speed.subtract(mobile.speed));
+		double vn = v.dot(mtd.normalize());
+
+		// sphere intersecting but moving away from each other already
+		if (vn > 0.0f)
+			return;
+
+		// collision impulse
+		double i = (-(1.0 + Constants.restitution) * vn) / (im1 + im2);
+		Vector2D impulse = mtd.multiply(i);
+
+		// change in momentum
+		speed = speed.add(impulse.multiply(im1));
+		mobile.speed = mobile.speed.subtract(impulse.multiply(im2));
+
 	}
 
 	@Override
@@ -125,7 +175,7 @@ public abstract class Mobile implements Animable {
 		g2d.dispose();
 	}
 
-	private void capModule(Point2D.Double p, double module) {
+	private void capModule(Vector2D p, double module) {
 		double absModule = Math.sqrt(p.x * p.x + p.y * p.y);
 		if (absModule > module) {
 			double correctedSpeed = module / absModule;
