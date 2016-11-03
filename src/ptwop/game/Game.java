@@ -4,12 +4,15 @@ import java.awt.Point;
 
 import ptwop.game.gui.AnimationPanel;
 import ptwop.game.gui.AnimationThread;
+import ptwop.game.gui.Dialog;
 import ptwop.game.gui.Frame;
 import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.physic.Vector2D;
+import ptwop.game.transfert.Client;
+import ptwop.game.transfert.Server;
 
 public class Game {
 	public enum State {
@@ -17,6 +20,9 @@ public class Game {
 	}
 
 	protected State state;
+
+	protected Server server;
+	protected Client client;
 
 	protected Frame frame;
 	protected AnimationThread thread;
@@ -35,6 +41,7 @@ public class Game {
 
 	private Game() {
 		state = State.DISCONNECTED;
+		System.out.println("Game state : DISCONNECTED");
 
 		frame = new Frame();
 		panel = new AnimationPanel();
@@ -52,47 +59,47 @@ public class Game {
 	public synchronized void connect() {
 		if (state == State.CONNECTED)
 			return;
-		else
+		else {
+			String ip = Dialog.IPDialog(frame);
+			if (ip == null)
+				return;
+			client = new Client();
+			client.connectToServer(ip);
+
+			map = new Map(Map.Type.DEFAULT_MAP);
+			chrono = new Chrono(10);
+			party = new Party(map);
+			thread = new AnimationThread(panel, party);
+
+			panel.setAnimable(party);
+			panel.setGraphicSize(map.getGraphicSize());
+
+			Player player;
+
+			player = new Player("Alice");
+			player.setPos(5, -4.9f);
+			party.addPlayer(player);
+
+			player = new Player("Bob");
+			player.setPos(3.7f, 8);
+			party.addPlayer(player);
+
+			player = new Player("Bob");
+			player.setPos(3.8f, 8);
+			player.moveToward(new Vector2D(3.8, 8));
+			party.addPlayer(player);
+
+			player = new Player("Steve", true);
+			player.setPos(0.2f, 2);
+			party.addPlayer(player);
+
+			party.addChrono(chrono);
+
+			thread.startAnimation();
+
 			state = State.CONNECTED;
-
-		map = new Map(Map.Type.DEFAULT_MAP);
-		chrono = new Chrono(10);
-		party = new Party(map);
-		thread = new AnimationThread(panel, party);
-
-		panel.setAnimable(party);
-		panel.setGraphicSize(map.getGraphicSize());
-
-		Player player;
-
-		player = new Player("Alice");
-		player.setPos(5, -4.9f);
-		party.addPlayer(player);
-
-		player = new Player("Bob");
-		player.setPos(3.7f, 8);
-		party.addPlayer(player);
-
-		player = new Player("Bob");
-		player.setPos(3.8f, 8);
-		player.moveToward(new Vector2D(3.8, 8));
-		party.addPlayer(player);
-
-		player = new Player("Steve", true);
-		player.setPos(0.2f, 2);
-		party.addPlayer(player);
-
-		for (int i = -10; i <= 10; i++) {
-			for (int j = -10; j <= 10; j++) {
-				player = new Player("Bob");
-				player.setPos(i, j);
-				party.addPlayer(player);
-			}
+			System.out.println("Game state : CONNECTED");
 		}
-
-		party.addChrono(chrono);
-		
-		thread.startAnimation();
 	}
 
 	public synchronized void disconnect() {
@@ -100,8 +107,19 @@ public class Game {
 			return;
 		else
 			state = State.DISCONNECTED;
+		System.out.println("Game state : CONNECTED");
 
 		thread.stopAnimation();
 		panel.setAnimable(null);
+	}
+
+	public void launchServer() {
+		if (server != null) {
+			Dialog.displayError(frame, "Serveur existant");
+			return;
+		}
+		
+		server = new Server();
+		server.startListener();
 	}
 }

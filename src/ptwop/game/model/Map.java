@@ -6,7 +6,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import ptwop.game.Animable;
-import ptwop.game.physic.Mobile;
 
 public class Map implements Animable {
 	public enum Type {

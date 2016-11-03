@@ -25,10 +25,7 @@ public class Collider implements Animable{
 	}
 
 	@Override
-	public synchronized void animate(long timeStep) {
-		for(Mobile m : mobiles)
-			m.animate(timeStep);
-		
+	public synchronized void animate(long timeStep) {		
 		for (int i = 0; i < mobiles.size(); i++)  
 		{  
 		    for (int j = i + 1; j < mobiles.size(); j++)  
@@ -39,5 +36,8 @@ public class Collider implements Animable{
 		        }
 		    }
 		}
+
+		for(Mobile m : mobiles)
+			m.animate(timeStep);
 	}
 }

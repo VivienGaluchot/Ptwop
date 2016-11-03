@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import ptwop.game.Animable;
 import ptwop.game.physic.Collider;
-import ptwop.game.physic.Mobile;
 
 public class Party implements Animable {
 	private Map map;
