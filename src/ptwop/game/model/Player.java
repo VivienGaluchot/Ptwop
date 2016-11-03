@@ -6,13 +6,13 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
+import ptwop.game.physic.Mobile;
+
 public class Player extends Mobile {
 	private String name;
 	private boolean you;
 
 	// Display
-	private float drawSize;
-	private float demiDrawSize;
 	private Color fillColor;
 
 	public Player(String name) {
@@ -20,16 +20,15 @@ public class Player extends Mobile {
 	}
 
 	public Player(String name, boolean you) {
+		super(1, 0.35f);
 		this.name = name;
 		this.you = you;
 		if (you)
 			fillColor = Color.white;
 		else
 			fillColor = Color.gray;
-		drawSize = 0.7f;
-		demiDrawSize = drawSize / 2;
 
-		this.setShape(new Ellipse2D.Double(-demiDrawSize, -demiDrawSize, drawSize, drawSize));
+		this.setShape(new Ellipse2D.Double(-radius, -radius, 2*radius, 2*radius));
 	}
 
 	@Override
@@ -47,9 +46,10 @@ public class Player extends Mobile {
 		// Name
 		String dispName = name.concat("   ").substring(0, 3);
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
-		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - drawSize / 1.5f);
-
-		super.paint(g2d);
+		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - (float) radius*2 / 1.5f);
+		
+		if(isYou())
+			super.paint(g2d);
 		g2d.dispose();
 	}
 

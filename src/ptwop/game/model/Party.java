@@ -2,25 +2,24 @@ package ptwop.game.model;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 
 import ptwop.game.Animable;
+import ptwop.game.physic.Collider;
 
 public class Party implements Animable {
 	private Map map;
-	private ArrayList<Player> players;
+	private Collider collider;
 	private Player you;
 	private Chrono chrono = null;
 
 	public Party(Map map) {
 		this.map = map;
-		players = new ArrayList<>();
+		collider = new Collider();
 	}
 	
 	public Party(Map map, Chrono chrono) {
 		this.map = map;
 		this.chrono = chrono;
-		players = new ArrayList<>();
 	}
 	
 	public synchronized void addChrono(Chrono chrono){
@@ -32,8 +31,8 @@ public class Party implements Animable {
 
 		if (p.isYou())
 			you = p;
-		else
-			players.add(p);
+		
+		collider.add(p);
 	}
 
 	public synchronized Player getYou() {
@@ -50,11 +49,9 @@ public class Party implements Animable {
 		Font newFont = currentFont.deriveFont(0.6f);
 		g2d.setFont(newFont);
 
-		for (Player p : players) {
-			p.paint(g2d);
-		}
-		you.paint(g2d);
+		collider.paint(g2d);
 		if (chrono != null) chrono.paint(g2d);
+
 		g2d.dispose();
 	}
 
@@ -62,10 +59,9 @@ public class Party implements Animable {
 	public synchronized void animate(long timeStep) {
 		map.animate(timeStep);
 
-		for (Player p : players) {
-			p.animate(timeStep);
-		}
-		you.animate(timeStep);
-		if (chrono != null)chrono.animate(timeStep);
+
+
+		collider.animate(timeStep);	
+		if (chrono != null)chrono.animate(timeStep);	
 	}
 }

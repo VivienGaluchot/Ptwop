@@ -1,7 +1,6 @@
 package ptwop.game;
 
 import java.awt.Point;
-import java.awt.geom.Point2D;
 
 import ptwop.game.gui.AnimationPanel;
 import ptwop.game.gui.AnimationThread;
@@ -10,6 +9,7 @@ import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
+import ptwop.game.physic.Vector2D;
 
 public class Game {
 	public enum State {
@@ -43,8 +43,8 @@ public class Game {
 	}
 
 	public void mouseMoved(Point mousePosition) {
-		if(state == State.CONNECTED){
-			Point2D.Double pos = panel.transformMousePosition(mousePosition);
+		if (state == State.CONNECTED) {
+			Vector2D pos = panel.transformMousePosition(mousePosition);
 			party.getYou().moveToward(pos);
 		}
 	}
@@ -59,7 +59,7 @@ public class Game {
 		chrono = new Chrono(10);
 		party = new Party(map);
 		thread = new AnimationThread(panel, party);
-		
+
 		panel.setAnimable(party);
 		panel.setGraphicSize(map.getGraphicSize());
 
@@ -72,12 +72,24 @@ public class Game {
 		player = new Player("Bob");
 		player.setPos(3.7f, 8);
 		party.addPlayer(player);
-		
+
+		player = new Player("Bob");
+		player.setPos(3.8f, 8);
+		player.moveToward(new Vector2D(3.8, 8));
+		party.addPlayer(player);
+
 		player = new Player("Steve", true);
 		player.setPos(0, 2);
 		party.addPlayer(player);
-		
+
+		for (int i = 0; i < 15; i++) {
+			player = new Player("Bob");
+			player.setPos(i, 8);
+			party.addPlayer(player);
+		}
+
 		party.addChrono(chrono);
+		
 		thread.startAnimation();
 	}
 
