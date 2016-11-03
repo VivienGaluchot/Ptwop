@@ -1,6 +1,7 @@
 package ptwop.game;
 
 import java.awt.Point;
+import java.io.IOException;
 
 import ptwop.game.gui.AnimationPanel;
 import ptwop.game.gui.AnimationThread;
@@ -52,7 +53,8 @@ public class Game {
 	public void mouseMoved(Point mousePosition) {
 		if (state == State.CONNECTED) {
 			Vector2D pos = panel.transformMousePosition(mousePosition);
-			party.getYou().moveToward(pos);
+			if(party.getYou() != null)
+				party.getYou().moveToward(pos);
 		}
 	}
 
@@ -64,36 +66,48 @@ public class Game {
 			if (ip == null)
 				return;
 			client = new Client();
-			client.connectToServer(ip);
+			try {
+				client.connectToServer(ip, "Michel");
+				party = client.getJoinedParty();
+				
+				thread = new AnimationThread(panel, party);
+				panel.setAnimable(party);
+				
+				map = party.getMap();
+				panel.setGraphicSize(map.getGraphicSize());
+				
+			} catch (IOException e) {
+				Dialog.displayError(null, e.toString());
+				
+				map = new Map(Map.Type.DEFAULT_MAP);
+				chrono = new Chrono(10);
+				party = new Party(map);
+				thread = new AnimationThread(panel, party);
 
-			map = new Map(Map.Type.DEFAULT_MAP);
-			chrono = new Chrono(10);
-			party = new Party(map);
-			thread = new AnimationThread(panel, party);
+				panel.setAnimable(party);
+				panel.setGraphicSize(map.getGraphicSize());
 
-			panel.setAnimable(party);
-			panel.setGraphicSize(map.getGraphicSize());
+				Player player;
 
-			Player player;
+				player = new Player("Alice");
+				player.setPos(5, -4.9f);
+				party.addPlayer(player);
 
-			player = new Player("Alice");
-			player.setPos(5, -4.9f);
-			party.addPlayer(player);
+				player = new Player("Bob");
+				player.setPos(3.7f, 8);
+				party.addPlayer(player);
 
-			player = new Player("Bob");
-			player.setPos(3.7f, 8);
-			party.addPlayer(player);
+				player = new Player("Bob");
+				player.setPos(3.8f, 8);
+				player.moveToward(new Vector2D(3.8, 8));
+				party.addPlayer(player);
 
-			player = new Player("Bob");
-			player.setPos(3.8f, 8);
-			player.moveToward(new Vector2D(3.8, 8));
-			party.addPlayer(player);
+				player = new Player("Steve", true);
+				player.setPos(0.2f, 2);
+				party.addPlayer(player);
 
-			player = new Player("Steve", true);
-			player.setPos(0.2f, 2);
-			party.addPlayer(player);
-
-			party.addChrono(chrono);
+				party.addChrono(chrono);
+			}
 
 			thread.startAnimation();
 
@@ -118,7 +132,7 @@ public class Game {
 			Dialog.displayError(frame, "Serveur existant");
 			return;
 		}
-		
+
 		server = new Server();
 		server.startListener();
 	}

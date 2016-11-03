@@ -3,35 +3,21 @@ package ptwop.game.transfert;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
-import ptwop.game.model.Party;
+import ptwop.game.model.Map;
 
 public class Server {
-	private Party hostedParty;
+	private ServerParty hostedParty;
 
 	private Thread listenerThread;
-	private ArrayList<Connection> clients;
 	private ServerSocket listener;
 
 	public Server() {
-		clients = new ArrayList<>();
+		this(new Map(Map.Type.DEFAULT_MAP));
 	}
 
-	public void sendToAll(Message m) {
-		synchronized (clients) {
-			for (int i = 0; i < clients.size(); i++) {
-				try {
-					clients.get(i).send(m);
-				} catch (IOException e) {
-					if (!clients.get(i).isConnected()) {
-						clients.remove(i);
-						i = i - 1;
-					}
-					e.printStackTrace();
-				}
-			}
-		}
+	public Server(Map map) {
+		hostedParty = new ServerParty(map);
 	}
 
 	public void startListener() {
@@ -41,16 +27,11 @@ public class Server {
 					listener = new ServerSocket(Constants.NETWORK_PORT);
 					while (true) {
 						Socket socket = listener.accept();
-						System.out.println("Server : new client");
-						synchronized (clients) {
-							clients.add(new Connection(socket));
-						}
+						System.out.println("Server : new client from " + socket.getInetAddress());
+						hostedParty.handleNewPlayer(socket);
 					}
 				} catch (Exception e) {
-					System.err.println("Server Error: " + e.getMessage());
-					System.err.println("Localized: " + e.getLocalizedMessage());
-					System.err.println("Stack Trace: " + e.getStackTrace());
-					System.err.println("To String: " + e.toString());
+					System.err.println("Listener error : " + e.toString());
 				}
 			}
 		};

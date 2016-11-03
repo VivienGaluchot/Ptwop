@@ -15,6 +15,10 @@ public class Vector2D {
 		this.x = p.getX();
 		this.y = p.getY();
 	}
+	
+	public Point2D.Double toPoint2D(){
+		return new Point2D.Double(x,y);
+	}
 
 	public Vector2D clone() {
 		return new Vector2D(x, y);

@@ -2,20 +2,24 @@ package ptwop.game.physic;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.List;
 
 import ptwop.game.Animable;
-import ptwop.game.model.Player;
 
 public class Collider implements Animable{
 	
-	private ArrayList<Mobile> mobiles;
+	private List<Mobile> mobiles;
 	
 	public Collider(){
-		mobiles = new ArrayList<>();
+		mobiles = new ArrayList<Mobile>();
 	}
 	
-	public synchronized void add(Player p) {
-		mobiles.add(p);
+	public synchronized void add(Mobile m){
+		mobiles.add(m);
+	}
+	
+	public synchronized void remove(Mobile m){
+		mobiles.remove(m);
 	}
 
 	@Override

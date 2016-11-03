@@ -45,7 +45,7 @@ public class Player extends Mobile {
 		g2d.draw(shape);
 
 		// Name
-		String dispName = name.concat("   ").substring(0, 3);
+		String dispName = (name.length() > 3) ? name.substring(0, 3) : name;
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
 		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - (float) radius*2 / 1.5f);
 		
@@ -68,5 +68,9 @@ public class Player extends Mobile {
 
 	public void setScore(int score) {
 		this.score = score;
+	}
+	
+	public String getName() {
+		return name;
 	}
 }

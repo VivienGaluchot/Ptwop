@@ -27,7 +27,7 @@ public class Party implements Animable {
 		players = new ArrayList<>();
 	}
 
-	public synchronized void addChrono(Chrono chrono) {
+	public void addChrono(Chrono chrono) {
 		this.chrono = chrono;
 	}
 
@@ -40,11 +40,19 @@ public class Party implements Animable {
 		collider.add(p);
 		players.add(p);
 	}
+	
+	public synchronized void removePlayer(Player p){
+		collider.remove(p);
+		players.remove(p);
+	}
 
-	public synchronized Player getYou() {
+	public Player getYou() {
 		return you;
 	}
 	
+	public Map getMap() {
+		return map;
+	}
 
 	private void checkWinner() {
 		int winner = 0;
@@ -83,7 +91,6 @@ public class Party implements Animable {
 	@Override
 	public synchronized void paint(Graphics2D g) {
 		Graphics2D g2d = (Graphics2D) g.create();
-		map.isInCamp(you);
 		map.paint(g2d);
 
 		// Player name size
@@ -107,6 +114,8 @@ public class Party implements Animable {
 	@Override
 	public synchronized void animate(long timeStep) {
 		map.animate(timeStep);
+		if(you != null)
+			map.isInCamp(you);
 
 		collider.animate(timeStep);
 		if (chrono != null)

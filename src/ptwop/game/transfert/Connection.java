@@ -5,18 +5,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class Connection extends Thread {
+public class Connection {
 	Socket socket;
 	ObjectOutputStream out;
 	ObjectInputStream in;
 
-	public Connection(Socket socket) throws IOException {
+	private int id;
+
+	public Connection(Socket socket, int id) throws IOException {
 		this.socket = socket;
+		this.setId(id);
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 	}
-	
-	public boolean isConnected(){
+
+	public boolean isConnected() {
 		return socket.isConnected();
 	}
 
@@ -28,23 +31,25 @@ public class Connection extends Thread {
 		}
 	}
 
-	public void send(Message m) throws IOException {
-		out.writeObject(m);
+	public void send(Object o) throws IOException {
+		out.writeObject(o);
 	}
 
-	@Override
-	public void run() {
-		boolean quit = false;
-		while (!quit) {
-			try {
-				Object o = in.readObject();
-				System.out.println("Read object : " + o);
-			} catch (IOException e) {
-				e.printStackTrace();
-				quit = true;
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
+	public Object read() throws IOException {
+		Object reading;
+		try {
+			reading = in.readObject();
+			return reading;
+		} catch (ClassNotFoundException e) {
+			return null;
 		}
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

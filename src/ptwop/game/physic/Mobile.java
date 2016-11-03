@@ -42,7 +42,7 @@ public abstract class Mobile implements Animable {
 		moveTo = p;
 	}
 
-	public synchronized void setPos(float x, float y) {
+	public synchronized void setPos(double x, double y) {
 		pos.x = x;
 		pos.y = y;
 	}

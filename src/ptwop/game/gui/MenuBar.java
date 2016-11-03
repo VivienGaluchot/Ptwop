@@ -28,6 +28,7 @@ public class MenuBar extends JMenuBar {
 		item = new JMenuItem("Lancer le serveur");
 		item.setActionCommand(Action.ACTION_LAUNCH_SERVER);
 		item.addActionListener(Action.getInstance());
+		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
 		item.getAccessibleContext().setAccessibleDescription("Lancement d'un serveur");
 		menu.add(item);
 
