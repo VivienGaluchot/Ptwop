@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import ptwop.game.gui.AnimationPanel;
 import ptwop.game.gui.AnimationThread;
 import ptwop.game.gui.Frame;
+import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
@@ -22,6 +23,7 @@ public class Game {
 	protected AnimationPanel panel;
 	protected Party party;
 	protected Map map;
+	protected Chrono chrono;
 
 	private static Game instance;
 
@@ -54,6 +56,7 @@ public class Game {
 			state = State.CONNECTED;
 
 		map = new Map(Map.Type.DEFAULT_MAP);
+		chrono = new Chrono(10);
 		party = new Party(map);
 		thread = new AnimationThread(panel, party);
 		
@@ -74,6 +77,7 @@ public class Game {
 		player.setPos(0, 2);
 		party.addPlayer(player);
 		
+		party.addChrono(chrono);
 		thread.startAnimation();
 	}
 

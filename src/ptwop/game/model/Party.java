@@ -10,12 +10,23 @@ public class Party implements Animable {
 	private Map map;
 	private ArrayList<Player> players;
 	private Player you;
+	private Chrono chrono = null;
 
 	public Party(Map map) {
 		this.map = map;
 		players = new ArrayList<>();
 	}
-
+	
+	public Party(Map map, Chrono chrono) {
+		this.map = map;
+		this.chrono = chrono;
+		players = new ArrayList<>();
+	}
+	
+	public synchronized void addChrono(Chrono chrono){
+		this.chrono = chrono;
+	}
+	
 	public synchronized void addPlayer(Player p) {
 		p.setMap(map);
 
@@ -43,6 +54,7 @@ public class Party implements Animable {
 			p.paint(g2d);
 		}
 		you.paint(g2d);
+		if (chrono != null) chrono.paint(g2d);
 		g2d.dispose();
 	}
 
@@ -54,5 +66,6 @@ public class Party implements Animable {
 			p.animate(timeStep);
 		}
 		you.animate(timeStep);
+		if (chrono != null)chrono.animate(timeStep);
 	}
 }
