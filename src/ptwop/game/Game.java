@@ -79,13 +79,12 @@ public class Game {
 		party.addPlayer(player);
 
 		player = new Player("Steve", true);
-		player.setPos(0, 2);
+		player.setPos(0.2f, 2);
 		party.addPlayer(player);
 
-		for (int i = 0; i < 15; i++) {
-			player = new Player("Bob");
-			player.setPos(i, 8);
-			party.addPlayer(player);
+				player = new Player("Bob");
+				party.addPlayer(player);
+			}
 		}
 
 		party.addChrono(chrono);
