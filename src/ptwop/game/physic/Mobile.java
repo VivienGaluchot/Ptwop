@@ -183,4 +183,8 @@ public abstract class Mobile implements Animable {
 			p.y = p.y * correctedSpeed;
 		}
 	}
+	
+	public Vector2D getPos(){
+		return pos;
+	}
 }

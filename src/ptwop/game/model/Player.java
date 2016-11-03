@@ -11,6 +11,7 @@ import ptwop.game.physic.Mobile;
 public class Player extends Mobile {
 	private String name;
 	private boolean you;
+	private int score = 0;
 
 	// Display
 	private Color fillColor;
@@ -59,5 +60,13 @@ public class Player extends Mobile {
 
 	public void setMap(Map map) {
 		this.setBounds(map.getMapShape());
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
 	}
 }

@@ -2,9 +2,11 @@ package ptwop.game.model;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import ptwop.game.Animable;
+import ptwop.game.physic.Mobile;
 
 public class Map implements Animable {
 	public enum Type {
@@ -19,10 +21,14 @@ public class Map implements Animable {
 
 	private static Color blueCampColor = new Color(200, 210, 255);
 	private static Color redCampColor = new Color(255, 210, 200);
+	private static Color blueEdgeColor = new Color(0, 0, 200);
+	private static Color redEdgeColor = new Color(255, 0, 0);
 
 	long lastFpsMesure = 0;
 	long fpsCounter = 0;
 	long fps = 0;
+	private boolean blueEdge = false;
+	private boolean redEdge = false;
 
 	public Map(Type type) {
 		this.type = type;
@@ -56,9 +62,17 @@ public class Map implements Animable {
 
 		g2d.setColor(blueCampColor);
 		g2d.fill(blueCamp);
+		if (blueEdge){
+			g2d.setColor(blueEdgeColor.darker().darker());
+			g2d.draw(blueCamp);
+		}
 
 		g2d.setColor(redCampColor);
 		g2d.fill(redCamp);
+		if (redEdge){
+			g2d.setColor(redEdgeColor.darker().darker());
+			g2d.draw(redCamp);
+		}
 
 		g2d.setColor(Color.darkGray);
 		g2d.draw(mapShape);
@@ -75,14 +89,41 @@ public class Map implements Animable {
 	public void animate(long timeStep) {
 		if (System.currentTimeMillis() - lastFpsMesure > 500) {
 			lastFpsMesure = System.currentTimeMillis();
-			fps = fpsCounter*2;
+			fps = fpsCounter * 2;
 			fpsCounter = 0;
 		} else {
 			fpsCounter++;
 		}
+
 	}
 
 	public Rectangle2D getMapShape() {
 		return mapShape;
 	}
+
+	public void isInCamp(Player p) {
+		blueEdge = false;
+		redEdge = false;
+		Point2D.Double point = new Point2D.Double(p.getPos().x, p.getPos().y);
+		if (blueCamp.contains(point)) {
+			blueEdge = true;
+			return;
+		} else if (redCamp.contains(point)) {
+			redEdge = true;
+			return;
+		}
+	}
+
+	// positive for blue, negative for red, zero for none
+	public int whereItIs(Player p) {
+
+		Point2D.Double point = new Point2D.Double(p.getPos().x, p.getPos().y);
+		if (blueCamp.contains(point)) {
+			return 1;
+		} else if (redCamp.contains(point)) {
+			redEdge = true;
+			return -1;
+		} else return 0;
+	}
+
 }
