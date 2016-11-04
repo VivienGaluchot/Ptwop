@@ -9,63 +9,108 @@ import java.util.Iterator;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
-import ptwop.game.transfert.messages.NewPlayerMessage;
+import ptwop.game.transfert.messages.PlayerJoin;
+import ptwop.game.transfert.messages.PlayerQuit;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 
 public class ServerParty {
-
-	private static int idCounter = Integer.MIN_VALUE;
-
 	private Party party;
 	private HashMap<Connection, Player> clients;
+
+	static int idCounter;
+
+	ArrayList<Connection> toRemove;
+	private Thread listenerThread;
 
 	public ServerParty(Map map) {
 		party = new Party(map);
 		clients = new HashMap<>();
+
+		idCounter = Integer.MIN_VALUE;
+		toRemove = new ArrayList<>();
+
+		listenerThread = new Thread() {
+			@Override
+			public void run() {
+				while (true) {
+					synchronized (ServerParty.this) {
+						for (Connection connection : clients.keySet()) {
+							try {
+								if (connection.hasData()) {
+									Object o = connection.read();
+									handleMessage(connection, o);
+								}
+							} catch (IOException e) {
+								System.out.println(e);
+								toRemove.add(connection);
+							}
+						}
+					}
+					removeConnections();
+				}
+			}
+		};
+
+		listenerThread.start();
+	}
+
+	public synchronized int getNewId() throws Exception {
+		if (idCounter == Integer.MAX_VALUE)
+			throw new Exception("Counter reached max value");
+		return idCounter++;
 	}
 
 	public synchronized void handleNewPlayer(Socket socket) throws Exception {
 		try {
-			if (idCounter == Integer.MAX_VALUE)
-				throw new Exception("Error : idCounter max, can't handle new player");
+			Connection connection = new Connection(socket);
+			int id = getNewId();
 
-			Connection connection = new Connection(socket, idCounter++);
-
-			connection.send(new HelloFromServer(party.getMap().getType(), connection.getId()));
+			// send / receve helloMessages
+			connection.send(new HelloFromServer(party.getMap().getType(), id));
 			HelloFromClient m = (HelloFromClient) connection.read();
-			Player newPlayer = new Player(m.getName());
 
+			// Create new player and send it to others
+			Player newPlayer = new Player(m.name, id);
+			sendToAll(new PlayerJoin(newPlayer));
+
+			// send other players to new client
+			for (Connection C : clients.keySet()) {
+				connection.send(new PlayerJoin(clients.get(C)));
+			}
+
+			// add new client to lists
 			clients.put(connection, newPlayer);
 			party.addPlayer(newPlayer);
-
-			sendToAll(new NewPlayerMessage(newPlayer, connection.getId()));
 		} catch (ClassCastException e) {
 			System.out.println(e);
 		}
 	}
 
-	public synchronized void removeConnection(Connection connection) {
-		Player p = clients.get(connection);
-		party.removePlayer(p);
-		clients.remove(connection);
+	public synchronized void removeConnections() {
+		for (Connection connection : toRemove) {
+			Player p = clients.get(connection);
+			party.removePlayer(p.getId());
+			clients.remove(connection);
+			sendToAll(new PlayerQuit(p));
+		}
+		toRemove.clear();
 	}
 
 	public synchronized void sendToAll(Object o) {
-		ArrayList<Connection> toRemove = new ArrayList<>();
 		Iterator<Connection> it = clients.keySet().iterator();
 		while (it.hasNext()) {
 			Connection connection = it.next();
 			try {
 				connection.send(o);
 			} catch (IOException e) {
-				if (!connection.isConnected())
-					toRemove.add(connection);
 				System.out.println(e);
+				toRemove.add(connection);
 			}
-			// Remove terminated connections
-			for (Connection c : toRemove)
-				removeConnection(c);
 		}
+	}
+
+	public void handleMessage(Connection connection, Object o) {
+		System.out.println("Frome id " + clients.get(connection).getId() + " : " + o);
 	}
 }

@@ -11,25 +11,30 @@ import ptwop.game.physic.Mobile;
 public class Player extends Mobile {
 	private String name;
 	private boolean you;
+
+	// Unique id
+	private int id;
+
 	private int score = 0;
 
 	// Display
 	private Color fillColor;
 
-	public Player(String name) {
-		this(name, false);
+	public Player(String name, int id) {
+		this(name, id, false);
 	}
 
-	public Player(String name, boolean you) {
+	public Player(String name, int id, boolean you) {
 		super(1, 0.35f);
 		this.name = name;
+		this.id = id;
 		this.you = you;
 		if (you)
 			fillColor = Color.white;
 		else
 			fillColor = Color.gray;
 
-		this.setShape(new Ellipse2D.Double(-radius, -radius, 2*radius, 2*radius));
+		this.setShape(new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius));
 	}
 
 	@Override
@@ -47,9 +52,9 @@ public class Player extends Mobile {
 		// Name
 		String dispName = (name.length() > 3) ? name.substring(0, 3) : name;
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
-		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - (float) radius*2 / 1.5f);
-		
-		if(isYou())
+		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - (float) radius * 2 / 1.5f);
+
+		if (isYou())
 			super.paint(g2d);
 		g2d.dispose();
 	}
@@ -69,8 +74,12 @@ public class Player extends Mobile {
 	public void setScore(int score) {
 		this.score = score;
 	}
-	
+
 	public String getName() {
 		return name;
+	}
+
+	public int getId() {
+		return id;
 	}
 }

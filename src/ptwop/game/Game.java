@@ -53,7 +53,7 @@ public class Game {
 	public void mouseMoved(Point mousePosition) {
 		if (state == State.CONNECTED) {
 			Vector2D pos = panel.transformMousePosition(mousePosition);
-			if(party.getYou() != null)
+			if (party.getYou() != null)
 				party.getYou().moveToward(pos);
 		}
 	}
@@ -65,20 +65,23 @@ public class Game {
 			String ip = Dialog.IPDialog(frame);
 			if (ip == null)
 				return;
+			String name = Dialog.NameDialog(frame);
+			if (name == null)
+				return;
 			client = new Client();
 			try {
-				client.connectToServer(ip, "Michel");
+				client.connectToServer(ip, name);
 				party = client.getJoinedParty();
-				
+
 				thread = new AnimationThread(panel, party);
 				panel.setAnimable(party);
-				
+
 				map = party.getMap();
 				panel.setGraphicSize(map.getGraphicSize());
-				
+
 			} catch (IOException e) {
 				Dialog.displayError(null, e.toString());
-				
+
 				map = new Map(Map.Type.DEFAULT_MAP);
 				chrono = new Chrono(10);
 				party = new Party(map);
@@ -89,20 +92,20 @@ public class Game {
 
 				Player player;
 
-				player = new Player("Alice");
+				player = new Player("Alice", 1);
 				player.setPos(5, -4.9f);
 				party.addPlayer(player);
 
-				player = new Player("Bob");
+				player = new Player("Bob", 2);
 				player.setPos(3.7f, 8);
 				party.addPlayer(player);
 
-				player = new Player("Bob");
-				player.setPos(3.8f, 8);
+				player = new Player("Bob", 3);
+				player.setPos(3.7f, 8);
 				player.moveToward(new Vector2D(3.8, 8));
 				party.addPlayer(player);
 
-				player = new Player("Steve", true);
+				player = new Player("Steve", 4, true);
 				player.setPos(0.2f, 2);
 				party.addPlayer(player);
 
@@ -123,6 +126,7 @@ public class Game {
 			state = State.DISCONNECTED;
 		System.out.println("Game state : CONNECTED");
 
+		client.disconnect();
 		thread.stopAnimation();
 		panel.setAnimable(null);
 	}

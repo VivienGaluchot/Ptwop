@@ -7,23 +7,15 @@ import ptwop.game.model.Map;
 public class HelloFromServer implements Serializable {
 	private static final long serialVersionUID = 0L;
 
-	private Map.Type mapType;
-	private int id;
+	public Map.Type mapType;
+	public int yourId;
 
-	public HelloFromServer(Map.Type mapType, int id) {
+	public HelloFromServer(Map.Type mapType, int yourId) {
 		this.mapType = mapType;
-		this.id = id;
-	}
-
-	public Map.Type getMapType() {
-		return mapType;
-	}
-
-	public int getId() {
-		return id;
+		this.yourId = yourId;
 	}
 
 	public String toString() {
-		return "HelloFromServer > MapType : " + mapType + " - id : " + id;
+		return "HelloFromServer > MapType : " + mapType + " yourId : " + yourId;
 	}
 }

@@ -3,6 +3,7 @@ package ptwop.game.model;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import ptwop.game.Animable;
 import ptwop.game.physic.Collider;
@@ -10,21 +11,19 @@ import ptwop.game.physic.Collider;
 public class Party implements Animable {
 	private Map map;
 	private Collider collider;
-	private ArrayList<Player> players;
+	private HashMap<Integer, Player> players;
 	private Player you;
 	private Chrono chrono = null;
 
 	public Party(Map map) {
-		this.map = map;
-		collider = new Collider();
-		players = new ArrayList<>();
+		this(map, null);
 	}
 
 	public Party(Map map, Chrono chrono) {
 		this.map = map;
 		this.chrono = chrono;
 		collider = new Collider();
-		players = new ArrayList<>();
+		players = new HashMap<>();
 	}
 
 	public void addChrono(Chrono chrono) {
@@ -38,18 +37,23 @@ public class Party implements Animable {
 			you = p;
 
 		collider.add(p);
-		players.add(p);
+		players.put(p.getId(), p);
 	}
 	
-	public synchronized void removePlayer(Player p){
+	public synchronized Player getPlayer(Integer id){
+		return players.get(id);
+	}
+	
+	public synchronized void removePlayer(Integer id){
+		Player p = players.get(id);
 		collider.remove(p);
-		players.remove(p);
+		players.remove(id);
 	}
 
 	public Player getYou() {
 		return you;
 	}
-	
+
 	public Map getMap() {
 		return map;
 	}
@@ -59,32 +63,34 @@ public class Party implements Animable {
 		ArrayList<Player> blueList = new ArrayList<>();
 		ArrayList<Player> redList = new ArrayList<>();
 		ArrayList<Player> midList = new ArrayList<>();
-		for (Player p : players){
+		for (int id : players.keySet()) {
+			Player p = players.get(id);
 			int score = map.whereItIs(p);
-			if (score == 1){
+			if (score == 1) {
 				blueList.add(p);
-			} else if ( score == -1){
+			} else if (score == -1) {
 				redList.add(p);
 			} else
 				midList.add(p);
-			winner  = winner + score;
+			winner = winner + score;
 		}
-		if (winner>0){
+		if (winner > 0) {
 			addScore(redList);
 			System.out.println("People in red camp win");
-		} else if (winner <0){
+		} else if (winner < 0) {
 			addScore(blueList);
 			System.out.println("People in blue camp win");
-		} else{
+		} else {
 			System.out.println("This is a draw");
 		}
-		
+
 	}
 
 	private void addScore(ArrayList<Player> list) {
-		for (Player p : list){
-			p.setScore(p.getScore()+1);
-			if ( p == you) System.out.println("Your Score is " +p.getScore());
+		for (Player p : list) {
+			p.setScore(p.getScore() + 1);
+			if (p == you)
+				System.out.println("Your Score is " + p.getScore());
 		}
 	}
 
@@ -99,10 +105,10 @@ public class Party implements Animable {
 		g2d.setFont(newFont);
 
 		collider.paint(g2d);
-		if (chrono != null){
+		if (chrono != null) {
 			chrono.paint(g2d);
-			if (chrono.getAlarm()){
-				//End of a round, need to see who win it
+			if (chrono.getAlarm()) {
+				// End of a round, need to see who win it
 				checkWinner();
 				chrono.reset();
 			}
@@ -114,7 +120,7 @@ public class Party implements Animable {
 	@Override
 	public synchronized void animate(long timeStep) {
 		map.animate(timeStep);
-		if(you != null)
+		if (you != null)
 			map.isInCamp(you);
 
 		collider.animate(timeStep);

@@ -10,17 +10,10 @@ public class Connection {
 	ObjectOutputStream out;
 	ObjectInputStream in;
 
-	private int id;
-
-	public Connection(Socket socket, int id) throws IOException {
+	public Connection(Socket socket) throws IOException {
 		this.socket = socket;
-		this.setId(id);
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
-	}
-
-	public boolean isConnected() {
-		return socket.isConnected();
 	}
 
 	public void disconnect() {
@@ -34,6 +27,10 @@ public class Connection {
 	public void send(Object o) throws IOException {
 		out.writeObject(o);
 	}
+	
+	public boolean hasData() throws IOException{
+		return in.available() > 0;
+	}
 
 	public Object read() throws IOException {
 		Object reading;
@@ -41,15 +38,8 @@ public class Connection {
 			reading = in.readObject();
 			return reading;
 		} catch (ClassNotFoundException e) {
+			System.out.println(e);
 			return null;
 		}
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 }

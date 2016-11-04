@@ -6,7 +6,8 @@ import java.net.Socket;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
-import ptwop.game.transfert.messages.NewPlayerMessage;
+import ptwop.game.transfert.messages.PlayerJoin;
+import ptwop.game.transfert.messages.PlayerQuit;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 
@@ -15,10 +16,10 @@ public class Client {
 
 	private Connection connection;
 
-	private Thread listenerTread;
+	private Thread listenerThread;
 
 	public Client() {
-		listenerTread = new Thread() {
+		listenerThread = new Thread() {
 			@Override
 			public void run() {
 				boolean quit = false;
@@ -31,26 +32,33 @@ public class Client {
 						quit = true;
 					}
 				}
+				System.out.println("End of Client listenerThread");
 			}
 		};
 	}
 
 	public void connectToServer(String ip, String name) throws IOException {
-		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), 0);
+		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT));
 
+		// Read HelloMessage and create party
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
-		party = new Party(new Map(m.getMapType()));
-		connection.setId(m.getId());
+		party = new Party(new Map(m.mapType));
 
+		// Create you player
+		Player you = new Player(name, m.yourId, true);
+		party.addPlayer(you);
+
+		listenerThread.start();
 		connection.send(new HelloFromClient(name));
-
-		listenerTread.start();
 	}
 
 	public void disconnect() {
-		connection.disconnect();
-		listenerTread.interrupt();
+		if (listenerThread != null)
+			listenerThread.interrupt();
+		
+		if (connection != null)
+			connection.disconnect();
 	}
 
 	public Party getJoinedParty() {
@@ -59,9 +67,12 @@ public class Client {
 
 	public void handleMessage(Object o) {
 		System.out.println(o);
-		if (o instanceof NewPlayerMessage) {
-			NewPlayerMessage m = (NewPlayerMessage) o;
-			party.addPlayer(m.toPlayer(connection.getId()));
+		if (o instanceof PlayerJoin) {
+			PlayerJoin m = (PlayerJoin) o;
+			party.addPlayer(m.createPlayer());
+		} else if (o instanceof PlayerQuit) {
+			PlayerQuit m = (PlayerQuit) o;
+			party.removePlayer(m.id);
 		}
 	}
 }
