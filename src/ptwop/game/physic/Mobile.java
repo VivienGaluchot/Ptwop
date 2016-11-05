@@ -47,8 +47,28 @@ public abstract class Mobile implements Animable {
 		pos.y = y;
 	}
 
+	public Vector2D getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(Vector2D speed) {
+		this.speed = speed;
+	}
+
 	public synchronized void setPos(Vector2D pos) {
 		this.pos = pos;
+	}
+
+	public Vector2D getPos() {
+		return pos;
+	}
+
+	public Vector2D getMoveTo() {
+		return moveTo;
+	}
+
+	public void setMoveTo(Vector2D moveTo) {
+		this.moveTo = moveTo;
 	}
 
 	public synchronized void setBounds(Rectangle2D bounds) {
@@ -106,9 +126,6 @@ public abstract class Mobile implements Animable {
 		// true speed, after computing real position
 		speed.x = (pos.x - oldPos.x) / time;
 		speed.y = (pos.y - oldPos.y) / time;
-		
-		if(Double.isNaN(pos.x))
-			System.out.println("Error NAN");
 	}
 
 	public boolean colliding(Mobile mobile) {
@@ -131,13 +148,13 @@ public abstract class Mobile implements Animable {
 		// get the mtd
 		Vector2D delta = (pos.subtract(mobile.pos));
 		double d = delta.getLength();
-		if(d == 0)
+		if (d == 0)
 			return;
-		
+
 		// minimum translation distance to push balls apart after intersecting
 		Vector2D mtd = delta.multiply(((radius + mobile.radius) - d) / d);
-		
-		if(mtd.isNull())
+
+		if (mtd.isNull())
 			return;
 
 		// resolve intersection --
@@ -188,9 +205,5 @@ public abstract class Mobile implements Animable {
 			p.x = p.x * correctedSpeed;
 			p.y = p.y * correctedSpeed;
 		}
-	}
-	
-	public Vector2D getPos(){
-		return pos;
 	}
 }

@@ -68,9 +68,8 @@ public class Game {
 			String name = Dialog.NameDialog(frame);
 			if (name == null)
 				return;
-			client = new Client();
 			try {
-				client.connectToServer(ip, name);
+				client = new Client(ip, name);
 				party = client.getJoinedParty();
 
 				thread = new AnimationThread(panel, party);

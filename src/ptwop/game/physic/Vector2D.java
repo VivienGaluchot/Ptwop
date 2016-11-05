@@ -1,8 +1,11 @@
 package ptwop.game.physic;
 
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 
-public class Vector2D {
+public class Vector2D implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
 	public double x;
 	public double y;
 

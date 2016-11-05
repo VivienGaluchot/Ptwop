@@ -2,43 +2,24 @@ package ptwop.game.transfert;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.transfert.messages.PlayerJoin;
 import ptwop.game.transfert.messages.PlayerQuit;
+import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 
-public class Client {
+public class Client implements ConnectionHandler{
 	private Party party;
 
 	private Connection connection;
 
-	private Thread listenerThread;
-
-	public Client() {
-		listenerThread = new Thread() {
-			@Override
-			public void run() {
-				boolean quit = false;
-				while (!quit) {
-					try {
-						Object o = connection.read();
-						handleMessage(o);
-					} catch (IOException e) {
-						System.out.println(e);
-						quit = true;
-					}
-				}
-				System.out.println("End of Client listenerThread");
-			}
-		};
-	}
-
-	public void connectToServer(String ip, String name) throws IOException {
-		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT));
+	public Client(String ip, String name) throws UnknownHostException, IOException {
+		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
 
 		// Read HelloMessage and create party
 		HelloFromServer m = (HelloFromServer) connection.read();
@@ -49,30 +30,43 @@ public class Client {
 		Player you = new Player(name, m.yourId, true);
 		party.addPlayer(you);
 
-		listenerThread.start();
+		connection.start();
 		connection.send(new HelloFromClient(name));
 	}
 
-	public void disconnect() {
-		if (listenerThread != null)
-			listenerThread.interrupt();
-		
-		if (connection != null)
-			connection.disconnect();
+	public void disconnect() {		
+		connection.disconnect();
 	}
 
 	public Party getJoinedParty() {
 		return party;
 	}
 
-	public void handleMessage(Object o) {
-		System.out.println(o);
+	public void handleMessage(Connection connection, Object o) throws IOException {
 		if (o instanceof PlayerJoin) {
+			System.out.println(o);
 			PlayerJoin m = (PlayerJoin) o;
 			party.addPlayer(m.createPlayer());
 		} else if (o instanceof PlayerQuit) {
+			System.out.println(o);
 			PlayerQuit m = (PlayerQuit) o;
 			party.removePlayer(m.id);
+		} else if (o instanceof PlayerUpdate){
+			PlayerUpdate m = (PlayerUpdate) o;
+			Player you = party.getYou();
+			if(m.id == you.getId()){
+				connection.send(new PlayerUpdate(you));
+			}
+			else
+				m.applyUpdate(party);
+		} else {
+			System.out.println(o);
 		}
+	}
+
+	@Override
+	public void connectionClosed(Connection connection) {
+		// TODO Auto-generated method stub
+		
 	}
 }
