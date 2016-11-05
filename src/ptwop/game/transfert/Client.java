@@ -12,8 +12,9 @@ import ptwop.game.transfert.messages.PlayerQuit;
 import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
+import ptwop.game.transfert.messages.PartyUpdate;
 
-public class Client implements ConnectionHandler{
+public class Client implements ConnectionHandler {
 	private Party party;
 
 	private Connection connection;
@@ -34,7 +35,7 @@ public class Client implements ConnectionHandler{
 		connection.send(new HelloFromClient(name));
 	}
 
-	public void disconnect() {		
+	public void disconnect() {
 		connection.disconnect();
 	}
 
@@ -51,13 +52,18 @@ public class Client implements ConnectionHandler{
 			System.out.println(o);
 			PlayerQuit m = (PlayerQuit) o;
 			party.removePlayer(m.id);
-		} else if (o instanceof PlayerUpdate){
+		} else if (o instanceof PlayerUpdate) {
 			PlayerUpdate m = (PlayerUpdate) o;
 			Player you = party.getYou();
-			if(m.id == you.getId())
+			if (m.id == you.getId())
 				connection.send(new PlayerUpdate(you));
 			else
 				m.applyUpdate(party);
+		} else if (o instanceof PartyUpdate) {
+			PartyUpdate m = (PartyUpdate) o;
+			m.applyUpdate(party);
+			Player you = party.getYou();
+			connection.send(new PlayerUpdate(you));
 		} else {
 			System.out.println(o);
 		}
@@ -66,6 +72,6 @@ public class Client implements ConnectionHandler{
 	@Override
 	public void connectionClosed(Connection connection) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

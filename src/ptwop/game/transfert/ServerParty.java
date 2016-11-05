@@ -14,6 +14,7 @@ import ptwop.game.transfert.messages.PlayerQuit;
 import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
+import ptwop.game.transfert.messages.PartyUpdate;
 
 public class ServerParty implements ConnectionHandler, Runnable {
 	private Party party;
@@ -21,7 +22,6 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	static int idCounter;
 
-	ArrayList<PlayerUpdate> toUpdate;
 	ArrayList<Connection> toRemove;
 	Thread animationThread;
 	long minAnimationPeriod;
@@ -33,10 +33,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 		idCounter = Integer.MIN_VALUE;
 		toRemove = new ArrayList<>();
-		toUpdate = new ArrayList<>();
 
-		minAnimationPeriod = 100;
-
+		minAnimationPeriod = 10;
+		
 		animationThread = new Thread(this);
 		animationThread.start();
 	}
@@ -51,21 +50,10 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		runAnimation = true;
 
 		while (runAnimation) {
-			synchronized (toUpdate) {
-				for (PlayerUpdate update : toUpdate) {
-					update.applyUpdate(party);
-				}
-			}
-			
 			long now = System.currentTimeMillis();
 			party.animate(now - lastMs);
 			lastMs = now;
 
-			synchronized (clients) {
-				for (Connection C : clients.keySet()) {
-					sendToAll(new PlayerUpdate(clients.get(C)));
-				}
-			}
 			removeConnections();
 
 			long timeToWait = lastMs + minAnimationPeriod - System.currentTimeMillis();
@@ -92,46 +80,43 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			Player newPlayer = new Player(m.name, id);
 			sendToAll(new PlayerJoin(newPlayer));
 
-			synchronized (clients) {
-				// send other players to new client
-				for (Connection C : clients.keySet()) {
-					connection.send(new PlayerJoin(clients.get(C)));
-				}
-
-				// add new client to lists
-				clients.put(connection, newPlayer);
+			// send other players to new client
+			for (Connection C : clients.keySet()) {
+				connection.send(new PlayerJoin(clients.get(C)));
 			}
+
+			// add new client to lists
+			clients.put(connection, newPlayer);
 			party.addPlayer(newPlayer);
 
 			connection.start();
+			sendUpdateTo(connection);
 		} catch (ClassCastException e) {
 			System.out.println(e);
 		}
 	}
 
-	private void sendToAll(Object o) {
-		synchronized (clients) {
-			Iterator<Connection> it = clients.keySet().iterator();
-			while (it.hasNext()) {
-				Connection connection = it.next();
-				try {
-					connection.send(o);
-				} catch (IOException e) {
-					System.out.println(e);
-					toRemove(connection);
-				}
+	private synchronized void sendToAll(Object o) {
+		Iterator<Connection> it = clients.keySet().iterator();
+		while (it.hasNext()) {
+			Connection connection = it.next();
+			try {
+				connection.send(o);
+			} catch (IOException e) {
+				System.out.println(e);
+				toRemove(connection);
 			}
 		}
 	}
 
-	private synchronized void toRemove(Connection c) {
+	private void toRemove(Connection c) {
 		synchronized (toRemove) {
 			if (!toRemove.contains(c))
 				toRemove.add(c);
 		}
 	}
 
-	private synchronized void removeConnections() {
+	private void removeConnections() {
 		synchronized (toRemove) {
 			for (Connection connection : toRemove) {
 				Player p;
@@ -152,6 +137,14 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		return idCounter++;
 	}
 
+	private synchronized void sendUpdateTo(Connection connection) throws IOException {
+		PartyUpdate update = new PartyUpdate();
+		for (Connection c : clients.keySet()) {
+			update.addPlayerUpdate(clients.get(c));
+		}
+		connection.send(update);
+	}
+
 	@Override
 	public void handleMessage(Connection connection, Object o) throws IOException {
 		if (o instanceof PlayerUpdate) {
@@ -159,9 +152,8 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			// wrong id received
 			if (m.id != clients.get(connection).getId())
 				return;
-			synchronized (toUpdate) {
-				toUpdate.add(m);
-			}
+			m.applyUpdateServ(party);
+			sendUpdateTo(connection);
 		}
 	}
 

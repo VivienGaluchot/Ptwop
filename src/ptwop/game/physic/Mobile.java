@@ -195,7 +195,7 @@ public abstract class Mobile implements Animable {
 		Line2D accVect = new Line2D.Double(pos.x, pos.y, acc.x + pos.x, acc.y + pos.y);
 		g2d.draw(accVect);
 		g2d.setColor(Color.green);
-		Line2D moveToVect = new Line2D.Double(moveTo.x-0.2, moveTo.y-0.2, moveTo.x + 0.2, moveTo.y + 0.2);
+		Line2D moveToVect = new Line2D.Double(moveTo.x - 0.2, moveTo.y - 0.2, moveTo.x + 0.2, moveTo.y + 0.2);
 		g2d.draw(moveToVect);
 
 		g2d.dispose();
