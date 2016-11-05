@@ -21,6 +21,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	static int idCounter;
 
+	ArrayList<PlayerUpdate> toUpdate;
 	ArrayList<Connection> toRemove;
 	Thread animationThread;
 	long minAnimationPeriod;
@@ -32,8 +33,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 		idCounter = Integer.MIN_VALUE;
 		toRemove = new ArrayList<>();
+		toUpdate = new ArrayList<>();
 
-		minAnimationPeriod = 20;
+		minAnimationPeriod = 100;
 
 		animationThread = new Thread(this);
 		animationThread.start();
@@ -49,20 +51,30 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		runAnimation = true;
 
 		while (runAnimation) {
+			synchronized (toUpdate) {
+				for (PlayerUpdate update : toUpdate) {
+					update.applyUpdate(party);
+				}
+			}
+			
 			long now = System.currentTimeMillis();
 			party.animate(now - lastMs);
 			lastMs = now;
 
-			for (Connection C : clients.keySet()) {
-				sendToAll(new PlayerUpdate(clients.get(C)));
+			synchronized (clients) {
+				for (Connection C : clients.keySet()) {
+					sendToAll(new PlayerUpdate(clients.get(C)));
+				}
 			}
 			removeConnections();
 
 			long timeToWait = lastMs + minAnimationPeriod - System.currentTimeMillis();
-			try {
-				Thread.sleep(timeToWait);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			if (timeToWait > 0) {
+				try {
+					Thread.sleep(timeToWait);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -80,13 +92,15 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			Player newPlayer = new Player(m.name, id);
 			sendToAll(new PlayerJoin(newPlayer));
 
-			// send other players to new client
-			for (Connection C : clients.keySet()) {
-				connection.send(new PlayerJoin(clients.get(C)));
-			}
+			synchronized (clients) {
+				// send other players to new client
+				for (Connection C : clients.keySet()) {
+					connection.send(new PlayerJoin(clients.get(C)));
+				}
 
-			// add new client to lists
-			clients.put(connection, newPlayer);
+				// add new client to lists
+				clients.put(connection, newPlayer);
+			}
 			party.addPlayer(newPlayer);
 
 			connection.start();
@@ -95,22 +109,24 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		}
 	}
 
-	private synchronized void sendToAll(Object o) {
-		Iterator<Connection> it = clients.keySet().iterator();
-		while (it.hasNext()) {
-			Connection connection = it.next();
-			try {
-				connection.send(o);
-			} catch (IOException e) {
-				System.out.println(e);
-				toRemove(connection);
+	private void sendToAll(Object o) {
+		synchronized (clients) {
+			Iterator<Connection> it = clients.keySet().iterator();
+			while (it.hasNext()) {
+				Connection connection = it.next();
+				try {
+					connection.send(o);
+				} catch (IOException e) {
+					System.out.println(e);
+					toRemove(connection);
+				}
 			}
 		}
 	}
-	
-	private synchronized void toRemove(Connection c){
+
+	private synchronized void toRemove(Connection c) {
 		synchronized (toRemove) {
-			if(!toRemove.contains(c))
+			if (!toRemove.contains(c))
 				toRemove.add(c);
 		}
 	}
@@ -118,9 +134,12 @@ public class ServerParty implements ConnectionHandler, Runnable {
 	private synchronized void removeConnections() {
 		synchronized (toRemove) {
 			for (Connection connection : toRemove) {
-				Player p = clients.get(connection);
-				party.removePlayer(p.getId());
-				clients.remove(connection);
+				Player p;
+				synchronized (clients) {
+					p = clients.get(connection);
+					party.removePlayer(p.getId());
+					clients.remove(connection);
+				}
 				sendToAll(new PlayerQuit(p));
 			}
 			toRemove.clear();
@@ -140,7 +159,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			// wrong id received
 			if (m.id != clients.get(connection).getId())
 				return;
-			m.applyUpdate(party);
+			synchronized (toUpdate) {
+				toUpdate.add(m);
+			}
 		}
 	}
 

@@ -54,9 +54,8 @@ public class Client implements ConnectionHandler{
 		} else if (o instanceof PlayerUpdate){
 			PlayerUpdate m = (PlayerUpdate) o;
 			Player you = party.getYou();
-			if(m.id == you.getId()){
+			if(m.id == you.getId())
 				connection.send(new PlayerUpdate(you));
-			}
 			else
 				m.applyUpdate(party);
 		} else {

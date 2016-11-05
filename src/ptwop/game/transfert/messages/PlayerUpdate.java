@@ -16,7 +16,7 @@ public class PlayerUpdate implements Serializable {
 
 	public PlayerUpdate(Player player) {
 		id = player.getId();
-		pos = player.getPos();
+		// pos = player.getPos();
 		speed = player.getSpeed();
 		moveTo = player.getMoveTo();
 	}
@@ -24,7 +24,7 @@ public class PlayerUpdate implements Serializable {
 	public void applyUpdate(Party party) {
 		Player p = party.getPlayer(id);
 		if (p != null) {
-			p.setPos(pos);
+			// p.setPos(pos);
 			p.setSpeed(speed);
 			p.setMoveTo(moveTo);
 		}
