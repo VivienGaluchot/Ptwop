@@ -1,13 +1,12 @@
 package ptwop.game.transfert.messages;
 
-import java.io.Serializable;
-
-public class TextMessage implements Serializable {
+public class TextMessage extends Message {
 	private static final long serialVersionUID = 0L;
-	
+
 	private String message;
 
-	public TextMessage(String message) {
+	public TextMessage(int timeStamp, String message) {
+		this.setTimeStamp(timeStamp);
 		this.message = message;
 	}
 

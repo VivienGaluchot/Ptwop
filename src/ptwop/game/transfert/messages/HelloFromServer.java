@@ -1,16 +1,15 @@
 package ptwop.game.transfert.messages;
 
-import java.io.Serializable;
-
 import ptwop.game.model.Map;
 
-public class HelloFromServer implements Serializable {
+public class HelloFromServer extends Message {
 	private static final long serialVersionUID = 0L;
 
 	public Map.Type mapType;
 	public int yourId;
 
-	public HelloFromServer(Map.Type mapType, int yourId) {
+	public HelloFromServer(int timeStamp, Map.Type mapType, int yourId) {
+		this.setTimeStamp(timeStamp);
 		this.mapType = mapType;
 		this.yourId = yourId;
 	}

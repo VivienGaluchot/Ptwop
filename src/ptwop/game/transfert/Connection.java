@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import ptwop.game.transfert.messages.Message;
+
 public class Connection implements Runnable {
 	private Socket socket;
 	private ObjectOutputStream out;
@@ -32,16 +34,16 @@ public class Connection implements Runnable {
 		}
 	}
 
-	public void send(Object o) throws IOException {
+	public void send(Message o) throws IOException {
 		out.writeObject(o);
 	}
 
-	public Object read() throws IOException {
+	public Message read() throws IOException {
 		Object reading;
 		try {
 			reading = in.readObject();
-			return reading;
-		} catch (ClassNotFoundException e) {
+			return (Message) reading;
+		} catch (ClassNotFoundException | ClassCastException e) {
 			System.out.println(e);
 			return null;
 		}
@@ -59,7 +61,7 @@ public class Connection implements Runnable {
 		run = true;
 		while (run) {
 			try {
-				Object o = this.read();
+				Message o = this.read();
 				handler.handleMessage(this, o);
 			} catch (IOException e) {
 				System.out.println(e);

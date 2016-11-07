@@ -1,15 +1,14 @@
 package ptwop.game.transfert.messages;
 
-import java.io.Serializable;
-
 import ptwop.game.model.Player;
 
-public class PlayerQuit implements Serializable {
+public class PlayerQuit extends Message {
 	private static final long serialVersionUID = 1L;
 
 	public int id;
 
-	public PlayerQuit(Player player) {
+	public PlayerQuit(int timeStamp, Player player) {
+		this.setTimeStamp(timeStamp);
 		id = player.getId();
 	}
 

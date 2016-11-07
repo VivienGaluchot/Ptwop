@@ -1,12 +1,9 @@
 package ptwop.game.transfert.messages;
 
-import java.io.Serializable;
-
-import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.physic.Vector2D;
 
-public class PlayerUpdate implements Serializable {
+public class PlayerUpdate extends Message {
 	private static final long serialVersionUID = 1L;
 
 	public int id;
@@ -14,7 +11,8 @@ public class PlayerUpdate implements Serializable {
 	public Vector2D speed;
 	public Vector2D moveTo;
 
-	public PlayerUpdate(Player player) {
+	public PlayerUpdate(int timeStamp, Player player) {
+		this.setTimeStamp(timeStamp);
 		id = player.getId();
 		pos = player.getPos();
 		speed = player.getSpeed();

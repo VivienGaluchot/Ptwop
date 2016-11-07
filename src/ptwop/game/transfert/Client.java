@@ -12,19 +12,24 @@ import ptwop.game.transfert.messages.PlayerQuit;
 import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
-import ptwop.game.transfert.messages.PartyUpdate;
+import ptwop.game.transfert.messages.Message;
 
 public class Client implements ConnectionHandler {
 	private Party party;
+	
+	private int timeStamp;
 
 	private Connection connection;
 
 	public Client(String ip, String name) throws UnknownHostException, IOException {
+		timeStamp = 0;
+		
 		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
 
 		// Read HelloMessage and create party
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
+		timeStamp = m.getTimeStamp();
 		party = new Party(new Map(m.mapType));
 
 		// Create you player
@@ -32,7 +37,7 @@ public class Client implements ConnectionHandler {
 		party.addPlayer(you);
 
 		connection.start();
-		connection.send(new HelloFromClient(name));
+		connection.send(new HelloFromClient(timeStamp, name));
 	}
 
 	public void disconnect() {
@@ -43,7 +48,10 @@ public class Client implements ConnectionHandler {
 		return party;
 	}
 
-	public void handleMessage(Connection connection, Object o) throws IOException {
+	public void handleMessage(Connection connection, Message o) throws IOException {
+		if(o.getTimeStamp() > timeStamp)
+			timeStamp = o.getTimeStamp();
+		
 		if (o instanceof PlayerJoin) {
 			System.out.println(o);
 			PlayerJoin m = (PlayerJoin) o;
@@ -56,15 +64,10 @@ public class Client implements ConnectionHandler {
 			PlayerUpdate m = (PlayerUpdate) o;
 			Player you = party.getYou();
 			if (m.id == you.getId())
-				connection.send(new PlayerUpdate(you));
+				connection.send(new PlayerUpdate(timeStamp, you));
 			else {
 				m.applyUpdate(party.getPlayer(m.id));
 			}
-		} else if (o instanceof PartyUpdate) {
-			PartyUpdate m = (PartyUpdate) o;
-			m.applyUpdate(party);
-			Player you = party.getYou();
-			connection.send(new PlayerUpdate(you));
 		} else {
 			System.out.println(o);
 		}

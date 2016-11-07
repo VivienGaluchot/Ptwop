@@ -13,13 +13,15 @@ import ptwop.game.transfert.messages.PlayerQuit;
 import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
-import ptwop.game.transfert.messages.PartyUpdate;
+import ptwop.game.transfert.messages.Message;
 
 public class ServerParty implements ConnectionHandler, Runnable {
-	private HashMap<Connection, Player> clients;
-	private Map map;
-
 	static int idCounter;
+
+	private Map map;
+	private HashMap<Connection, Player> clients;
+
+	int timeStamp;
 
 	ArrayList<Connection> toRemove;
 	Thread checkThread;
@@ -27,14 +29,15 @@ public class ServerParty implements ConnectionHandler, Runnable {
 	boolean runCheck;
 
 	public ServerParty(Map map) {
+		idCounter = Integer.MIN_VALUE;
+		
 		this.map = map;
 		clients = new HashMap<>();
 
-		idCounter = Integer.MIN_VALUE;
-		toRemove = new ArrayList<>();
+		timeStamp = 0;
 
+		toRemove = new ArrayList<>();
 		checkPeriod = 500;
-		
 		checkThread = new Thread(this);
 		checkThread.start();
 	}
@@ -69,16 +72,16 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			int id = getNewId();
 
 			// send / receve helloMessages
-			connection.send(new HelloFromServer(map.getType(), id));
+			connection.send(new HelloFromServer(timeStamp, map.getType(), id));
 			HelloFromClient m = (HelloFromClient) connection.read();
 
 			// Create new player and send it to others
 			Player newPlayer = new Player(m.name, id);
-			sendToAll(new PlayerJoin(newPlayer));
+			sendToAll(new PlayerJoin(timeStamp, newPlayer));
 
 			// send other players to new client
 			for (Connection C : clients.keySet()) {
-				connection.send(new PlayerJoin(clients.get(C)));
+				connection.send(new PlayerJoin(timeStamp, clients.get(C)));
 			}
 
 			// add new client to lists
@@ -91,7 +94,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		}
 	}
 
-	private synchronized void sendToAll(Object o) {
+	private synchronized void sendToAll(Message o) {
 		Iterator<Connection> it = clients.keySet().iterator();
 		while (it.hasNext()) {
 			Connection connection = it.next();
@@ -119,7 +122,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 					p = clients.get(connection);
 					clients.remove(connection);
 				}
-				sendToAll(new PlayerQuit(p));
+				sendToAll(new PlayerQuit(timeStamp, p));
 			}
 			toRemove.clear();
 		}
@@ -132,20 +135,11 @@ public class ServerParty implements ConnectionHandler, Runnable {
 	}
 
 	private synchronized void sendUpdateTo(Connection connection) throws IOException {
-		PartyUpdate update = new PartyUpdate();
-		try {
-			Thread.sleep(5);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		for (Connection c : clients.keySet()) {
-			// update.addPlayerUpdate(clients.get(c));
-			connection.send(new PlayerUpdate(clients.get(c)));
+			connection.send(new PlayerUpdate(timeStamp, clients.get(c)));
 		}
-		// connection.send(update);
 	}
-	
+
 	private synchronized void sendUpdateFrom(Connection connection) throws IOException {
 		try {
 			Thread.sleep(100);
@@ -154,12 +148,13 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			e.printStackTrace();
 		}
 		for (Connection c : clients.keySet()) {
-			c.send(new PlayerUpdate(clients.get(connection)));
+			c.send(new PlayerUpdate(timeStamp, clients.get(connection)));
 		}
 	}
 
 	@Override
-	public void handleMessage(Connection connection, Object o) throws IOException {
+	public void handleMessage(Connection connection, Message o) throws IOException {
+		timeStamp = Math.max(timeStamp, o.getTimeStamp() + 1);
 		if (o instanceof PlayerUpdate) {
 			PlayerUpdate m = (PlayerUpdate) o;
 			// wrong id received

@@ -1,16 +1,15 @@
 package ptwop.game.transfert.messages;
 
-import java.io.Serializable;
-
 import ptwop.game.model.Player;
 
-public class PlayerJoin implements Serializable {
+public class PlayerJoin extends Message {
 	private static final long serialVersionUID = 1L;
 
 	public String name;
 	public int id;
 
-	public PlayerJoin(Player newPlayer) {
+	public PlayerJoin(int timeStamp, Player newPlayer) {
+		this.setTimeStamp(timeStamp);
 		name = newPlayer.getName();
 		id = newPlayer.getId();
 	}
