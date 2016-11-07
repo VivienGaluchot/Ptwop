@@ -18,6 +18,7 @@ public abstract class Mobile implements Animable {
 	protected Rectangle2D mobileBounds;
 
 	// Movement
+	private Vector2D oldPos;
 	protected Vector2D pos;
 	protected Vector2D speed;
 	protected Vector2D acc;
@@ -26,6 +27,7 @@ public abstract class Mobile implements Animable {
 	protected double mass;
 
 	public Mobile(double mass, double radius) {
+		oldPos = new Vector2D(0, 0);
 		pos = new Vector2D(0, 0);
 		speed = new Vector2D(0, 0);
 		acc = new Vector2D(0, 0);
@@ -101,31 +103,19 @@ public abstract class Mobile implements Animable {
 			return;
 
 		double time = timeStep / 1000.0;
+		oldPos = pos.clone();
 
-		double T = 1;
-		Point2D.Double A = new Point2D.Double(0, 0);
-		Point2D.Double B = new Point2D.Double(0, 0);
-		B.x = (3 * (moveTo.x - pos.x) / T - (2 * speed.x)) / T;
-		A.x = (-speed.x - 2 * B.x * T) / (3 * T * T);
-		B.y = (3 * (moveTo.y - pos.y) / T - (2 * speed.y)) / T;
-		A.y = (-speed.y - 2 * B.y * T) / (3 * T * T);
-		acc.x = A.x * time + B.x;
-		acc.y = A.y * time + B.y;
+		acc = moveTo.subtract(pos).multiply(6).subtract(speed.multiply(5));
 		capModule(acc, Constants.maxPower / mass);
 
-		speed.x = speed.x + acc.x * time;
-		speed.y = speed.y + acc.y * time;
+		speed = acc.multiply(time).add(speed);
 		capModule(speed, Constants.maxSpeed);
 
-		Vector2D oldPos = pos.clone();
-
-		pos.x = pos.x + speed.x * time;
-		pos.y = pos.y + speed.y * time;
+		pos = speed.multiply(time).add(pos);
 		rectifyPosition();
 
 		// true speed, after computing real position
-		speed.x = (pos.x - oldPos.x) / time;
-		speed.y = (pos.y - oldPos.y) / time;
+		speed = pos.subtract(oldPos).multiply(1/time);
 	}
 
 	public boolean colliding(Mobile mobile) {
@@ -181,7 +171,6 @@ public abstract class Mobile implements Animable {
 		// change in momentum
 		speed = speed.add(impulse.multiply(im1));
 		mobile.speed = mobile.speed.subtract(impulse.multiply(im2));
-
 	}
 
 	@Override

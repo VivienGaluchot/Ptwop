@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import ptwop.game.model.Map;
-import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.transfert.messages.PlayerJoin;
 import ptwop.game.transfert.messages.PlayerQuit;
@@ -17,46 +16,43 @@ import ptwop.game.transfert.messages.HelloFromServer;
 import ptwop.game.transfert.messages.PartyUpdate;
 
 public class ServerParty implements ConnectionHandler, Runnable {
-	private Party party;
 	private HashMap<Connection, Player> clients;
+	private Map map;
 
 	static int idCounter;
 
 	ArrayList<Connection> toRemove;
-	Thread animationThread;
-	long minAnimationPeriod;
-	boolean runAnimation;
+	Thread checkThread;
+	long checkPeriod;
+	boolean runCheck;
 
 	public ServerParty(Map map) {
-		party = new Party(map);
+		this.map = map;
 		clients = new HashMap<>();
 
 		idCounter = Integer.MIN_VALUE;
 		toRemove = new ArrayList<>();
 
-		minAnimationPeriod = 10;
+		checkPeriod = 500;
 		
-		animationThread = new Thread(this);
-		animationThread.start();
+		checkThread = new Thread(this);
+		checkThread.start();
 	}
 
 	public void stop() {
-		runAnimation = false;
+		runCheck = false;
 	}
 
 	@Override
 	public void run() {
 		long lastMs = System.currentTimeMillis();
-		runAnimation = true;
+		runCheck = true;
 
-		while (runAnimation) {
-			long now = System.currentTimeMillis();
-			party.animate(now - lastMs);
-			lastMs = now;
+		while (runCheck) {
 
 			removeConnections();
 
-			long timeToWait = lastMs + minAnimationPeriod - System.currentTimeMillis();
+			long timeToWait = lastMs + checkPeriod - System.currentTimeMillis();
 			if (timeToWait > 0) {
 				try {
 					Thread.sleep(timeToWait);
@@ -73,7 +69,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			int id = getNewId();
 
 			// send / receve helloMessages
-			connection.send(new HelloFromServer(party.getMap().getType(), id));
+			connection.send(new HelloFromServer(map.getType(), id));
 			HelloFromClient m = (HelloFromClient) connection.read();
 
 			// Create new player and send it to others
@@ -87,7 +83,6 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 			// add new client to lists
 			clients.put(connection, newPlayer);
-			party.addPlayer(newPlayer);
 
 			connection.start();
 			sendUpdateTo(connection);
@@ -122,7 +117,6 @@ public class ServerParty implements ConnectionHandler, Runnable {
 				Player p;
 				synchronized (clients) {
 					p = clients.get(connection);
-					party.removePlayer(p.getId());
 					clients.remove(connection);
 				}
 				sendToAll(new PlayerQuit(p));
@@ -139,10 +133,29 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	private synchronized void sendUpdateTo(Connection connection) throws IOException {
 		PartyUpdate update = new PartyUpdate();
-		for (Connection c : clients.keySet()) {
-			update.addPlayerUpdate(clients.get(c));
+		try {
+			Thread.sleep(5);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		connection.send(update);
+		for (Connection c : clients.keySet()) {
+			// update.addPlayerUpdate(clients.get(c));
+			connection.send(new PlayerUpdate(clients.get(c)));
+		}
+		// connection.send(update);
+	}
+	
+	private synchronized void sendUpdateFrom(Connection connection) throws IOException {
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (Connection c : clients.keySet()) {
+			c.send(new PlayerUpdate(clients.get(connection)));
+		}
 	}
 
 	@Override
@@ -150,10 +163,11 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		if (o instanceof PlayerUpdate) {
 			PlayerUpdate m = (PlayerUpdate) o;
 			// wrong id received
-			if (m.id != clients.get(connection).getId())
+			Player p = clients.get(connection);
+			if (m.id != p.getId())
 				return;
-			m.applyUpdateServ(party);
-			sendUpdateTo(connection);
+			m.applyUpdate(p);
+			sendUpdateFrom(connection);
 		}
 	}
 

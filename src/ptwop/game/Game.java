@@ -124,8 +124,9 @@ public class Game {
 		else
 			state = State.DISCONNECTED;
 		System.out.println("Game state : CONNECTED");
-
-		client.disconnect();
+		
+		if(client != null)
+			client.disconnect();
 		thread.stopAnimation();
 		panel.setAnimable(null);
 	}

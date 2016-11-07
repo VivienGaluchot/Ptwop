@@ -21,8 +21,8 @@ public class PartyUpdate implements Serializable {
 
 	public void applyUpdate(Party party) {
 		for (PlayerUpdate update : updates) {
-			if(party.getYou().getId() != update.id)
-				update.applyUpdate(party);
+			if (party.getYou().getId() != update.id)
+				update.applyUpdate(party.getPlayer(update.id));
 		}
 	}
 

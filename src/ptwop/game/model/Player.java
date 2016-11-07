@@ -54,7 +54,7 @@ public class Player extends Mobile {
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
 		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y - (float) radius * 2 / 1.5f);
 
-		//if (isYou())
+		if (isYou())
 			super.paint(g2d);
 		g2d.dispose();
 	}
