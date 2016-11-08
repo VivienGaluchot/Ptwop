@@ -8,7 +8,7 @@ public class Chrono implements Animable {
 
 	private long leftTime;
 	private long totalTime;
-	private boolean alarm = false;
+	// private boolean alarm = false;
 
 	public Chrono(int t) {
 		this.leftTime = t * 1000;
@@ -43,9 +43,9 @@ public class Chrono implements Animable {
 		return false;
 	}
 
-	public void setAlarm(boolean a) {
-		alarm = a;
-	}
+//	public void setAlarm(boolean a) {
+//		alarm = a;
+//	}
 
 	public void reset() {
 		leftTime = totalTime;

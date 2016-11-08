@@ -36,6 +36,7 @@ public class Server {
 			}
 		};
 		listenerThread.start();
+		System.out.println("Server listening on port " + Constants.NETWORK_PORT);
 	}
 
 	public void endListener() {
@@ -46,5 +47,10 @@ public class Server {
 				e.printStackTrace();
 			}
 		listenerThread.interrupt();
+	}
+
+	public void close() {
+		endListener();
+		hostedParty.close();
 	}
 }

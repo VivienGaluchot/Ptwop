@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import ptwop.game.Action;
 import ptwop.game.Animable;
 import ptwop.game.physic.Collider;
 
@@ -34,8 +35,14 @@ public class Party implements Animable {
 		if (p.isYou())
 			you = p;
 
-		collider.add(p);
+		if (players.containsKey(p.getId())) {
+			throw new IllegalArgumentException("Player's id already used");
+		}
+
 		players.put(p.getId(), p);
+		collider.add(p);
+
+		Action.getInstance().handleAction(Action.PARTY_UPDATE);
 	}
 
 	public synchronized Player getPlayer(Integer id) {
@@ -48,6 +55,17 @@ public class Party implements Animable {
 		players.remove(id);
 		if (p == you)
 			you = null;
+
+		Action.getInstance().handleAction(Action.PARTY_UPDATE);
+	}
+
+	public synchronized Player[] getPlayers() {
+		Player array[] = new Player[players.size()];
+		int i = 0;
+		for (int id : players.keySet()) {
+			array[i++] = players.get(id);
+		}
+		return array;
 	}
 
 	public Player getYou() {
@@ -83,7 +101,6 @@ public class Party implements Animable {
 		} else {
 			System.out.println("This is a draw");
 		}
-
 	}
 
 	private void addScore(ArrayList<Player> list) {
@@ -92,6 +109,8 @@ public class Party implements Animable {
 			if (p == you)
 				System.out.println("Your Score is " + p.getScore());
 		}
+
+		Action.getInstance().handleAction(Action.PARTY_UPDATE);
 	}
 
 	@Override

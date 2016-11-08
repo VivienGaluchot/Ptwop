@@ -2,7 +2,6 @@ package ptwop.game.transfert;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -17,12 +16,17 @@ import ptwop.game.transfert.messages.Message;
 import ptwop.game.transfert.messages.MessagePack;
 
 public class ServerParty implements ConnectionHandler, Runnable {
+	
 	static int idCounter;
+	private synchronized int getNewId() throws Exception {
+		if (idCounter == Integer.MAX_VALUE)
+			throw new Exception("Counter reached max value");
+		return idCounter++;
+	}
 
 	private Map map;
 	private HashMap<Connection, Player> clients;
 
-	ArrayList<Connection> toRemove;
 	Thread checkThread;
 	long checkPeriod;
 	boolean runCheck;
@@ -33,13 +37,21 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		this.map = map;
 		clients = new HashMap<>();
 
-		toRemove = new ArrayList<>();
-		checkPeriod = 500;
+		checkPeriod = 1000;
 		checkThread = new Thread(this);
 		checkThread.start();
 	}
 
-	public void stop() {
+	public synchronized void close() {
+		stopCheking();
+		Iterator<Connection> it = clients.keySet().iterator();
+		while (it.hasNext()) {
+			Connection connection = it.next();
+			connection.disconnect();
+		}
+	}
+
+	public void stopCheking() {
 		runCheck = false;
 	}
 
@@ -49,8 +61,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		runCheck = true;
 
 		while (runCheck) {
+			lastMs = System.currentTimeMillis();
 
-			removeConnections();
+			// TODO
 
 			long timeToWait = lastMs + checkPeriod - System.currentTimeMillis();
 			if (timeToWait > 0) {
@@ -68,7 +81,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			Connection connection = new Connection(socket, this);
 			int id = getNewId();
 
-			// send / receve helloMessages
+			// send / receive helloMessages
 			connection.send(new HelloFromServer(map.getType(), id));
 			HelloFromClient m = (HelloFromClient) connection.read();
 
@@ -91,6 +104,17 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		}
 	}
 
+	private void remove(Connection c) {
+		Player p;
+		synchronized (clients) {
+			p = clients.remove(c);
+		}
+		if (p != null) {
+			System.out.println("Server : PlayerQuit " + p.getId());
+			sendToAll(new PlayerQuit(p.getId()));
+		}
+	}
+
 	private synchronized void sendToAll(Message o) {
 		Iterator<Connection> it = clients.keySet().iterator();
 		while (it.hasNext()) {
@@ -99,36 +123,8 @@ public class ServerParty implements ConnectionHandler, Runnable {
 				connection.send(o);
 			} catch (IOException e) {
 				System.out.println(e);
-				toRemove(connection);
 			}
 		}
-	}
-
-	private void toRemove(Connection c) {
-		synchronized (toRemove) {
-			if (!toRemove.contains(c))
-				toRemove.add(c);
-		}
-	}
-
-	private void removeConnections() {
-		synchronized (toRemove) {
-			for (Connection connection : toRemove) {
-				Player p;
-				synchronized (clients) {
-					p = clients.get(connection);
-					clients.remove(connection);
-				}
-				sendToAll(new PlayerQuit(p));
-			}
-			toRemove.clear();
-		}
-	}
-
-	private synchronized int getNewId() throws Exception {
-		if (idCounter == Integer.MAX_VALUE)
-			throw new Exception("Counter reached max value");
-		return idCounter++;
 	}
 
 	private synchronized void sendUpdateTo(Connection connection) throws IOException {
@@ -137,15 +133,19 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		}
 	}
 
-	private synchronized void sendUpdateFrom(Connection connection) throws IOException {
+	private synchronized void sendUpdateFrom(Connection connection) {
+		// Lag simulation
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		for (Connection c : clients.keySet()) {
-			c.send(new PlayerUpdate(clients.get(connection)));
+			try {
+				c.send(new PlayerUpdate(clients.get(connection)));
+			} catch (IOException e) {
+			}
 		}
 	}
 
@@ -157,7 +157,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 				handleMessage(connection, m);
 		} else if (o instanceof PlayerUpdate) {
 			PlayerUpdate m = (PlayerUpdate) o;
-			// wrong id received
+			// Wrong id received
 			Player p = clients.get(connection);
 			if (m.id != p.getId())
 				return;
@@ -168,6 +168,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	@Override
 	public void connectionClosed(Connection connection) {
-		toRemove(connection);
+		System.out.println(clients.get(connection).getId() + " connectionClosed");
+		remove(connection);
 	}
 }

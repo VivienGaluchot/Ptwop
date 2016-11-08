@@ -10,6 +10,10 @@ public class PlayerQuit extends Message {
 	public PlayerQuit(Player player) {
 		id = player.getId();
 	}
+	
+	public PlayerQuit(int id) {
+		this.id = id;
+	}
 
 	public String toString() {
 		return "PlayerQuit > id : " + id;

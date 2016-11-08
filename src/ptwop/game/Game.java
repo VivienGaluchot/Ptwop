@@ -7,6 +7,7 @@ import ptwop.game.gui.AnimationPanel;
 import ptwop.game.gui.AnimationThread;
 import ptwop.game.gui.Dialog;
 import ptwop.game.gui.Frame;
+import ptwop.game.gui.SideBar;
 import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
@@ -27,7 +28,8 @@ public class Game {
 
 	protected Frame frame;
 	protected AnimationThread thread;
-	protected AnimationPanel panel;
+	protected AnimationPanel mainPanel;
+	protected SideBar sideBar;
 	protected Party party;
 	protected Map map;
 	protected Chrono chrono;
@@ -44,16 +46,18 @@ public class Game {
 		state = State.DISCONNECTED;
 		System.out.println("Game state : DISCONNECTED");
 
-		frame = new Frame();
-		panel = new AnimationPanel();
-		frame.setMainPanel(panel);
-		panel.setAnimable(null);
+		mainPanel = new AnimationPanel();
+		mainPanel.setAnimable(null);
+
+		sideBar = new SideBar(null);
+
+		frame = new Frame(mainPanel, sideBar);
 	}
 
 	public void mouseMoved(Point mousePosition) {
 		if (state == State.CONNECTED) {
-			Vector2D pos = panel.transformMousePosition(mousePosition);
-			if (party.getYou() != null)
+			Vector2D pos = mainPanel.transformMousePosition(mousePosition);
+			if (party.getYou() != null && pos != null)
 				party.getYou().setMoveTo(pos);
 		}
 	}
@@ -72,22 +76,27 @@ public class Game {
 				client = new Client(ip, name);
 				party = client.getJoinedParty();
 
-				thread = new AnimationThread(panel, party);
-				panel.setAnimable(party);
+				thread = new AnimationThread(mainPanel, party);
+				mainPanel.setAnimable(party);
 
 				map = party.getMap();
-				panel.setGraphicSize(map.getGraphicSize());
+				mainPanel.setGraphicSize(map.getGraphicSize());
 
+				sideBar.setParty(party);
+				sideBar.update();
 			} catch (IOException e) {
+				// DEBUG PART
+				
 				Dialog.displayError(null, e.toString());
 
 				map = new Map(Map.Type.DEFAULT_MAP);
 				chrono = new Chrono(10);
 				party = new Party(map);
-				thread = new AnimationThread(panel, party);
+				thread = new AnimationThread(mainPanel, party);
 
-				panel.setAnimable(party);
-				panel.setGraphicSize(map.getGraphicSize());
+				mainPanel.setAnimable(party);
+				mainPanel.setGraphicSize(map.getGraphicSize());
+				sideBar.setParty(party);
 
 				Player player;
 
@@ -99,15 +108,23 @@ public class Game {
 				player.setPos(3.7f, 8);
 				party.addPlayer(player);
 
-				player = new Player("Bob", 3);
+				player = new Player("Maurice", 3);
 				player.setPos(3.7f, 8);
+				player.setMoveTo(new Vector2D(3.8, 4));
+				party.addPlayer(player);
+				
+				player = new Player("Jeanclawde", 4);
+				player.setPos(4f, 8);
+				player.setMoveTo(new Vector2D(-3.8, -5));
 				party.addPlayer(player);
 
-				player = new Player("Steve", 4, true);
+				player = new Player("Steve", 5, true);
 				player.setPos(0.2f, 2);
 				party.addPlayer(player);
 
 				party.addChrono(chrono);
+
+				sideBar.update();
 			}
 
 			thread.startAnimation();
@@ -122,12 +139,18 @@ public class Game {
 			return;
 		else
 			state = State.DISCONNECTED;
-		System.out.println("Game state : CONNECTED");
-		
-		if(client != null)
+		System.out.println("Game state : DISCONNECTED");
+
+		if (client != null)
 			client.disconnect();
 		thread.stopAnimation();
-		panel.setAnimable(null);
+		mainPanel.setAnimable(null);
+		sideBar.setParty(null);
+		sideBar.update();
+	}
+	
+	public void partyUpdate() {
+		sideBar.update();
 	}
 
 	public void launchServer() {
@@ -138,5 +161,9 @@ public class Game {
 
 		server = new Server();
 		server.startListener();
+	}
+	
+	public void stopServer(){
+		
 	}
 }

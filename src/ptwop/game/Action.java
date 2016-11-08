@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 
 public class Action implements ActionListener, ItemListener, MouseMotionListener {
 
+	// User action
 	public static final String ACTION_CONNECT = "connect";
 	public static final String ACTION_DISCONNECT = "disconnect";
 	public static final String ACTION_QUIT = "quit";
@@ -17,9 +18,12 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 	public static final String ACTION_CTRL = "control";
 	public static final String ACTION_LAUNCH_SERVER = "launch-server";
 
+	// Programm action
+	public static final String PARTY_UPDATE = "party-update";
+
 	private static Action instance;
-	
-	private Action(){
+
+	private Action() {
 	}
 
 	public static Action getInstance() {
@@ -32,14 +36,20 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 	public void actionPerformed(ActionEvent ev) {
 		String action = ev.getActionCommand();
 		System.out.println("Action : " + action);
+		handleAction(action);
+	}
+
+	public void handleAction(String action) {
 		if (action == ACTION_QUIT)
 			System.exit(0);
-		else if(action == ACTION_CONNECT)
+		else if (action == ACTION_CONNECT)
 			Game.getInstance().connect();
-		else if(action == ACTION_DISCONNECT)
+		else if (action == ACTION_DISCONNECT)
 			Game.getInstance().disconnect();
-		else if(action == ACTION_LAUNCH_SERVER)
+		else if (action == ACTION_LAUNCH_SERVER)
 			Game.getInstance().launchServer();
+		else if (action == PARTY_UPDATE)
+			Game.getInstance().partyUpdate();
 	}
 
 	@Override
@@ -50,7 +60,7 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 	@Override
 	public void mouseDragged(MouseEvent ev) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

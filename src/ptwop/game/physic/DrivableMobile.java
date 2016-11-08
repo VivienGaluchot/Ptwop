@@ -19,7 +19,7 @@ public class DrivableMobile extends Mobile {
 
 	@Override
 	public synchronized void animate(long timeStep) {
-
+		
 		acc = moveTo.subtract(pos).multiply(6).subtract(speed.multiply(5));
 		acc.capModule(Constants.maxPower / mass);
 

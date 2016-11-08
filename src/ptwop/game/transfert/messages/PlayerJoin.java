@@ -18,6 +18,6 @@ public class PlayerJoin extends Message {
 	}
 
 	public String toString() {
-		return "PLayerJoin > name : " + name + " id : " + id;
+		return "PlayerJoin > name : " + name + " id : " + id;
 	}
 }

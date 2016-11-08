@@ -28,7 +28,7 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 
 	public AnimationPanel() {
 		setPreferredSize(new Dimension(500, 500));
-		setMinimumSize(new Dimension(100, 100));
+		setMinimumSize(new Dimension(200, 200));
 
 		graphicSize = 25;
 		computeTransform();
