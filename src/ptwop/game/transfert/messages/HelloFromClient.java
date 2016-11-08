@@ -9,6 +9,7 @@ public class HelloFromClient extends Message {
 		this.name = name;
 	}
 
+	@Override
 	public String toString() {
 		return "HelloFromClient > Pseudo : " + name;
 	}

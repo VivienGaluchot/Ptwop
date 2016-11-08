@@ -15,6 +15,10 @@ public class LayerComparator implements Comparator<Mobile> {
 				return 1;
 			else if (!p1.isYou() && p2.isYou())
 				return -1;
+		} else if(a instanceof Player){
+			return 1;
+		} else if(b instanceof Player){
+			return -1;
 		}
 		return 0;
 	}

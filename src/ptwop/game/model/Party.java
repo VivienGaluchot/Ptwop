@@ -8,6 +8,7 @@ import java.util.HashMap;
 import ptwop.game.Action;
 import ptwop.game.Animable;
 import ptwop.game.physic.Collider;
+import ptwop.game.physic.Mobile;
 
 public class Party implements Animable {
 	private Map map;
@@ -40,7 +41,7 @@ public class Party implements Animable {
 		}
 
 		players.put(p.getId(), p);
-		collider.add(p);
+		addMobileToCollider(p);
 
 		Action.getInstance().handleAction(Action.PARTY_UPDATE);
 	}
@@ -51,12 +52,20 @@ public class Party implements Animable {
 
 	public synchronized void removePlayer(Integer id) {
 		Player p = players.get(id);
-		collider.remove(p);
 		players.remove(id);
+		removeMobileFromCollider(p);
 		if (p == you)
 			you = null;
 
 		Action.getInstance().handleAction(Action.PARTY_UPDATE);
+	}
+
+	public synchronized void addMobileToCollider(Mobile m) {
+		collider.add(m);
+	}
+
+	public synchronized void removeMobileFromCollider(Mobile m) {
+		collider.remove(m);
 	}
 
 	public synchronized Player[] getPlayers() {

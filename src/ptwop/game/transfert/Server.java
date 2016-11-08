@@ -22,6 +22,7 @@ public class Server {
 
 	public void startListener() {
 		listenerThread = new Thread() {
+			@Override
 			public void run() {
 				try {
 					listener = new ServerSocket(Constants.NETWORK_PORT);

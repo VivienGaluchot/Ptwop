@@ -10,6 +10,7 @@ import ptwop.game.gui.Frame;
 import ptwop.game.gui.SideBar;
 import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
+import ptwop.game.model.Ball;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.physic.Vector2D;
@@ -86,7 +87,7 @@ public class Game {
 				sideBar.update();
 			} catch (IOException e) {
 				// DEBUG PART
-				
+
 				Dialog.displayError(null, e.toString());
 
 				map = new Map(Map.Type.DEFAULT_MAP);
@@ -97,6 +98,8 @@ public class Game {
 				mainPanel.setAnimable(party);
 				mainPanel.setGraphicSize(map.getGraphicSize());
 				sideBar.setParty(party);
+
+				party.addChrono(chrono);
 
 				Player player;
 
@@ -112,7 +115,7 @@ public class Game {
 				player.setPos(3.7f, 8);
 				player.setMoveTo(new Vector2D(3.8, 4));
 				party.addPlayer(player);
-				
+
 				player = new Player("Jeanclawde", 4);
 				player.setPos(4f, 8);
 				player.setMoveTo(new Vector2D(-3.8, -5));
@@ -121,9 +124,8 @@ public class Game {
 				player = new Player("Steve", 5, true);
 				player.setPos(0.2f, 2);
 				party.addPlayer(player);
-
-				party.addChrono(chrono);
-
+				
+				party.addMobileToCollider(new Ball());
 				sideBar.update();
 			}
 
@@ -148,7 +150,7 @@ public class Game {
 		sideBar.setParty(null);
 		sideBar.update();
 	}
-	
+
 	public void partyUpdate() {
 		sideBar.update();
 	}
@@ -162,8 +164,8 @@ public class Game {
 		server = new Server();
 		server.startListener();
 	}
-	
-	public void stopServer(){
-		
+
+	public void stopServer() {
+
 	}
 }

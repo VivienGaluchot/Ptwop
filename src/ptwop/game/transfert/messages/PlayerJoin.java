@@ -17,6 +17,7 @@ public class PlayerJoin extends Message {
 		return new Player(name, id);
 	}
 
+	@Override
 	public String toString() {
 		return "PlayerJoin > name : " + name + " id : " + id;
 	}

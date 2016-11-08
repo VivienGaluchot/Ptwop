@@ -13,6 +13,7 @@ public class TextMessage extends Message {
 		return message;
 	}
 
+	@Override
 	public String toString() {
 		return message;
 	}

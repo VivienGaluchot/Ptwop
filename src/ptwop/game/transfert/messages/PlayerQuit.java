@@ -15,6 +15,7 @@ public class PlayerQuit extends Message {
 		this.id = id;
 	}
 
+	@Override
 	public String toString() {
 		return "PlayerQuit > id : " + id;
 	}

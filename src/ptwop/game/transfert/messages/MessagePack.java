@@ -11,6 +11,7 @@ public class MessagePack extends Message {
 		array = new ArrayList<>();
 	}
 
+	@Override
 	public String toString() {
 		return "MessagePack, " + array.size() + " elements";
 	}

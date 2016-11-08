@@ -44,6 +44,7 @@ public class Client implements ConnectionHandler {
 		return party;
 	}
 
+	@Override
 	public void handleMessage(Connection connection, Message o) throws IOException {
 		if (o instanceof MessagePack) {
 			MessagePack pack = (MessagePack) o;

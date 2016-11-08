@@ -24,6 +24,7 @@ public class PlayerUpdate extends Message {
 		p.setMoveTo(moveTo);
 	}
 
+	@Override
 	public String toString() {
 		return "PlayerUpdate > id : " + id;
 	}

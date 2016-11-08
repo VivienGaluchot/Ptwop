@@ -13,6 +13,7 @@ public class HelloFromServer extends Message {
 		this.yourId = yourId;
 	}
 
+	@Override
 	public String toString() {
 		return "HelloFromServer > MapType : " + mapType + " yourId : " + yourId;
 	}

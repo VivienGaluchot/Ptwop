@@ -23,6 +23,7 @@ public class Vector2D implements Serializable{
 		return new Point2D.Double(x,y);
 	}
 
+	@Override
 	public Vector2D clone() {
 		return new Vector2D(x, y);
 	}
