@@ -8,8 +8,7 @@ public class HelloFromServer extends Message {
 	public Map.Type mapType;
 	public int yourId;
 
-	public HelloFromServer(int timeStamp, Map.Type mapType, int yourId) {
-		this.setTimeStamp(timeStamp);
+	public HelloFromServer(Map.Type mapType, int yourId) {
 		this.mapType = mapType;
 		this.yourId = yourId;
 	}

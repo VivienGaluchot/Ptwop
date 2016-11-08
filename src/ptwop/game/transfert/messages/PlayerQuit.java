@@ -7,8 +7,7 @@ public class PlayerQuit extends Message {
 
 	public int id;
 
-	public PlayerQuit(int timeStamp, Player player) {
-		this.setTimeStamp(timeStamp);
+	public PlayerQuit(Player player) {
 		id = player.getId();
 	}
 

@@ -22,7 +22,7 @@ public class Party implements Animable {
 	public Party(Map map, Chrono chrono) {
 		this.map = map;
 		this.chrono = chrono;
-		collider = new Collider();
+		collider = new Collider(map.getMapShape());
 		players = new HashMap<>();
 	}
 
@@ -31,8 +31,6 @@ public class Party implements Animable {
 	}
 
 	public synchronized void addPlayer(Player p) {
-		p.setMap(map);
-
 		if (p.isYou())
 			you = p;
 
@@ -105,6 +103,7 @@ public class Party implements Animable {
 		g2d.setFont(newFont);
 
 		collider.paint(g2d);
+		
 		if (chrono != null) {
 			chrono.paint(g2d);
 			if (chrono.getAlarm()) {
@@ -124,6 +123,7 @@ public class Party implements Animable {
 			map.isInCamp(you);
 
 		collider.animate(timeStep);
+		
 		if (chrono != null)
 			chrono.animate(timeStep);
 	}

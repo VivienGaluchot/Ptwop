@@ -11,8 +11,7 @@ public class PlayerUpdate extends Message {
 	public Vector2D speed;
 	public Vector2D moveTo;
 
-	public PlayerUpdate(int timeStamp, Player player) {
-		this.setTimeStamp(timeStamp);
+	public PlayerUpdate(Player player) {
 		id = player.getId();
 		pos = player.getPos();
 		speed = player.getSpeed();

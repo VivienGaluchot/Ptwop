@@ -6,7 +6,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 
 import ptwop.game.Animable;
 
@@ -14,7 +13,6 @@ public abstract class Mobile implements Animable {
 
 	protected Shape mobileShape;
 	protected double radius;
-	protected Rectangle2D mobileBounds;
 
 	// Movement
 	private Vector2D oldPos;
@@ -36,7 +34,6 @@ public abstract class Mobile implements Animable {
 		this.radius = radius;
 
 		this.mobileShape = new Ellipse2D.Double(pos.x - radius / 2, pos.y - radius / 2, radius, radius);
-		this.mobileBounds = null;
 	}
 
 	public synchronized void moveToward(Vector2D p) {
@@ -72,12 +69,12 @@ public abstract class Mobile implements Animable {
 		this.moveTo = moveTo;
 	}
 
-	public synchronized void setBounds(Rectangle2D bounds) {
-		this.mobileBounds = bounds;
+	public void setShape(Ellipse2D shape) {
+		this.mobileShape = shape;
 	}
 
-	public synchronized void setShape(Ellipse2D shape) {
-		this.mobileShape = shape;
+	public Shape getShape() {
+		return mobileShape;
 	}
 
 	public Shape getTranslatedShape() {
@@ -86,23 +83,12 @@ public abstract class Mobile implements Animable {
 		return transformShape.createTransformedShape(mobileShape);
 	}
 
-	protected void rectifyPosition() {
-		if (mobileBounds != null) {
-			Rectangle2D bounds = mobileShape.getBounds2D();
-			pos.x = (float) Math.min(pos.x, mobileBounds.getMaxX() + bounds.getMinX());
-			pos.y = (float) Math.min(pos.y, mobileBounds.getMaxY() + bounds.getMinY());
-			pos.x = (float) Math.max(pos.x, mobileBounds.getMinY() + bounds.getMaxX());
-			pos.y = (float) Math.max(pos.y, mobileBounds.getMinY() + bounds.getMaxY());
-		}
-	}
-
 	@Override
 	public synchronized void animate(long timeStep) {
 		if (timeStep <= 0)
 			return;
 
 		double time = timeStep / 1000.0;
-		oldPos = pos.clone();
 
 		acc = moveTo.subtract(pos).multiply(6).subtract(speed.multiply(5));
 		capModule(acc, Constants.maxPower / mass);
@@ -111,10 +97,15 @@ public abstract class Mobile implements Animable {
 		capModule(speed, Constants.maxSpeed);
 
 		pos = speed.multiply(time).add(pos);
-		rectifyPosition();
+	}
+	
+	public void registerOldPos() {
+		oldPos = pos.clone();
+	}
 
-		// true speed, after computing real position
-		speed = pos.subtract(oldPos).multiply(1/time);
+	public void computeTrueSpeed(long timeStep) {
+		if(timeStep > 0)
+			speed = pos.subtract(oldPos).multiply(1000/timeStep);
 	}
 
 	public boolean colliding(Mobile mobile) {
@@ -177,14 +168,11 @@ public abstract class Mobile implements Animable {
 		Graphics2D g2d = (Graphics2D) g.create();
 
 		g2d.setColor(Color.red);
-		Line2D speedVect = new Line2D.Double(pos.x, pos.y, speed.x + pos.x, speed.y + pos.y);
+		Line2D speedVect = new Line2D.Double(pos.x, pos.y, speed.x / 2 + pos.x, speed.y / 2 + pos.y);
 		g2d.draw(speedVect);
 		g2d.setColor(Color.blue);
-		Line2D accVect = new Line2D.Double(pos.x, pos.y, acc.x + pos.x, acc.y + pos.y);
+		Line2D accVect = new Line2D.Double(pos.x, pos.y, acc.x / 2 + pos.x, acc.y / 2 + pos.y);
 		g2d.draw(accVect);
-		g2d.setColor(Color.green);
-		Line2D moveToVect = new Line2D.Double(moveTo.x - 0.2, moveTo.y - 0.2, moveTo.x + 0.2, moveTo.y + 0.2);
-		g2d.draw(moveToVect);
 
 		g2d.dispose();
 	}

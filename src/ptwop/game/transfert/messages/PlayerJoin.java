@@ -8,8 +8,7 @@ public class PlayerJoin extends Message {
 	public String name;
 	public int id;
 
-	public PlayerJoin(int timeStamp, Player newPlayer) {
-		this.setTimeStamp(timeStamp);
+	public PlayerJoin(Player newPlayer) {
 		name = newPlayer.getName();
 		id = newPlayer.getId();
 	}

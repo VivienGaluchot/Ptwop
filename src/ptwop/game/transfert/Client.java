@@ -16,20 +16,15 @@ import ptwop.game.transfert.messages.Message;
 
 public class Client implements ConnectionHandler {
 	private Party party;
-	
-	private int timeStamp;
 
 	private Connection connection;
 
-	public Client(String ip, String name) throws UnknownHostException, IOException {
-		timeStamp = 0;
-		
+	public Client(String ip, String name) throws UnknownHostException, IOException {		
 		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
 
 		// Read HelloMessage and create party
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
-		timeStamp = m.getTimeStamp();
 		party = new Party(new Map(m.mapType));
 
 		// Create you player
@@ -37,7 +32,7 @@ public class Client implements ConnectionHandler {
 		party.addPlayer(you);
 
 		connection.start();
-		connection.send(new HelloFromClient(timeStamp, name));
+		connection.send(new HelloFromClient(name));
 	}
 
 	public void disconnect() {
@@ -48,10 +43,7 @@ public class Client implements ConnectionHandler {
 		return party;
 	}
 
-	public void handleMessage(Connection connection, Message o) throws IOException {
-		if(o.getTimeStamp() > timeStamp)
-			timeStamp = o.getTimeStamp();
-		
+	public void handleMessage(Connection connection, Message o) throws IOException {		
 		if (o instanceof PlayerJoin) {
 			System.out.println(o);
 			PlayerJoin m = (PlayerJoin) o;
@@ -64,7 +56,7 @@ public class Client implements ConnectionHandler {
 			PlayerUpdate m = (PlayerUpdate) o;
 			Player you = party.getYou();
 			if (m.id == you.getId())
-				connection.send(new PlayerUpdate(timeStamp, you));
+				connection.send(new PlayerUpdate( you));
 			else {
 				m.applyUpdate(party.getPlayer(m.id));
 			}

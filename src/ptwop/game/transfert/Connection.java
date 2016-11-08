@@ -12,6 +12,8 @@ public class Connection implements Runnable {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
+	int timeStamp;
+
 	ConnectionHandler handler;
 
 	private Thread runner;
@@ -23,6 +25,7 @@ public class Connection implements Runnable {
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 		runner = new Thread(this);
+		timeStamp = Integer.MIN_VALUE;
 	}
 
 	public void disconnect() {
@@ -35,6 +38,7 @@ public class Connection implements Runnable {
 	}
 
 	public void send(Message o) throws IOException {
+		o.setTimeStamp(timeStamp);
 		out.writeObject(o);
 	}
 
@@ -42,7 +46,12 @@ public class Connection implements Runnable {
 		Object reading;
 		try {
 			reading = in.readObject();
-			return (Message) reading;
+			Message m = (Message) reading;
+			if (m.getTimeStamp() < timeStamp)
+				System.out.println("Outdated message");
+			else
+				timeStamp = m.getTimeStamp() + 1;
+			return m;
 		} catch (ClassNotFoundException | ClassCastException e) {
 			System.out.println(e);
 			return null;

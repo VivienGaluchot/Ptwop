@@ -5,8 +5,7 @@ public class HelloFromClient extends Message {
 
 	public String name;
 
-	public HelloFromClient(int timeStamp, String name) {
-		this.setTimeStamp(timeStamp);
+	public HelloFromClient(String name) {
 		this.name = name;
 	}
 

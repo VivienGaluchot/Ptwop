@@ -21,8 +21,6 @@ public class ServerParty implements ConnectionHandler, Runnable {
 	private Map map;
 	private HashMap<Connection, Player> clients;
 
-	int timeStamp;
-
 	ArrayList<Connection> toRemove;
 	Thread checkThread;
 	long checkPeriod;
@@ -30,11 +28,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	public ServerParty(Map map) {
 		idCounter = Integer.MIN_VALUE;
-		
+
 		this.map = map;
 		clients = new HashMap<>();
-
-		timeStamp = 0;
 
 		toRemove = new ArrayList<>();
 		checkPeriod = 500;
@@ -72,16 +68,16 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			int id = getNewId();
 
 			// send / receve helloMessages
-			connection.send(new HelloFromServer(timeStamp, map.getType(), id));
+			connection.send(new HelloFromServer(map.getType(), id));
 			HelloFromClient m = (HelloFromClient) connection.read();
 
 			// Create new player and send it to others
 			Player newPlayer = new Player(m.name, id);
-			sendToAll(new PlayerJoin(timeStamp, newPlayer));
+			sendToAll(new PlayerJoin(newPlayer));
 
 			// send other players to new client
 			for (Connection C : clients.keySet()) {
-				connection.send(new PlayerJoin(timeStamp, clients.get(C)));
+				connection.send(new PlayerJoin(clients.get(C)));
 			}
 
 			// add new client to lists
@@ -122,7 +118,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 					p = clients.get(connection);
 					clients.remove(connection);
 				}
-				sendToAll(new PlayerQuit(timeStamp, p));
+				sendToAll(new PlayerQuit(p));
 			}
 			toRemove.clear();
 		}
@@ -136,7 +132,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	private synchronized void sendUpdateTo(Connection connection) throws IOException {
 		for (Connection c : clients.keySet()) {
-			connection.send(new PlayerUpdate(timeStamp, clients.get(c)));
+			connection.send(new PlayerUpdate(clients.get(c)));
 		}
 	}
 
@@ -148,13 +144,12 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			e.printStackTrace();
 		}
 		for (Connection c : clients.keySet()) {
-			c.send(new PlayerUpdate(timeStamp, clients.get(connection)));
+			c.send(new PlayerUpdate(clients.get(connection)));
 		}
 	}
 
 	@Override
 	public void handleMessage(Connection connection, Message o) throws IOException {
-		timeStamp = Math.max(timeStamp, o.getTimeStamp() + 1);
 		if (o instanceof PlayerUpdate) {
 			PlayerUpdate m = (PlayerUpdate) o;
 			// wrong id received

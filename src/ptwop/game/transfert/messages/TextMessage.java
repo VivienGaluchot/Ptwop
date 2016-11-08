@@ -5,8 +5,7 @@ public class TextMessage extends Message {
 
 	private String message;
 
-	public TextMessage(int timeStamp, String message) {
-		this.setTimeStamp(timeStamp);
+	public TextMessage(String message) {
 		this.message = message;
 	}
 

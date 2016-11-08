@@ -63,10 +63,6 @@ public class Player extends Mobile {
 		return you;
 	}
 
-	public void setMap(Map map) {
-		this.setBounds(map.getMapShape());
-	}
-
 	public int getScore() {
 		return score;
 	}
