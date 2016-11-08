@@ -40,6 +40,7 @@ public class Connection implements Runnable {
 	public void send(Message o) throws IOException {
 		o.setTimeStamp(timeStamp);
 		out.writeObject(o);
+		timeStamp = timeStamp + 1;
 	}
 
 	public Message read() throws IOException {
@@ -48,7 +49,7 @@ public class Connection implements Runnable {
 			reading = in.readObject();
 			Message m = (Message) reading;
 			if (m.getTimeStamp() < timeStamp)
-				System.out.println("Outdated message");
+				System.out.println("Outdated message : " + (timeStamp - m.getTimeStamp()));
 			else
 				timeStamp = m.getTimeStamp() + 1;
 			return m;

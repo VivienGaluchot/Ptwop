@@ -6,9 +6,9 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
-import ptwop.game.physic.Mobile;
+import ptwop.game.physic.DrivableMobile;
 
-public class Player extends Mobile {
+public class Player extends DrivableMobile {
 	private String name;
 	private boolean you;
 

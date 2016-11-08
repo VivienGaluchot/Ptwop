@@ -13,13 +13,14 @@ import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 import ptwop.game.transfert.messages.Message;
+import ptwop.game.transfert.messages.MessagePack;
 
 public class Client implements ConnectionHandler {
 	private Party party;
 
 	private Connection connection;
 
-	public Client(String ip, String name) throws UnknownHostException, IOException {		
+	public Client(String ip, String name) throws UnknownHostException, IOException {
 		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
 
 		// Read HelloMessage and create party
@@ -43,8 +44,12 @@ public class Client implements ConnectionHandler {
 		return party;
 	}
 
-	public void handleMessage(Connection connection, Message o) throws IOException {		
-		if (o instanceof PlayerJoin) {
+	public void handleMessage(Connection connection, Message o) throws IOException {
+		if (o instanceof MessagePack) {
+			MessagePack pack = (MessagePack) o;
+			for (Message m : pack.array)
+				handleMessage(connection, m);
+		} else if (o instanceof PlayerJoin) {
 			System.out.println(o);
 			PlayerJoin m = (PlayerJoin) o;
 			party.addPlayer(m.createPlayer());
@@ -56,7 +61,7 @@ public class Client implements ConnectionHandler {
 			PlayerUpdate m = (PlayerUpdate) o;
 			Player you = party.getYou();
 			if (m.id == you.getId())
-				connection.send(new PlayerUpdate( you));
+				connection.send(new PlayerUpdate(you));
 			else {
 				m.applyUpdate(party.getPlayer(m.id));
 			}

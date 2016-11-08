@@ -54,7 +54,7 @@ public class Game {
 		if (state == State.CONNECTED) {
 			Vector2D pos = panel.transformMousePosition(mousePosition);
 			if (party.getYou() != null)
-				party.getYou().moveToward(pos);
+				party.getYou().setMoveTo(pos);
 		}
 	}
 
@@ -101,7 +101,6 @@ public class Game {
 
 				player = new Player("Bob", 3);
 				player.setPos(3.7f, 8);
-				player.moveToward(new Vector2D(3.8, 8));
 				party.addPlayer(player);
 
 				player = new Player("Steve", 4, true);

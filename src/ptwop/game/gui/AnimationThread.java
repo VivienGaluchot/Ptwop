@@ -12,12 +12,15 @@ public class AnimationThread {
 
 	private final Component component;
 	private final Animable animable;
+	private final int fps = 60;
 
 	private Thread thread;
 
 	public AnimationThread(Component compo, Animable anim) {
 		this.component = compo;
 		this.animable = anim;
+
+		long periodTime = 1000 / fps;
 
 		thread = new Thread() {
 			@Override
@@ -36,6 +39,9 @@ public class AnimationThread {
 								component.repaint();
 							}
 						});
+						long toWait = periodTime - (System.currentTimeMillis() - lastMs);
+						if(toWait > 0)
+							Thread.sleep(toWait);
 					} catch (InvocationTargetException | InterruptedException e) {
 						e.printStackTrace();
 					}

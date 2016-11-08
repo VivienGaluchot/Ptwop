@@ -37,15 +37,17 @@ public class Party implements Animable {
 		collider.add(p);
 		players.put(p.getId(), p);
 	}
-	
-	public synchronized Player getPlayer(Integer id){
+
+	public synchronized Player getPlayer(Integer id) {
 		return players.get(id);
 	}
-	
-	public synchronized void removePlayer(Integer id){
+
+	public synchronized void removePlayer(Integer id) {
 		Player p = players.get(id);
 		collider.remove(p);
 		players.remove(id);
+		if (p == you)
+			you = null;
 	}
 
 	public Player getYou() {
@@ -103,7 +105,7 @@ public class Party implements Animable {
 		g2d.setFont(newFont);
 
 		collider.paint(g2d);
-		
+
 		if (chrono != null) {
 			chrono.paint(g2d);
 			if (chrono.getAlarm()) {
@@ -123,7 +125,7 @@ public class Party implements Animable {
 			map.isInCamp(you);
 
 		collider.animate(timeStep);
-		
+
 		if (chrono != null)
 			chrono.animate(timeStep);
 	}

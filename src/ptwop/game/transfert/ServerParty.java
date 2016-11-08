@@ -14,6 +14,7 @@ import ptwop.game.transfert.messages.PlayerUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 import ptwop.game.transfert.messages.Message;
+import ptwop.game.transfert.messages.MessagePack;
 
 public class ServerParty implements ConnectionHandler, Runnable {
 	static int idCounter;
@@ -150,7 +151,11 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	@Override
 	public void handleMessage(Connection connection, Message o) throws IOException {
-		if (o instanceof PlayerUpdate) {
+		if (o instanceof MessagePack) {
+			MessagePack pack = (MessagePack) o;
+			for (Message m : pack.array)
+				handleMessage(connection, m);
+		} else if (o instanceof PlayerUpdate) {
 			PlayerUpdate m = (PlayerUpdate) o;
 			// wrong id received
 			Player p = clients.get(connection);

@@ -34,6 +34,15 @@ public class Vector2D implements Serializable{
 	public double getLength() {
 		return Math.sqrt(x * x + y * y);
 	}
+	
+	protected void capModule(double module) {
+		double absModule = getLength();
+		if (absModule > module) {
+			double correctedSpeed = module / absModule;
+			x = x * correctedSpeed;
+			y = y * correctedSpeed;
+		}
+	}
 
 	public Vector2D multiply(double d) {
 		return new Vector2D(x * d, y * d);

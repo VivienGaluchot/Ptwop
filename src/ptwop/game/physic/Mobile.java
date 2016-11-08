@@ -9,7 +9,7 @@ import java.awt.geom.Line2D;
 
 import ptwop.game.Animable;
 
-public abstract class Mobile implements Animable {
+public class Mobile implements Animable {
 
 	protected Shape mobileShape;
 	protected double radius;
@@ -19,7 +19,6 @@ public abstract class Mobile implements Animable {
 	protected Vector2D pos;
 	protected Vector2D speed;
 	protected Vector2D acc;
-	protected Vector2D moveTo;
 
 	protected double mass;
 
@@ -28,16 +27,11 @@ public abstract class Mobile implements Animable {
 		pos = new Vector2D(0, 0);
 		speed = new Vector2D(0, 0);
 		acc = new Vector2D(0, 0);
-		moveTo = new Vector2D(0, 0);
 
 		this.mass = mass;
 		this.radius = radius;
 
 		this.mobileShape = new Ellipse2D.Double(pos.x - radius / 2, pos.y - radius / 2, radius, radius);
-	}
-
-	public synchronized void moveToward(Vector2D p) {
-		moveTo = p;
 	}
 
 	public synchronized void setPos(double x, double y) {
@@ -61,14 +55,6 @@ public abstract class Mobile implements Animable {
 		return pos;
 	}
 
-	public Vector2D getMoveTo() {
-		return moveTo;
-	}
-
-	public void setMoveTo(Vector2D moveTo) {
-		this.moveTo = moveTo;
-	}
-
 	public void setShape(Ellipse2D shape) {
 		this.mobileShape = shape;
 	}
@@ -90,22 +76,19 @@ public abstract class Mobile implements Animable {
 
 		double time = timeStep / 1000.0;
 
-		acc = moveTo.subtract(pos).multiply(6).subtract(speed.multiply(5));
-		capModule(acc, Constants.maxPower / mass);
-
 		speed = acc.multiply(time).add(speed);
-		capModule(speed, Constants.maxSpeed);
+		speed.capModule(Constants.maxSpeed);
 
 		pos = speed.multiply(time).add(pos);
 	}
-	
+
 	public void registerOldPos() {
 		oldPos = pos.clone();
 	}
 
 	public void computeTrueSpeed(long timeStep) {
-		if(timeStep > 0)
-			speed = pos.subtract(oldPos).multiply(1000/timeStep);
+		if (timeStep > 0)
+			speed = pos.subtract(oldPos).multiply(1000 / timeStep);
 	}
 
 	public boolean colliding(Mobile mobile) {
@@ -175,14 +158,5 @@ public abstract class Mobile implements Animable {
 		g2d.draw(accVect);
 
 		g2d.dispose();
-	}
-
-	private void capModule(Vector2D p, double module) {
-		double absModule = Math.sqrt(p.x * p.x + p.y * p.y);
-		if (absModule > module) {
-			double correctedSpeed = module / absModule;
-			p.x = p.x * correctedSpeed;
-			p.y = p.y * correctedSpeed;
-		}
 	}
 }
