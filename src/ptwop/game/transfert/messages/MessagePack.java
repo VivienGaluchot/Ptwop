@@ -5,14 +5,14 @@ import java.util.ArrayList;
 public class MessagePack extends Message {
 	private static final long serialVersionUID = 0L;
 
-	public ArrayList<Message> array;
+	public ArrayList<Message> messages;
 
 	public MessagePack() {
-		array = new ArrayList<>();
+		messages = new ArrayList<>();
 	}
 
 	@Override
 	public String toString() {
-		return "MessagePack, " + array.size() + " elements";
+		return "MessagePack, " + messages.size() + " elements";
 	}
 }

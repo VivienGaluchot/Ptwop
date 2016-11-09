@@ -12,8 +12,8 @@ public class Ball extends Mobile {
 
 	private Color fillColor;
 
-	public Ball() {
-		super(5, 1f);
+	public Ball(int id) {
+		super(id, 5, 1f);
 
 		fillColor = new Color(200, 250, 180);
 		speed = new Vector2D(3.5,1);

@@ -14,6 +14,9 @@ public class Mobile implements Animable {
 	protected Shape mobileShape;
 	protected double radius;
 
+	// Unique id
+	private int id;
+
 	// Movement
 	private Vector2D oldPos;
 	protected Vector2D pos;
@@ -22,7 +25,8 @@ public class Mobile implements Animable {
 
 	protected double mass;
 
-	public Mobile(double mass, double radius) {
+	public Mobile(int id, double mass, double radius) {
+		this.id = id;
 		oldPos = new Vector2D(0, 0);
 		pos = new Vector2D(0, 0);
 		speed = new Vector2D(0, 0);
@@ -53,6 +57,10 @@ public class Mobile implements Animable {
 
 	public Vector2D getPos() {
 		return pos;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public void setShape(Ellipse2D shape) {

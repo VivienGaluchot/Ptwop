@@ -4,6 +4,8 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.Vector;
 
 import ptwop.game.Action;
 import ptwop.game.Animable;
@@ -13,7 +15,7 @@ import ptwop.game.physic.Mobile;
 public class Party implements Animable {
 	private Map map;
 	private Collider collider;
-	private HashMap<Integer, Player> players;
+	private HashMap<Integer, Mobile> mobiles;
 	private Player you;
 	private Chrono chrono = null;
 
@@ -25,34 +27,36 @@ public class Party implements Animable {
 		this.map = map;
 		this.chrono = chrono;
 		collider = new Collider(map.getMapShape());
-		players = new HashMap<>();
+		mobiles = new HashMap<>();
 	}
 
 	public void addChrono(Chrono chrono) {
 		this.chrono = chrono;
 	}
 
-	public synchronized void addPlayer(Player p) {
-		if (p.isYou())
-			you = p;
-
-		if (players.containsKey(p.getId())) {
-			throw new IllegalArgumentException("Player's id already used");
+	public synchronized void addMobile(Mobile m) {
+		if (m instanceof Player) {
+			Player p = (Player) m;
+			if (p.isYou())
+				you = p;
+		}
+		if (mobiles.containsKey(m.getId())) {
+			throw new IllegalArgumentException("Mobile's id already used");
 		}
 
-		players.put(p.getId(), p);
-		addMobileToCollider(p);
+		mobiles.put(m.getId(), m);
+		addMobileToCollider(m);
 
 		Action.getInstance().handleAction(Action.PARTY_UPDATE);
 	}
 
-	public synchronized Player getPlayer(Integer id) {
-		return players.get(id);
+	public synchronized Mobile getMobile(Integer id) {
+		return mobiles.get(id);
 	}
 
-	public synchronized void removePlayer(Integer id) {
-		Player p = players.get(id);
-		players.remove(id);
+	public synchronized void removeMobile(Integer id) {
+		Mobile p = mobiles.get(id);
+		mobiles.remove(id);
 		removeMobileFromCollider(p);
 		if (p == you)
 			you = null;
@@ -60,19 +64,23 @@ public class Party implements Animable {
 		Action.getInstance().handleAction(Action.PARTY_UPDATE);
 	}
 
-	public synchronized void addMobileToCollider(Mobile m) {
+	public Set<Integer> getIdSet() {
+		return mobiles.keySet();
+	}
+
+	private synchronized void addMobileToCollider(Mobile m) {
 		collider.add(m);
 	}
 
-	public synchronized void removeMobileFromCollider(Mobile m) {
+	private synchronized void removeMobileFromCollider(Mobile m) {
 		collider.remove(m);
 	}
 
-	public synchronized Player[] getPlayers() {
-		Player array[] = new Player[players.size()];
-		int i = 0;
-		for (int id : players.keySet()) {
-			array[i++] = players.get(id);
+	public synchronized Vector<Player> getPlayers() {
+		Vector<Player> array = new Vector<>();
+		for (int id : mobiles.keySet()) {
+			if (mobiles.get(id) instanceof Player)
+				array.add((Player) mobiles.get(id));
 		}
 		return array;
 	}
@@ -90,16 +98,18 @@ public class Party implements Animable {
 		ArrayList<Player> blueList = new ArrayList<>();
 		ArrayList<Player> redList = new ArrayList<>();
 		ArrayList<Player> midList = new ArrayList<>();
-		for (int id : players.keySet()) {
-			Player p = players.get(id);
-			int score = map.whereItIs(p);
-			if (score == 1) {
-				blueList.add(p);
-			} else if (score == -1) {
-				redList.add(p);
-			} else
-				midList.add(p);
-			winner = winner + score;
+		for (int id : mobiles.keySet()) {
+			if (mobiles.get(id) instanceof Player) {
+				Player p = (Player) mobiles.get(id);
+				int score = map.whereItIs(p);
+				if (score == 1) {
+					blueList.add(p);
+				} else if (score == -1) {
+					redList.add(p);
+				} else
+					midList.add(p);
+				winner = winner + score;
+			}
 		}
 		if (winner > 0) {
 			addScore(redList);

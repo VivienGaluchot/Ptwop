@@ -12,9 +12,6 @@ public class Player extends DrivableMobile {
 	private String name;
 	private boolean you;
 
-	// Unique id
-	private int id;
-
 	private int score = 0;
 
 	// Display
@@ -25,9 +22,8 @@ public class Player extends DrivableMobile {
 	}
 
 	public Player(String name, int id, boolean you) {
-		super(1, 0.35f);
+		super(id, 1, 0.35f);
 		this.name = name;
-		this.id = id;
 		this.you = you;
 		if (you)
 			fillColor = Color.white;
@@ -73,9 +69,5 @@ public class Player extends DrivableMobile {
 
 	public String getName() {
 		return name;
-	}
-
-	public int getId() {
-		return id;
 	}
 }

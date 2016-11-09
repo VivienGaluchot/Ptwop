@@ -6,8 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -59,8 +59,8 @@ public class SideBar extends JPanel {
 		if (party == null)
 			list.setListData(new Player[0]);
 		else {
-			Player[] players = party.getPlayers();
-			Arrays.sort(players, new PlayerComparator());
+			Vector<Player> players = party.getPlayers();
+			players.sort(new PlayerComparator());
 			list.setListData(players);
 		}
 	}

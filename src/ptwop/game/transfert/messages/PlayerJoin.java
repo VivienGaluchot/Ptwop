@@ -8,12 +8,12 @@ public class PlayerJoin extends Message {
 	public String name;
 	public int id;
 
-	public PlayerJoin(Player newPlayer) {
-		name = newPlayer.getName();
-		id = newPlayer.getId();
+	public PlayerJoin(Player player) {
+		name = player.getName();
+		id = player.getId();
 	}
 
-	public Player createPlayer() {
+	public Player createMobile() {
 		return new Player(name, id);
 	}
 

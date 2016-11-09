@@ -3,9 +3,9 @@ package ptwop.game.physic;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
-public class Vector2D implements Serializable{
+public class Vector2D implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	public double x;
 	public double y;
 
@@ -18,14 +18,19 @@ public class Vector2D implements Serializable{
 		this.x = p.getX();
 		this.y = p.getY();
 	}
-	
-	public Point2D.Double toPoint2D(){
-		return new Point2D.Double(x,y);
+
+	public Point2D.Double toPoint2D() {
+		return new Point2D.Double(x, y);
 	}
 
 	@Override
 	public Vector2D clone() {
 		return new Vector2D(x, y);
+	}
+
+	@Override
+	public String toString() {
+		return "Vector2D(" + x + "," + y + ")";
 	}
 
 	public Vector2D subtract(Vector2D vect) {
@@ -35,7 +40,7 @@ public class Vector2D implements Serializable{
 	public double getLength() {
 		return Math.sqrt(x * x + y * y);
 	}
-	
+
 	protected void capModule(double module) {
 		double absModule = getLength();
 		if (absModule > module) {
@@ -55,7 +60,7 @@ public class Vector2D implements Serializable{
 
 	public Vector2D normalize() {
 		double length = getLength();
-		if(length == 0)
+		if (length == 0)
 			throw new ArithmeticException();
 		return new Vector2D(x / length, y / length);
 	}
@@ -63,8 +68,8 @@ public class Vector2D implements Serializable{
 	public double dot(Vector2D vect) {
 		return x * vect.x + y * vect.y;
 	}
-	
-	public boolean isNull(){
+
+	public boolean isNull() {
 		return x == 0 && y == 0;
 	}
 }

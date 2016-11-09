@@ -105,27 +105,27 @@ public class Game {
 
 				player = new Player("Alice", 1);
 				player.setPos(5, -4.9f);
-				party.addPlayer(player);
+				party.addMobile(player);
 
 				player = new Player("Bob", 2);
 				player.setPos(3.7f, 8);
-				party.addPlayer(player);
+				party.addMobile(player);
 
 				player = new Player("Maurice", 3);
 				player.setPos(3.7f, 8);
 				player.setMoveTo(new Vector2D(3.8, 4));
-				party.addPlayer(player);
+				party.addMobile(player);
 
 				player = new Player("Jeanclawde", 4);
 				player.setPos(4f, 8);
 				player.setMoveTo(new Vector2D(-3.8, -5));
-				party.addPlayer(player);
+				party.addMobile(player);
 
 				player = new Player("Steve", 5, true);
 				player.setPos(0.2f, 2);
-				party.addPlayer(player);
+				party.addMobile(player);
 				
-				party.addMobileToCollider(new Ball());
+				party.addMobile(new Ball(6));
 				sideBar.update();
 			}
 

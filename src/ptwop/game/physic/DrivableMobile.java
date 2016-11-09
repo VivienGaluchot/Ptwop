@@ -4,8 +4,8 @@ public class DrivableMobile extends Mobile {
 
 	protected Vector2D moveTo;
 
-	public DrivableMobile(double mass, double radius) {
-		super(mass, radius);
+	public DrivableMobile(int id, double mass, double radius) {
+		super(id, mass, radius);
 		moveTo = new Vector2D(0,0);
 	}
 

@@ -7,18 +7,16 @@ import java.net.UnknownHostException;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
-import ptwop.game.transfert.messages.PlayerJoin;
-import ptwop.game.transfert.messages.PlayerQuit;
-import ptwop.game.transfert.messages.PlayerUpdate;
+import ptwop.game.transfert.messages.RequireUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 import ptwop.game.transfert.messages.Message;
-import ptwop.game.transfert.messages.MessagePack;
 
 public class Client implements ConnectionHandler {
-	private Party party;
 
 	private Connection connection;
+	private Party party;
+	private MessageFactory messageFactory;
 
 	public Client(String ip, String name) throws UnknownHostException, IOException {
 		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
@@ -27,10 +25,11 @@ public class Client implements ConnectionHandler {
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
 		party = new Party(new Map(m.mapType));
+		messageFactory = new MessageFactory(party);
 
 		// Create you player
 		Player you = new Player(name, m.yourId, true);
-		party.addPlayer(you);
+		party.addMobile(you);
 
 		connection.start();
 		connection.send(new HelloFromClient(name));
@@ -46,28 +45,11 @@ public class Client implements ConnectionHandler {
 
 	@Override
 	public void handleMessage(Connection connection, Message o) throws IOException {
-		if (o instanceof MessagePack) {
-			MessagePack pack = (MessagePack) o;
-			for (Message m : pack.array)
-				handleMessage(connection, m);
-		} else if (o instanceof PlayerJoin) {
-			System.out.println(o);
-			PlayerJoin m = (PlayerJoin) o;
-			party.addPlayer(m.createPlayer());
-		} else if (o instanceof PlayerQuit) {
-			System.out.println(o);
-			PlayerQuit m = (PlayerQuit) o;
-			party.removePlayer(m.id);
-		} else if (o instanceof PlayerUpdate) {
-			PlayerUpdate m = (PlayerUpdate) o;
+		if (o instanceof RequireUpdate) {
 			Player you = party.getYou();
-			if (m.id == you.getId())
-				connection.send(new PlayerUpdate(you));
-			else {
-				m.applyUpdate(party.getPlayer(m.id));
-			}
+			connection.send(MessageFactory.generateUpdate(you));
 		} else {
-			System.out.println(o);
+			messageFactory.updatePartyWith(o);
 		}
 	}
 

@@ -1,22 +1,22 @@
 package ptwop.game.transfert.messages;
 
-import ptwop.game.model.Player;
+import ptwop.game.physic.Mobile;
 
-public class PlayerQuit extends Message {
+public class MobileQuit extends Message {
 	private static final long serialVersionUID = 1L;
 
 	public int id;
 
-	public PlayerQuit(Player player) {
+	public MobileQuit(Mobile player) {
 		id = player.getId();
 	}
 	
-	public PlayerQuit(int id) {
+	public MobileQuit(int id) {
 		this.id = id;
 	}
 
 	@Override
 	public String toString() {
-		return "PlayerQuit > id : " + id;
+		return "MobileQuit > id : " + id;
 	}
 }
