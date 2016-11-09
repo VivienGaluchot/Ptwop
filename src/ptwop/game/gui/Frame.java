@@ -22,9 +22,6 @@ public class Frame extends JFrame {
 		menubar = new MenuBar();
 		setJMenuBar(menubar);
 
-		setVisible(true);
-		setLocationRelativeTo(null);
-
 		contentPane = new JPanel();
 		setContentPane(contentPane);
 
@@ -34,5 +31,8 @@ public class Frame extends JFrame {
 
 		contentPane.add(sideBar, new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
+
+		setVisible(true);
+		setLocationRelativeTo(null);
 	}
 }

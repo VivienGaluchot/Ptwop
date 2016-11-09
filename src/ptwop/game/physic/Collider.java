@@ -40,7 +40,7 @@ public class Collider implements Animable {
 	@Override
 	public synchronized void animate(long timeStep) {
 		for (Mobile m : mobiles){
-			m.registerOldPos();
+			// m.registerOldPos();
 			m.animate(timeStep);
 		}
 
@@ -51,17 +51,36 @@ public class Collider implements Animable {
 		
 		for (Mobile m : mobiles){
 			rectifyPosition(m);
-			m.computeTrueSpeed(timeStep);
+			// m.computeTrueSpeed(timeStep);
 		}
 	}
 	
 	protected void rectifyPosition(Mobile m) {
 		if (mobileBounds != null) {
-			Rectangle2D bounds = m.getShape().getBounds2D();
-			m.pos.x = (float) Math.min(m.pos.x, mobileBounds.getMaxX() + bounds.getMinX());
-			m.pos.y = (float) Math.min(m.pos.y, mobileBounds.getMaxY() + bounds.getMinY());
-			m.pos.x = (float) Math.max(m.pos.x, mobileBounds.getMinY() + bounds.getMaxX());
-			m.pos.y = (float) Math.max(m.pos.y, mobileBounds.getMinY() + bounds.getMaxY());
+			Rectangle2D bounds = m.getShape().getBounds2D();			
+			double A = mobileBounds.getMaxX() + bounds.getMinX();
+			if(m.pos.x > A){
+				m.pos.x = A;
+				m.speed.x = -m.speed.x * Constants.boundsRestitution;
+			}
+			
+			A = mobileBounds.getMaxY() + bounds.getMinY();
+			if(m.pos.y > A){
+				m.pos.y = A;
+				m.speed.y = -m.speed.y * Constants.boundsRestitution;
+			}
+			
+			A = mobileBounds.getMinY() + bounds.getMaxX();
+			if(m.pos.x < A){
+				m.pos.x = A;
+				m.speed.x = -m.speed.x * Constants.boundsRestitution;
+			}
+			
+			A = mobileBounds.getMinY() + bounds.getMaxY();
+			if(m.pos.y < A){
+				m.pos.y = A;
+				m.speed.y = -m.speed.y * Constants.boundsRestitution;
+			}
 		}
 	}
 }
