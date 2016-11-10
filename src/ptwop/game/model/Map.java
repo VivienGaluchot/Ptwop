@@ -1,6 +1,7 @@
 package ptwop.game.model;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
@@ -21,10 +22,7 @@ public class Map implements Animable {
 	private static Color redCampColor = new Color(255, 210, 200);
 	private static Color blueEdgeColor = new Color(0, 0, 200).darker().darker();
 	private static Color redEdgeColor = new Color(255, 0, 0).darker().darker();
-
-	long lastFpsMesure = 0;
-	long fpsCounter = 0;
-	long fps = 0;
+	
 	private boolean blueEdge = false;
 	private boolean redEdge = false;
 
@@ -53,7 +51,7 @@ public class Map implements Animable {
 	}
 
 	@Override
-	public void paint(Graphics2D g) {
+	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 		g2d.setColor(Color.white);
 		g2d.fill(mapShape);
@@ -78,21 +76,12 @@ public class Map implements Animable {
 		int width = g2d.getFontMetrics().stringWidth(name);
 		g2d.drawString(name, -width / 2, (int) mapShape.getY() - 0.5f);
 
-		g2d.drawString(fps + " fps", (int) mapShape.getY(), (int) mapShape.getMinX() - 0.5f);
-
 		g2d.dispose();
 	}
 
 	@Override
 	public void animate(long timeStep) {
-		if (System.currentTimeMillis() - lastFpsMesure > 500) {
-			lastFpsMesure = System.currentTimeMillis();
-			fps = fpsCounter * 2;
-			fpsCounter = 0;
-		} else {
-			fpsCounter++;
-		}
-
+		// TODO
 	}
 
 	public Rectangle2D getMapShape() {

@@ -7,6 +7,7 @@ import ptwop.game.gui.AnimationPanel;
 import ptwop.game.gui.AnimationThread;
 import ptwop.game.gui.Dialog;
 import ptwop.game.gui.Frame;
+import ptwop.game.gui.InfoLayer;
 import ptwop.game.gui.SideBar;
 import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
@@ -29,7 +30,7 @@ public class Game {
 
 	protected Frame frame;
 	protected AnimationThread thread;
-	protected AnimationPanel mainPanel;
+	protected AnimationPanel animationPanel;
 	protected SideBar sideBar;
 	protected Party party;
 	protected Map map;
@@ -47,17 +48,17 @@ public class Game {
 		state = State.DISCONNECTED;
 		System.out.println("Game state : DISCONNECTED");
 
-		mainPanel = new AnimationPanel();
-		mainPanel.setAnimable(null);
+		animationPanel = new AnimationPanel();
+		animationPanel.setAnimable(null);
 
 		sideBar = new SideBar(null);
 
-		frame = new Frame(mainPanel, sideBar);
+		frame = new Frame(animationPanel, sideBar);
 	}
 
 	public void mouseMoved(Point mousePosition) {
 		if (state == State.CONNECTED) {
-			Vector2D pos = mainPanel.transformMousePosition(mousePosition);
+			Vector2D pos = animationPanel.transformMousePosition(mousePosition);
 			if (party.getYou() != null && pos != null)
 				party.getYou().setMoveTo(pos);
 		}
@@ -77,11 +78,14 @@ public class Game {
 				client = new Client(ip, name);
 				party = client.getJoinedParty();
 
-				thread = new AnimationThread(mainPanel, party);
-				mainPanel.setAnimable(party);
+				thread = new AnimationThread(animationPanel);
+				animationPanel.setAnimable(party);
 
 				map = party.getMap();
-				mainPanel.setGraphicSize(map.getGraphicSize());
+				animationPanel.setGraphicSize(map.getGraphicSize());
+				
+				InfoLayer infoLayer = new InfoLayer(null, client);
+				animationPanel.setInfoLayer(infoLayer);
 
 				sideBar.setParty(party);
 				sideBar.update();
@@ -93,10 +97,10 @@ public class Game {
 				map = new Map(Map.Type.DEFAULT_MAP);
 				chrono = new Chrono(10);
 				party = new Party(map);
-				thread = new AnimationThread(mainPanel, party);
+				thread = new AnimationThread(animationPanel);
 
-				mainPanel.setAnimable(party);
-				mainPanel.setGraphicSize(map.getGraphicSize());
+				animationPanel.setAnimable(party);
+				animationPanel.setGraphicSize(map.getGraphicSize());
 				sideBar.setParty(party);
 
 				party.addChrono(chrono);
@@ -146,7 +150,8 @@ public class Game {
 		if (client != null)
 			client.disconnect();
 		thread.stopAnimation();
-		mainPanel.setAnimable(null);
+		animationPanel.setAnimable(null);
+		animationPanel.setInfoLayer(null);
 		sideBar.setParty(null);
 		sideBar.update();
 	}

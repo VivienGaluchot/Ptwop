@@ -1,5 +1,6 @@
 package ptwop.game.model;
 
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import ptwop.game.Animable;
@@ -16,7 +17,7 @@ public class Chrono implements Animable {
 	}
 
 	@Override
-	public void paint(Graphics2D g) {
+	public void paint(Graphics g) {
 		// TODO Auto-generated method stub
 		Graphics2D g2d = (Graphics2D) g.create();
 

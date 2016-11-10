@@ -1,6 +1,7 @@
 package ptwop.game.model;
 
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +15,11 @@ import ptwop.game.physic.Mobile;
 
 public class Party implements Animable {
 	private Map map;
+	
 	private Collider collider;
 	private HashMap<Integer, Mobile> mobiles;
 	private Player you;
+	
 	private Chrono chrono = null;
 
 	public Party(Map map) {
@@ -133,7 +136,7 @@ public class Party implements Animable {
 	}
 
 	@Override
-	public synchronized void paint(Graphics2D g) {
+	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 		map.paint(g2d);
 
@@ -152,7 +155,7 @@ public class Party implements Animable {
 				chrono.reset();
 			}
 		}
-
+		
 		g2d.dispose();
 	}
 

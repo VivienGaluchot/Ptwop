@@ -12,8 +12,9 @@ public class Connection implements Runnable {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
-	int timeStamp;
-	int peerTimeStamp;
+	private int timeStamp;
+	private long lastSendTime;
+	private long pingTime;
 
 	ConnectionHandler handler;
 
@@ -27,40 +28,10 @@ public class Connection implements Runnable {
 		in = new ObjectInputStream(socket.getInputStream());
 		runner = new Thread(this);
 		timeStamp = Integer.MIN_VALUE;
-		peerTimeStamp = Integer.MIN_VALUE;
+		lastSendTime = 0;
+		pingTime = 0;
 	}
-
-	public void disconnect() {
-		run = false;
-		try {
-			socket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public synchronized void send(Message o) throws IOException {
-		o.setTimeStamp(timeStamp);
-		out.writeObject(o);
-		timeStamp = timeStamp + 1;
-	}
-
-	public synchronized Message read() throws IOException {
-		try {
-			Message m = (Message) in.readObject();
-			if (m.getTimeStamp() < peerTimeStamp)
-				System.out.println("Outdated message : " + (timeStamp - m.getTimeStamp()));
-			else {
-				peerTimeStamp = m.getTimeStamp();
-				timeStamp = m.getTimeStamp() + 1;
-			}
-			return m;
-		} catch (ClassNotFoundException | ClassCastException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
+	
 	public void start() {
 		runner.start();
 	}
@@ -82,5 +53,52 @@ public class Connection implements Runnable {
 			}
 		}
 		handler.connectionClosed(this);
+	}
+
+	public void disconnect() {
+		run = false;
+		try {
+			socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public long getPingTime(){
+		return pingTime;
+	}
+
+	public synchronized void send(Message o) throws IOException {
+		o.setTimeStamp(timeStamp);
+		timeStamp = timeStamp + 1;
+		lastSendTime = System.currentTimeMillis();
+
+		// Lag simulation
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		out.writeObject(o);
+	}
+
+	public synchronized Message read() throws IOException {
+		try {
+			Message m = (Message) in.readObject();
+			if (m.getTimeStamp() < timeStamp)
+				System.out.println("Outdated message : " + (timeStamp - m.getTimeStamp()));
+			else {
+				if (m.getTimeStamp() == timeStamp && lastSendTime > 0) {
+					pingTime = System.currentTimeMillis() - lastSendTime;
+					lastSendTime = 0;
+				}
+				timeStamp = m.getTimeStamp() + 1;
+			}
+			return m;
+		} catch (ClassNotFoundException | ClassCastException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

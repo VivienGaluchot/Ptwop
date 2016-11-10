@@ -1,6 +1,6 @@
 package ptwop.game.physic;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
@@ -32,7 +32,7 @@ public class Collider implements Animable {
 	}
 
 	@Override
-	public synchronized void paint(Graphics2D g) {
+	public synchronized void paint(Graphics g) {
 		for (Mobile m : mobiles)
 			m.paint(g);
 	}

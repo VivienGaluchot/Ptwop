@@ -1,6 +1,7 @@
 package ptwop.game.model;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -13,7 +14,7 @@ public class Ball extends Mobile {
 	private Color fillColor;
 
 	public Ball(int id) {
-		super(id, 5, 1f);
+		super(id, 5, 0.8f);
 
 		fillColor = new Color(200, 250, 180);
 		speed = new Vector2D(3.5,1);
@@ -22,7 +23,7 @@ public class Ball extends Mobile {
 	}
 
 	@Override
-	public synchronized void paint(Graphics2D g) {
+	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
 		// Shape

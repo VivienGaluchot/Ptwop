@@ -43,6 +43,13 @@ public class Client implements ConnectionHandler {
 		return party;
 	}
 
+	public long getPingTime() {
+		if (connection != null)
+			return connection.getPingTime();
+		else
+			return 0;
+	}
+
 	@Override
 	public void handleMessage(Connection connection, Message o) throws IOException {
 		if (o instanceof RequireUpdate) {

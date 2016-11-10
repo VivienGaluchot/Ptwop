@@ -161,12 +161,6 @@ public class ServerParty implements ConnectionHandler, Runnable {
 				e.printStackTrace();
 			}
 		}
-		// Lag simulation
-		try {
-			Thread.sleep(50);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override

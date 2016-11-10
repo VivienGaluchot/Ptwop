@@ -1,10 +1,10 @@
 package ptwop.game;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 
 public interface Animable {
 	
-	public void paint(Graphics2D g);
+	public void paint(Graphics g);
 	
 	public void animate(long timeStep);
 	

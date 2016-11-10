@@ -4,13 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
-import ptwop.game.Animable;
-
 public class AnimationThread {
 	private boolean runAnimation;
 
 	private final AnimationPanel mainPanel;
-	private final Animable animable;
 
 	/**
 	 * The thread will try to animate and paint at this rate
@@ -19,9 +16,8 @@ public class AnimationThread {
 
 	private Thread thread;
 
-	public AnimationThread(AnimationPanel mainCompo, Animable anim) {
+	public AnimationThread(AnimationPanel mainCompo) {
 		this.mainPanel = mainCompo;
-		this.animable = anim;
 
 		long periodTime = 1000 / fps;
 
@@ -33,7 +29,7 @@ public class AnimationThread {
 
 				while (runAnimation) {
 					long now = System.currentTimeMillis();
-					animable.animate(now - lastMs);
+					mainCompo.animate(now - lastMs);
 					lastMs = now;
 					try {
 						SwingUtilities.invokeAndWait(new Runnable() {

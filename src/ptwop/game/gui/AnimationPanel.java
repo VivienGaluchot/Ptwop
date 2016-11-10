@@ -18,26 +18,34 @@ import ptwop.game.Action;
 import ptwop.game.Animable;
 import ptwop.game.physic.Vector2D;
 
-public class AnimationPanel extends JPanel implements ComponentListener {
+public class AnimationPanel extends JPanel implements ComponentListener, Animable {
 	private static final long serialVersionUID = 1L;
 
 	private Animable animable;
 	private int graphicSize;
-	
+
+	private InfoLayer infoLayer;
+
 	private AffineTransform currentTransform;
 
 	public AnimationPanel() {
 		setPreferredSize(new Dimension(500, 500));
 		setMinimumSize(new Dimension(200, 200));
 
+		infoLayer = null;
+
 		graphicSize = 25;
 		computeTransform();
-		
+
 		addMouseMotionListener(Action.getInstance());
 		addComponentListener(this);
 	}
-	
-	public void computeTransform(){		
+
+	public void setInfoLayer(InfoLayer infoLayer) {
+		this.infoLayer = infoLayer;
+	}
+
+	public void computeTransform() {
 		double scale = Math.min(this.getWidth(), this.getHeight()) / (double) graphicSize;
 		currentTransform = new AffineTransform();
 		currentTransform.scale(scale, scale);
@@ -50,7 +58,7 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 		Graphics2D g2d = (Graphics2D) g.create();
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		
+
 		g2d.transform(currentTransform);
 
 		Font currentFont = g2d.getFont();
@@ -65,6 +73,17 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 		}
 
 		g2d.dispose();
+
+		if (infoLayer != null)
+			infoLayer.paint(g);
+	}
+
+	@Override
+	public void animate(long timeStep) {
+		animable.animate(timeStep);
+		
+		if (infoLayer != null)
+			infoLayer.animate(timeStep);
 	}
 
 	private void paintDefault(Graphics2D g) {
@@ -93,8 +112,8 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 		computeTransform();
 		repaint();
 	}
-	
-	public Vector2D transformMousePosition(Point position){
+
+	public Vector2D transformMousePosition(Point position) {
 		try {
 			Point2D.Double p = new Point2D.Double(position.x, position.y);
 			currentTransform.inverseTransform(p, p);
@@ -108,7 +127,7 @@ public class AnimationPanel extends JPanel implements ComponentListener {
 	public int getGraphicSize() {
 		return graphicSize;
 	}
-	
+
 	// Component Listener
 
 	@Override
