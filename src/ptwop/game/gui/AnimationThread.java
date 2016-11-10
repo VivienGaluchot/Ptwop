@@ -7,7 +7,7 @@ import javax.swing.SwingUtilities;
 public class AnimationThread implements Runnable {
 	private boolean runAnimation;
 
-	private final AnimationPanel mainPanel;
+	private AnimationPanel mainPanel;
 
 	/**
 	 * The thread will try to animate and paint at this rate
@@ -16,19 +16,33 @@ public class AnimationThread implements Runnable {
 
 	private Thread thread;
 
-	public AnimationThread(AnimationPanel mainCompo) {
-		this.mainPanel = mainCompo;
+	public AnimationThread(AnimationPanel mainPanel) {
+		this.mainPanel = mainPanel;
 
 		thread = new Thread(this);
 		thread.setName("Animation Thread");
-	}
 
-	public void startAnimation() {
 		thread.start();
 	}
 
+	public void setAnimationPanel(AnimationPanel mainPanel) {
+		this.mainPanel = mainPanel;
+	}
+
+	// TODO
+	public void startAnimation() {
+		// thread.start();
+	}
+
+	// TODO
 	public void stopAnimation() {
-		runAnimation = false;
+		// runAnimation = false;
+		// try {
+		// thread.join();
+		// } catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 	}
 
 	@Override

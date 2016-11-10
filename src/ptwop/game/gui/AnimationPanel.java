@@ -79,28 +79,27 @@ public class AnimationPanel extends JPanel implements ComponentListener, Animabl
 	}
 
 	@Override
-	public void animate(long timeStep) {
-		animable.animate(timeStep);
-		
+	public synchronized void animate(long timeStep) {
+		if (animable != null)
+			animable.animate(timeStep);
+
 		if (infoLayer != null)
 			infoLayer.animate(timeStep);
 	}
 
-	private void paintDefault(Graphics2D g) {
+	private synchronized void paintDefault(Graphics2D g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 		g2d.drawLine(-1, 0, 1, 0);
 		g2d.drawLine(0, -1, 0, 1);
 
-		int width = g2d.getFontMetrics().stringWidth("Connecte toi a une partie !!!");
-		g2d.drawString("Connecte toi a une partie !!!", -width / 2.0f, -11f);
+		int width = g2d.getFontMetrics().stringWidth("No signal");
+		g2d.drawString("No signal", -width / 2.0f, -11f);
 
 		g2d.dispose();
 	}
 
 	public synchronized void setAnimable(Animable animable) {
 		this.animable = animable;
-		revalidate();
-		repaint();
 	}
 
 	public Animable getAnimable() {

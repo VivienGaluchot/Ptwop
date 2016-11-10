@@ -23,25 +23,35 @@ public class Game {
 		CONNECTED, DISCONNECTED
 	}
 
-	protected State state;
+	private State state;
 
-	protected Server server;
-	protected Client client;
+	private Server server;
+	private Client client;
 
-	protected Frame frame;
-	protected AnimationThread thread;
-	protected AnimationPanel animationPanel;
-	protected SideBar sideBar;
-	protected Party party;
-	protected Map map;
-	protected Chrono chrono;
+	private Frame frame;
+	private AnimationThread thread;
+	private AnimationPanel animationPanel;
+	private SideBar sideBar;
+
+	private Party currentParty;
+	private Party waitingParty;
 
 	private static Game instance;
+	private static boolean instanciating;
 
-	public static Game getInstance() {
-		if (instance == null)
+	public synchronized static Game getInstance() {
+		if(instanciating)
+			return null;
+		else if (instance == null) {
+			instanciating = true;
 			instance = new Game();
+			instanciating = false;
+		}
 		return instance;
+	}
+	
+	public synchronized static boolean isInstanciating(){
+		return instanciating;
 	}
 
 	private Game() {
@@ -49,18 +59,64 @@ public class Game {
 		System.out.println("Game state : DISCONNECTED");
 
 		animationPanel = new AnimationPanel();
-		animationPanel.setAnimable(null);
+		thread = new AnimationThread(animationPanel);
 
 		sideBar = new SideBar(null);
 
 		frame = new Frame(animationPanel, sideBar);
+
+		// Create waitingParty
+		waitingParty = new Party(new Map(Map.Type.DEFAULT_MAP));
+		waitingParty.addChrono(new Chrono(10));
+
+		Player player;
+
+		player = new Player("Alice", 1);
+		player.setPos(5, -4.9f);
+		waitingParty.addMobile(player);
+
+		player = new Player("Bob", 2);
+		player.setPos(3.7f, 8);
+		waitingParty.addMobile(player);
+
+		player = new Player("Maurice", 3);
+		player.setPos(3.7f, 8);
+		player.setMoveTo(new Vector2D(3.8, 4));
+		waitingParty.addMobile(player);
+
+		player = new Player("Jeanclawde", 4);
+		player.setPos(4f, 8);
+		player.setMoveTo(new Vector2D(-3.8, -5));
+		waitingParty.addMobile(player);
+
+		player = new Player("Steve", 5, true);
+		player.setPos(0.2f, 2);
+		waitingParty.addMobile(player);
+
+		waitingParty.addMobile(new Ball(6));
+
+		// Launch waintingParty
+		playParty(waitingParty, null);
+	}
+
+	public void playParty(Party party, Client client) {
+		currentParty = party;
+
+		animationPanel.setAnimable(party);
+		animationPanel.setGraphicSize(party.getMap().getGraphicSize());
+		
+		InfoLayer infoLayer = new InfoLayer(party, client);
+		animationPanel.setInfoLayer(infoLayer);
+
+		sideBar.setParty(waitingParty);
+		sideBar.update();
 	}
 
 	public void mouseMoved(Point mousePosition) {
-		if (state == State.CONNECTED) {
+		if (currentParty != null) {
 			Vector2D pos = animationPanel.transformMousePosition(mousePosition);
-			if (party.getYou() != null && pos != null)
-				party.getYou().setMoveTo(pos);
+			if (currentParty.getYou() != null && pos != null)
+				currentParty.getYou().setMoveTo(pos);
 		}
 	}
 
@@ -75,68 +131,18 @@ public class Game {
 			if (name == null)
 				return;
 			try {
+				// Client connection
 				client = new Client(ip, name);
-				party = client.getJoinedParty();
+				Party party = client.getJoinedParty();
+				playParty(party, client);
 
-				thread = new AnimationThread(animationPanel);
-				animationPanel.setAnimable(party);
-
-				map = party.getMap();
-				animationPanel.setGraphicSize(map.getGraphicSize());
-				
-				InfoLayer infoLayer = new InfoLayer(null, client);
-				animationPanel.setInfoLayer(infoLayer);
-
-				sideBar.setParty(party);
-				sideBar.update();
+				// Update game state
+				state = State.CONNECTED;
+				System.out.println("Game state : CONNECTED");
 			} catch (IOException e) {
-				// DEBUG PART
-
 				Dialog.displayError(null, e.toString());
-
-				map = new Map(Map.Type.DEFAULT_MAP);
-				chrono = new Chrono(10);
-				party = new Party(map);
-				thread = new AnimationThread(animationPanel);
-
-				animationPanel.setAnimable(party);
-				animationPanel.setGraphicSize(map.getGraphicSize());
-				sideBar.setParty(party);
-
-				party.addChrono(chrono);
-
-				Player player;
-
-				player = new Player("Alice", 1);
-				player.setPos(5, -4.9f);
-				party.addMobile(player);
-
-				player = new Player("Bob", 2);
-				player.setPos(3.7f, 8);
-				party.addMobile(player);
-
-				player = new Player("Maurice", 3);
-				player.setPos(3.7f, 8);
-				player.setMoveTo(new Vector2D(3.8, 4));
-				party.addMobile(player);
-
-				player = new Player("Jeanclawde", 4);
-				player.setPos(4f, 8);
-				player.setMoveTo(new Vector2D(-3.8, -5));
-				party.addMobile(player);
-
-				player = new Player("Steve", 5, true);
-				player.setPos(0.2f, 2);
-				party.addMobile(player);
-				
-				party.addMobile(new Ball(6));
-				sideBar.update();
+				e.printStackTrace();
 			}
-
-			thread.startAnimation();
-
-			state = State.CONNECTED;
-			System.out.println("Game state : CONNECTED");
 		}
 	}
 
@@ -149,11 +155,8 @@ public class Game {
 
 		if (client != null)
 			client.disconnect();
-		thread.stopAnimation();
-		animationPanel.setAnimable(null);
-		animationPanel.setInfoLayer(null);
-		sideBar.setParty(null);
-		sideBar.update();
+
+		playParty(waitingParty, null);
 	}
 
 	public void partyUpdate() {

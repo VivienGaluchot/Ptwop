@@ -42,13 +42,13 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 	public void handleAction(String action) {
 		if (action == ACTION_QUIT)
 			System.exit(0);
-		else if (action == ACTION_CONNECT)
+		else if (action == ACTION_CONNECT && !Game.isInstanciating())
 			Game.getInstance().connect();
-		else if (action == ACTION_DISCONNECT)
+		else if (action == ACTION_DISCONNECT && !Game.isInstanciating())
 			Game.getInstance().disconnect();
-		else if (action == ACTION_LAUNCH_SERVER)
+		else if (action == ACTION_LAUNCH_SERVER && !Game.isInstanciating())
 			Game.getInstance().launchServer();
-		else if (action == PARTY_UPDATE)
+		else if (action == PARTY_UPDATE && !Game.isInstanciating())
 			Game.getInstance().partyUpdate();
 	}
 
@@ -65,6 +65,8 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 
 	@Override
 	public void mouseMoved(MouseEvent ev) {
+		if (Game.isInstanciating())
+			return;
 		Point mousePosition = ev.getPoint();
 		Game.getInstance().mouseMoved(mousePosition);
 	}
