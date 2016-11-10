@@ -7,16 +7,23 @@ import java.net.UnknownHostException;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
+import ptwop.game.physic.DrivableMobile;
+import ptwop.game.physic.Mobile;
 import ptwop.game.transfert.messages.RequireUpdate;
+import ptwop.game.transfert.messages.DrivableMobileUpdate;
 import ptwop.game.transfert.messages.HelloFromClient;
 import ptwop.game.transfert.messages.HelloFromServer;
 import ptwop.game.transfert.messages.Message;
+import ptwop.game.transfert.messages.MessagePack;
+import ptwop.game.transfert.messages.MobileJoin;
+import ptwop.game.transfert.messages.MobileQuit;
+import ptwop.game.transfert.messages.MobileUpdate;
+import ptwop.game.transfert.messages.PlayerJoin;
 
 public class Client implements ConnectionHandler {
 
 	private Connection connection;
 	private Party party;
-	private MessageFactory messageFactory;
 
 	public Client(String ip, String name) throws UnknownHostException, IOException {
 		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
@@ -25,7 +32,6 @@ public class Client implements ConnectionHandler {
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
 		party = new Party(new Map(m.mapType));
-		messageFactory = new MessageFactory(party);
 
 		// Create you player
 		Player you = new Player(name, m.yourId, true);
@@ -55,8 +61,40 @@ public class Client implements ConnectionHandler {
 		if (o instanceof RequireUpdate) {
 			Player you = party.getYou();
 			connection.send(MessageFactory.generateUpdate(you));
+		} else if (o instanceof DrivableMobileUpdate) {
+			DrivableMobileUpdate m = (DrivableMobileUpdate) o;
+			Mobile mobile = party.getMobile(m.id);
+			if (mobile != null && mobile instanceof DrivableMobile) {
+				m.applyUpdate((DrivableMobile) mobile);
+				// delay compensation
+				mobile.animate(connection.getPingTime() / 2);
+			} else
+				throw new IllegalArgumentException("DrivableMobileUpdate wrong id");
+		} else if (o instanceof MobileUpdate) {
+			MobileUpdate m = (MobileUpdate) o;
+			Mobile mobile = party.getMobile(m.id);
+			if (mobile != null) {
+				m.applyUpdate(mobile);
+				// delay compensation
+				mobile.animate(connection.getPingTime() / 2);
+			}
+		} else if (o instanceof PlayerJoin) {
+			PlayerJoin m = (PlayerJoin) o;
+			party.addMobile(m.createMobile());
+		} else if (o instanceof MobileJoin) {
+			MobileJoin m = (MobileJoin) o;
+			Mobile mobile = m.createMobile();
+			if (mobile != null)
+				party.addMobile(mobile);
+		} else if (o instanceof MobileQuit) {
+			MobileQuit m = (MobileQuit) o;
+			party.removeMobile(m.id);
+		} else if (o instanceof MessagePack) {
+			MessagePack pack = (MessagePack) o;
+			for (Message m : pack.messages)
+				handleMessage(connection, m);
 		} else {
-			messageFactory.updatePartyWith(o);
+			System.out.println("Unhandled message : " + o);
 		}
 	}
 

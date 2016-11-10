@@ -27,6 +27,7 @@ public class Connection implements Runnable {
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 		runner = new Thread(this);
+		runner.setName("Connection runner");
 		timeStamp = Integer.MIN_VALUE;
 		lastSendTime = 0;
 		pingTime = 0;

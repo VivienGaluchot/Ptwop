@@ -24,7 +24,7 @@ public class MessageFactory {
 	/**
 	 * @return a MessagePack containing all the party's mobile joins
 	 */
-	public Message generatePartyJoin() {
+	public MessagePack generatePartyJoin() {
 		MessagePack pack = new MessagePack();
 		for (Integer id : party.getIdSet()) {
 			pack.messages.add(generateJoin(id));
@@ -59,7 +59,7 @@ public class MessageFactory {
 	/**
 	 * @return a MessagePack containing all the party's mobile update
 	 */
-	public Message generatePartyUpdate() {
+	public MessagePack generatePartyUpdate() {
 		MessagePack pack = new MessagePack();
 		for (Integer id : party.getIdSet()) {
 			pack.messages.add(generateUpdate(id));
@@ -67,7 +67,7 @@ public class MessageFactory {
 		return pack;
 	}
 
-	public Message generateNonPlayerUpdate() {
+	public MessagePack generateNonPlayerUpdate() {
 		MessagePack pack = new MessagePack();
 		for (Integer id : party.getIdSet()) {
 			Mobile m = party.getMobile(id);
@@ -89,39 +89,5 @@ public class MessageFactory {
 	public Message generateUpdate(int id) {
 		Mobile mobile = party.getMobile(id);
 		return generateUpdate(mobile);
-	}
-
-	/**
-	 * Apply the message corresponding action to the party
-	 * 
-	 * @param o Message
-	 */
-	public void updatePartyWith(Message o) {
-		if (o instanceof DrivableMobileUpdate) {
-			DrivableMobileUpdate m = (DrivableMobileUpdate) o;
-			Mobile mobile = party.getMobile(m.id);
-			if (mobile instanceof DrivableMobile)
-				m.applyUpdate((DrivableMobile) mobile);
-		} else if (o instanceof MobileUpdate) {
-			MobileUpdate m = (MobileUpdate) o;
-			m.applyUpdate(party.getMobile(m.id));
-		} else if (o instanceof PlayerJoin) {
-			PlayerJoin m = (PlayerJoin) o;
-			party.addMobile(m.createMobile());
-		} else if (o instanceof MobileJoin) {
-			MobileJoin m = (MobileJoin) o;
-			Mobile mobile = m.createMobile();
-			if (mobile != null)
-				party.addMobile(mobile);
-		} else if (o instanceof MobileQuit) {
-			MobileQuit m = (MobileQuit) o;
-			party.removeMobile(m.id);
-		} else if (o instanceof MessagePack) {
-			MessagePack pack = (MessagePack) o;
-			for (Message m : pack.messages)
-				updatePartyWith(m);
-		} else {
-			System.out.println("Unhandled message : " + o);
-		}
 	}
 }

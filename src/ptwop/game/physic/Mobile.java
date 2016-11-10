@@ -19,7 +19,6 @@ public class Mobile implements Animable {
 	private int id;
 
 	// Movement
-	private Vector2D oldPos;
 	protected Vector2D pos;
 	protected Vector2D speed;
 	protected Vector2D acc;
@@ -28,7 +27,6 @@ public class Mobile implements Animable {
 
 	public Mobile(int id, double mass, double radius) {
 		this.id = id;
-		oldPos = new Vector2D(0, 0);
 		pos = new Vector2D(0, 0);
 		speed = new Vector2D(0, 0);
 		acc = new Vector2D(0, 0);
@@ -89,15 +87,6 @@ public class Mobile implements Animable {
 		speed.capModule(Constants.maxSpeed);
 
 		pos = speed.multiply(time).add(pos);
-	}
-
-	public void registerOldPos() {
-		oldPos = pos.clone();
-	}
-
-	public void computeTrueSpeed(long timeStep) {
-		if (timeStep > 0)
-			speed = pos.subtract(oldPos).multiply(1000 / timeStep);
 	}
 
 	public boolean colliding(Mobile mobile) {

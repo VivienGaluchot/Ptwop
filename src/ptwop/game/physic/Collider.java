@@ -39,20 +39,16 @@ public class Collider implements Animable {
 
 	@Override
 	public synchronized void animate(long timeStep) {
-		for (Mobile m : mobiles){
-			// m.registerOldPos();
+		for (Mobile m : mobiles)
 			m.animate(timeStep);
-		}
 
 		for (int i = 0; i < mobiles.size(); i++)
 			for (int j = i + 1; j < mobiles.size(); j++)
 				if (mobiles.get(i).colliding(mobiles.get(j)))
 					mobiles.get(i).resolveCollision(mobiles.get(j));
 		
-		for (Mobile m : mobiles){
+		for (Mobile m : mobiles)
 			rectifyPosition(m);
-			// m.computeTrueSpeed(timeStep);
-		}
 	}
 	
 	protected void rectifyPosition(Mobile m) {

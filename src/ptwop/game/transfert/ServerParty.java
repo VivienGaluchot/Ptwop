@@ -50,8 +50,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			e.printStackTrace();
 		}
 
-		checkPeriod = 1000/60;
+		checkPeriod = 1000 / 60;
 		checkThread = new Thread(this);
+		checkThread.setName("Server CheckThread");
 		checkThread.start();
 	}
 
@@ -173,13 +174,17 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			DrivableMobileUpdate m = (DrivableMobileUpdate) o;
 			// Wrong id received
 			Player p = clients.get(connection);
-			if (m.id != p.getId())
-				return;
-			m.applyUpdate(p);
-			sendUpdateFrom(connection);
-			// sendAllNonPlayerUpdates
-			connection.send(messageFactory.generateNonPlayerUpdate());
-			connection.send(new RequireUpdate());
+			if (m.id == p.getId()) {
+				m.applyUpdate(p);
+				// delay compensation
+				p.animate(connection.getPingTime() / 2);
+				// spread update
+				sendUpdateFrom(connection);
+				// sendAllNonPlayerUpdates & require update
+				MessagePack reply = messageFactory.generateNonPlayerUpdate();
+				reply.messages.add(new RequireUpdate());
+				connection.send(reply);
+			}
 		} else if (o instanceof MobileUpdate) {
 			System.out.println("MobileUpdate received, will be ignored");
 			/*
