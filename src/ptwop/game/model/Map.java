@@ -12,7 +12,7 @@ public class Map implements Animable {
 		DEFAULT_MAP, BIG_MAP
 	}
 
-	private String name;
+	private String title;
 	private Type type;
 	private Rectangle2D mapShape;
 	private Rectangle2D blueCamp;
@@ -26,20 +26,23 @@ public class Map implements Animable {
 	private boolean blueEdge = false;
 	private boolean redEdge = false;
 
-	public Map(Type type) {
+	public Map(Type type, String title) {
 		this.type = type;
+		this.title = title;
 		if (type == Type.DEFAULT_MAP) {
-			name = "Square";
 			mapShape = new Rectangle2D.Float(-10f, -10f, 20f, 20f);
 			blueCamp = new Rectangle2D.Float(-9f, -9f, 7f, 18f);
 			redCamp = new Rectangle2D.Float(2f, -9f, 7f, 18f);
 		} else if (type == Type.BIG_MAP) {
-			name = "Big square";
 			mapShape = new Rectangle2D.Float(-20f, -20f, 40f, 40f);
 			blueCamp = new Rectangle2D.Float(-19f, -19f, 15f, 38f);
 			redCamp = new Rectangle2D.Float(4f, -19f, 15f, 38f);
 		} else
 			System.out.println("Undefined map type");
+	}
+	
+	public String getTitle(){
+		return title;
 	}
 
 	public int getGraphicSize() {
@@ -73,8 +76,8 @@ public class Map implements Animable {
 		g2d.setColor(Color.darkGray);
 		g2d.draw(mapShape);
 
-		int width = g2d.getFontMetrics().stringWidth(name);
-		g2d.drawString(name, -width / 2, (int) mapShape.getY() - 0.5f);
+		int width = g2d.getFontMetrics().stringWidth(title);
+		g2d.drawString(title, -width / 2, (int) mapShape.getY() - 0.5f);
 
 		g2d.dispose();
 	}

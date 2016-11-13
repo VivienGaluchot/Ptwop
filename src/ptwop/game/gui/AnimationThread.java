@@ -21,17 +21,14 @@ public class AnimationThread implements Runnable {
 
 		thread = new Thread(this);
 		thread.setName("Animation Thread");
-
-		thread.start();
 	}
 
 	public void setAnimationPanel(AnimationPanel mainPanel) {
 		this.mainPanel = mainPanel;
 	}
 
-	// TODO
 	public void startAnimation() {
-		// thread.start();
+		thread.start();
 	}
 
 	// TODO

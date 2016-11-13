@@ -13,11 +13,11 @@ public class Server {
 	private ServerSocket listener;
 
 	public Server() {
-		this(new Map(Map.Type.DEFAULT_MAP));
+		this(new Map(Map.Type.DEFAULT_MAP, "InDev-Server"));
 	}
 
 	public Server(Map map) {
-		hostedParty = new ServerParty(map);
+		hostedParty = new ServerParty(map,1);
 	}
 
 	public void startListener() {

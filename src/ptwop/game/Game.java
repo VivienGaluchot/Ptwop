@@ -60,13 +60,14 @@ public class Game {
 
 		animationPanel = new AnimationPanel();
 		thread = new AnimationThread(animationPanel);
+		thread.startAnimation();
 
 		sideBar = new SideBar(null);
 
 		frame = new Frame(animationPanel, sideBar);
 
 		// Create waitingParty
-		waitingParty = new Party(new Map(Map.Type.DEFAULT_MAP));
+		waitingParty = new Party(new Map(Map.Type.DEFAULT_MAP, "Map d'attente..."));
 		waitingParty.addChrono(new Chrono(10));
 
 		Player player;

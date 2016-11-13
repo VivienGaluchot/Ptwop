@@ -3,7 +3,6 @@ package ptwop.game.transfert;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import ptwop.game.model.Ball;
 import ptwop.game.model.Map;
@@ -18,15 +17,6 @@ import ptwop.game.transfert.messages.Message;
 import ptwop.game.transfert.messages.MessagePack;
 
 public class ServerParty implements ConnectionHandler, Runnable {
-
-	static int idCounter;
-
-	private synchronized int getNewId() throws Exception {
-		if (idCounter == Integer.MAX_VALUE)
-			throw new Exception("Counter reached max value");
-		return idCounter++;
-	}
-
 	private Map map;
 	private Party party;
 	private MessageFactory messageFactory;
@@ -35,11 +25,12 @@ public class ServerParty implements ConnectionHandler, Runnable {
 	Thread checkThread;
 	long checkPeriod;
 	boolean runCheck;
+	
+	int maxPlayer;
 
-	public ServerParty(Map map) {
-		idCounter = Integer.MIN_VALUE;
-
+	public ServerParty(Map map, int maxPlayer) {
 		this.map = map;
+		this.maxPlayer = maxPlayer;
 		party = new Party(map);
 		messageFactory = new MessageFactory(party);
 		clients = new HashMap<>();
@@ -58,10 +49,8 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 	public synchronized void close() {
 		stopChecking();
-		Iterator<Connection> it = clients.keySet().iterator();
-		while (it.hasNext()) {
-			Connection connection = it.next();
-			connection.disconnect();
+		for (Connection c : clients.keySet()) {
+			c.disconnect();
 		}
 	}
 
@@ -89,6 +78,13 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			}
 		}
 	}
+	
+	private synchronized Integer getNewId() throws Exception {
+		for(int i = 0; i<maxPlayer; i++)
+			if(party.getMobile(i) == null)
+					return i;
+		throw new Exception("Party full");
+	}
 
 	/**
 	 * Called when new socket is connected to the server, if an exception occur
@@ -101,10 +97,10 @@ public class ServerParty implements ConnectionHandler, Runnable {
 		Connection connection = null;
 		try {
 			connection = new Connection(socket, this);
-			int id = getNewId();
+			Integer id = getNewId();
 
 			// send / receive helloMessages
-			connection.send(new HelloFromServer(map.getType(), id));
+			connection.send(new HelloFromServer(map, id));
 			HelloFromClient m = (HelloFromClient) connection.read();
 
 			// Create new player and send it to others
@@ -125,6 +121,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			clients.put(connection, newPlayer);
 		} catch (Exception e) {
 			e.printStackTrace();
+			connection.disconnect();
 			if (connection != null)
 				remove(connection);
 		}

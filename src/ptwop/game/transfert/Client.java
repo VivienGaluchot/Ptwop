@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.physic.DrivableMobile;
@@ -31,7 +30,7 @@ public class Client implements ConnectionHandler {
 		// Read HelloMessage and create party
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
-		party = new Party(new Map(m.mapType));
+		party = new Party(m.createMap());
 
 		// Create you player
 		Player you = new Player(name, m.yourId, true);

@@ -2,6 +2,7 @@ package ptwop.game.gui;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import ptwop.game.Animable;
 import ptwop.game.model.Party;
@@ -25,10 +26,18 @@ public class InfoLayer implements Animable {
 	@Override
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		
-		g2d.drawString(fps + " fps", 10, 15);
+		g2d.setFont(g2d.getFont().deriveFont(12f));
+		
+		int i = 2;
+		g2d.drawString("InfoLayer", 10, 12*i++);
+		g2d.drawString(fps + " fps", 10, 12*i++);
+		if(party != null)
+			g2d.drawString("id : " + party.getYou().getId(), 10, 12*i++);
 		if(client != null)
-			g2d.drawString("ping : " + client.getPingTime() + " ms", 10, 30);
+			g2d.drawString("ping : " + client.getPingTime() + " ms", 10, 12*i++);
 		
 		g2d.dispose();
 	}
