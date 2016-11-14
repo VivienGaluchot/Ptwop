@@ -17,7 +17,7 @@ public class Server {
 	}
 
 	public Server(Map map) {
-		hostedParty = new ServerParty(map, 1);
+		hostedParty = new ServerParty(map, 100);
 	}
 
 	public void startListener() {
