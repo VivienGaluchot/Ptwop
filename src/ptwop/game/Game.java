@@ -109,7 +109,7 @@ public class Game {
 		InfoLayer infoLayer = new InfoLayer(party, client);
 		animationPanel.setInfoLayer(infoLayer);
 
-		sideBar.setParty(waitingParty);
+		sideBar.setParty(party);
 		sideBar.update();
 	}
 

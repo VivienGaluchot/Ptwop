@@ -39,13 +39,14 @@ public class Party implements Animable {
 	}
 
 	public synchronized void addMobile(Mobile m) {
+		if (mobiles.containsKey(m.getId())) {
+			throw new IllegalArgumentException("Mobile's id already used");
+		}
+
 		if (m instanceof Player) {
 			Player p = (Player) m;
 			if (p.isYou())
 				you = p;
-		}
-		if (mobiles.containsKey(m.getId())) {
-			throw new IllegalArgumentException("Mobile's id already used");
 		}
 
 		mobiles.put(m.getId(), m);

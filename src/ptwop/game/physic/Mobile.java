@@ -6,6 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+
 import ptwop.game.Animable;
 
 public class Mobile implements Animable {
@@ -24,24 +27,26 @@ public class Mobile implements Animable {
 	// Display
 	private Color drawColor;
 	private Color fillColor;
+	private boolean drawAccSpeed;
 
 	protected double mass;
 
 	public Mobile(int id, double mass, double radius) {
 		this.id = id;
+		this.mass = mass;
+		this.radius = radius;
+		
 		pos = new Vector2D(0, 0);
 		speed = new Vector2D(0, 0);
 		acc = new Vector2D(0, 0);
 
-		this.mass = mass;
-		this.radius = radius;
-		
 		resetFillColor();
 		resetDrawColor();
+		drawAccSpeed = false;
 
-		this.mobileShape = new Ellipse2D.Double(-radius, -radius, 2*radius, 2*radius);
+		this.mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
 	}
-	
+
 	public int getId() {
 		return id;
 	}
@@ -76,21 +81,25 @@ public class Mobile implements Animable {
 		transformShape.translate(pos.x, pos.y);
 		return transformShape.createTransformedShape(mobileShape);
 	}
-	
-	public void setDrawColor(Color drawColor){
+
+	public void setDrawColor(Color drawColor) {
 		this.drawColor = drawColor;
 	}
-	
-	public void resetDrawColor(){
+
+	public void resetDrawColor() {
 		setDrawColor(Constants.defaultDrawColor);
 	}
-	
-	public void setFillColor(Color fillColor){
+
+	public void setFillColor(Color fillColor) {
 		this.fillColor = fillColor;
 	}
-	
-	public void resetFillColor(){
+
+	public void resetFillColor() {
 		setFillColor(Constants.defaultFillColor);
+	}
+
+	public void setDrawAccSpeed(boolean drawAccSpeed) {
+		this.drawAccSpeed = drawAccSpeed;
 	}
 
 	@Override
@@ -105,21 +114,21 @@ public class Mobile implements Animable {
 
 		pos = speed.multiply(time).add(pos);
 	}
-	
+
 	@Override
 	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
 		// Speed / Acc
-		/*
-		g2d.setColor(Color.red);
-		Line2D speedVect = new Line2D.Double(pos.x, pos.y, speed.x / 2 + pos.x, speed.y / 2 + pos.y);
-		g2d.draw(speedVect);
-		g2d.setColor(Color.blue);
-		Line2D accVect = new Line2D.Double(pos.x, pos.y, acc.x / 2 + pos.x, acc.y / 2 + pos.y);
-		g2d.draw(accVect);
-		*/
-		
+		if (drawAccSpeed) {
+			g2d.setColor(Color.red);
+			Line2D speedVect = new Line2D.Double(pos.x, pos.y, speed.x / 2 + pos.x, speed.y / 2 + pos.y);
+			g2d.draw(speedVect);
+			g2d.setColor(Color.blue);
+			Line2D accVect = new Line2D.Double(pos.x, pos.y, acc.x / 2 + pos.x, acc.y / 2 + pos.y);
+			g2d.draw(accVect);
+		}
+
 		// Shape
 		Shape shape = getTranslatedShape();
 		g2d.setColor(fillColor);
@@ -129,7 +138,7 @@ public class Mobile implements Animable {
 
 		g2d.dispose();
 	}
-	
+
 	public boolean colliding(Mobile mobile) {
 		double xd = pos.x - mobile.pos.x;
 		double yd = pos.y - mobile.pos.y;

@@ -21,8 +21,10 @@ public class Player extends DrivableMobile {
 		super(id, 1, 0.35f);
 		this.name = name;
 		this.you = you;
-		if (you)
+		if (you){
 			setFillColor(Color.white);
+			setDrawTrajectory(true);
+		}
 		else
 			setFillColor(Color.gray);
 		setDrawColor(Color.darkGray);
