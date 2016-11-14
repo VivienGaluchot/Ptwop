@@ -10,7 +10,7 @@ public class MobileQuit extends Message {
 	public MobileQuit(Mobile player) {
 		id = player.getId();
 	}
-	
+
 	public MobileQuit(int id) {
 		this.id = id;
 	}

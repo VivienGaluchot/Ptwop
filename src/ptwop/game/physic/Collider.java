@@ -46,34 +46,34 @@ public class Collider implements Animable {
 			for (int j = i + 1; j < mobiles.size(); j++)
 				if (mobiles.get(i).colliding(mobiles.get(j)))
 					mobiles.get(i).resolveCollision(mobiles.get(j));
-		
+
 		for (Mobile m : mobiles)
 			rectifyPosition(m);
 	}
-	
+
 	protected void rectifyPosition(Mobile m) {
 		if (mobileBounds != null) {
-			Rectangle2D bounds = m.getShape().getBounds2D();			
+			Rectangle2D bounds = m.getShape().getBounds2D();
 			double A = mobileBounds.getMaxX() + bounds.getMinX();
-			if(m.pos.x > A){
+			if (m.pos.x > A) {
 				m.pos.x = A;
 				m.speed.x = -m.speed.x * Constants.boundsRestitution;
 			}
-			
+
 			A = mobileBounds.getMaxY() + bounds.getMinY();
-			if(m.pos.y > A){
+			if (m.pos.y > A) {
 				m.pos.y = A;
 				m.speed.y = -m.speed.y * Constants.boundsRestitution;
 			}
-			
+
 			A = mobileBounds.getMinY() + bounds.getMaxX();
-			if(m.pos.x < A){
+			if (m.pos.x < A) {
 				m.pos.x = A;
 				m.speed.x = -m.speed.x * Constants.boundsRestitution;
 			}
-			
+
 			A = mobileBounds.getMinY() + bounds.getMaxY();
-			if(m.pos.y < A){
+			if (m.pos.y < A) {
 				m.pos.y = A;
 				m.speed.y = -m.speed.y * Constants.boundsRestitution;
 			}

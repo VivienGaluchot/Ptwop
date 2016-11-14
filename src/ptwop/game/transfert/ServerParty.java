@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.HashMap;
 
 import ptwop.game.model.Ball;
+import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
@@ -19,13 +20,14 @@ import ptwop.game.transfert.messages.MessagePack;
 public class ServerParty implements ConnectionHandler, Runnable {
 	private Map map;
 	private Party party;
+	private Chrono chrono;
 	private MessageFactory messageFactory;
 	private HashMap<Connection, Player> clients;
 
 	Thread checkThread;
 	long checkPeriod;
 	boolean runCheck;
-	
+
 	int maxPlayer;
 
 	public ServerParty(Map map, int maxPlayer) {
@@ -41,7 +43,9 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			e.printStackTrace();
 		}
 
-		checkPeriod = 1000 / 60;
+		chrono = new Chrono(10000);
+
+		checkPeriod = 1000 / 60; // 60fps
 		checkThread = new Thread(this);
 		checkThread.setName("Server CheckThread");
 		checkThread.start();
@@ -65,8 +69,18 @@ public class ServerParty implements ConnectionHandler, Runnable {
 
 		while (runCheck) {
 			long now = System.currentTimeMillis();
-			party.animate(now - lastMs);
+			long timeStep = now - lastMs;
 			lastMs = now;
+
+			party.animate(timeStep);
+
+			chrono.animate(timeStep);
+			if (chrono.getAlarm()) {
+				// End of a round, need to see who win it
+				party.checkWinner();
+				chrono.reset();
+				// TODO send score to clients
+			}
 
 			long timeToWait = lastMs + checkPeriod - System.currentTimeMillis();
 			if (timeToWait > 0) {
@@ -78,11 +92,11 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			}
 		}
 	}
-	
+
 	private synchronized Integer getNewId() throws Exception {
-		for(int i = 0; i<maxPlayer; i++)
-			if(party.getMobile(i) == null)
-					return i;
+		for (int i = 0; i < maxPlayer; i++)
+			if (party.getMobile(i) == null)
+				return i;
 		throw new Exception("Party full");
 	}
 
@@ -100,7 +114,7 @@ public class ServerParty implements ConnectionHandler, Runnable {
 			Integer id = getNewId();
 
 			// send / receive helloMessages
-			connection.send(new HelloFromServer(map, id));
+			connection.send(new HelloFromServer(map, id, chrono));
 			HelloFromClient m = (HelloFromClient) connection.read();
 
 			// Create new player and send it to others

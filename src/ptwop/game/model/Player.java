@@ -21,11 +21,10 @@ public class Player extends DrivableMobile {
 		super(id, 1, 0.35f);
 		this.name = name;
 		this.you = you;
-		if (you){
+		if (you) {
 			setFillColor(Color.white);
 			setDrawTrajectory(true);
-		}
-		else
+		} else
 			setFillColor(Color.gray);
 		setDrawColor(Color.darkGray);
 	}
@@ -33,7 +32,7 @@ public class Player extends DrivableMobile {
 	@Override
 	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
-		
+
 		// Mobile
 		super.paint(g2d);
 

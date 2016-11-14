@@ -13,7 +13,7 @@ public class MobileJoin extends Message {
 	public Type type;
 	public int id;
 
-	public MobileJoin(Mobile newMobile){
+	public MobileJoin(Mobile newMobile) {
 		if (newMobile instanceof Ball)
 			type = Type.BALL;
 		else

@@ -12,7 +12,7 @@ public class InfoLayer implements Animable {
 
 	private Party party;
 	private Client client;
-	
+
 	// Frame per second measurement
 	private long lastFpsMesure = 0;
 	private long fpsCounter = 0;
@@ -28,16 +28,16 @@ public class InfoLayer implements Animable {
 		Graphics2D g2d = (Graphics2D) g.create();
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		
+
 		g2d.setFont(g2d.getFont().deriveFont(12f));
-		
+
 		int i = 2;
-		if(party != null)
-			g2d.drawString("id : " + party.getYou().getId(), 10, 12*i++);
-		if(client != null)
-			g2d.drawString("ping : " + client.getPingTime() + " ms", 10, 12*i++);
-		g2d.drawString(fps + " fps", 10, 12*i++);
-		
+		if (party != null)
+			g2d.drawString("id : " + party.getYou().getId(), 10, 12 * i++);
+		if (client != null)
+			g2d.drawString("ping : " + client.getPingTime() + " ms", 10, 12 * i++);
+		g2d.drawString(fps + " fps", 10, 12 * i++);
+
 		g2d.dispose();
 	}
 

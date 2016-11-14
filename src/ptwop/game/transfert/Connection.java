@@ -32,7 +32,7 @@ public class Connection implements Runnable {
 		lastSendTime = 0;
 		pingTime = 0;
 	}
-	
+
 	public void start() {
 		runner.start();
 	}
@@ -64,8 +64,8 @@ public class Connection implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
-	public long getPingTime(){
+
+	public long getPingTime() {
 		return pingTime;
 	}
 

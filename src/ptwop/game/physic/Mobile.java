@@ -7,8 +7,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
-
 import ptwop.game.Animable;
 
 public class Mobile implements Animable {
@@ -35,7 +33,7 @@ public class Mobile implements Animable {
 		this.id = id;
 		this.mass = mass;
 		this.radius = radius;
-		
+
 		pos = new Vector2D(0, 0);
 		speed = new Vector2D(0, 0);
 		acc = new Vector2D(0, 0);

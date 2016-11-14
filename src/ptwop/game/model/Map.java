@@ -105,7 +105,7 @@ public class Map implements Animable {
 	}
 
 	// positive for blue, negative for red, zero for none
-	public int whereItIs(Mobile p) {
+	public int whereIs(Mobile p) {
 		if (blueCamp.contains(p.getPos().toPoint2D())) {
 			return 1;
 		} else if (redCamp.contains(p.getPos().toPoint2D())) {
@@ -115,11 +115,11 @@ public class Map implements Animable {
 	}
 
 	public boolean isInRed(Mobile m) {
-		return whereItIs(m) < 0;
+		return whereIs(m) < 0;
 	}
 
 	public boolean isInBlue(Mobile m) {
-		return whereItIs(m) > 0;
+		return whereIs(m) > 0;
 	}
 
 	public Type getType() {

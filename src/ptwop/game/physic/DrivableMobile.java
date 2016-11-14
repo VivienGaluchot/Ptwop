@@ -23,7 +23,7 @@ public class DrivableMobile extends Mobile {
 		drawTrajectory = false;
 		trajectory = new ArrayList<>();
 		trajectoryBallRadius = 0.1;
-		trajectoryColor = new Color(0,0,0,0.2f);
+		trajectoryColor = new Color(0, 0, 0, 0.2f);
 	}
 
 	public synchronized void setMoveTo(Vector2D p) {

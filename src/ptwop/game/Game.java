@@ -40,7 +40,7 @@ public class Game {
 	private static boolean instanciating;
 
 	public synchronized static Game getInstance() {
-		if(instanciating)
+		if (instanciating)
 			return null;
 		else if (instance == null) {
 			instanciating = true;
@@ -49,8 +49,8 @@ public class Game {
 		}
 		return instance;
 	}
-	
-	public synchronized static boolean isInstanciating(){
+
+	public synchronized static boolean isInstanciating() {
 		return instanciating;
 	}
 
@@ -68,7 +68,7 @@ public class Game {
 
 		// Create waitingParty
 		waitingParty = new Party(new Map(Map.Type.DEFAULT_MAP, "Map d'attente..."));
-		waitingParty.addChrono(new Chrono(10));
+		waitingParty.addChrono(new Chrono(10000));
 
 		Player player;
 
@@ -105,7 +105,7 @@ public class Game {
 
 		animationPanel.setAnimable(party);
 		animationPanel.setGraphicSize(party.getMap().getGraphicSize());
-		
+
 		InfoLayer infoLayer = new InfoLayer(party, client);
 		animationPanel.setInfoLayer(infoLayer);
 

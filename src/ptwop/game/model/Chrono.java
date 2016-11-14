@@ -16,11 +16,23 @@ public class Chrono implements Animable {
 	private Color barColor;
 	private Color passedBarColor;
 
-	public Chrono(int t) {
-		this.leftTime = t * 1000;
-		this.totalTime = leftTime;
-		barColor = new Color(50,200,150);
-		passedBarColor = new Color(25,100,75);
+	public Chrono(long totalTime) {
+		this.leftTime = totalTime;
+		this.totalTime = totalTime;
+		barColor = new Color(50, 200, 150);
+		passedBarColor = new Color(25, 100, 75);
+	}
+
+	public long getPeriod() {
+		return totalTime;
+	}
+
+	public long getLeftTime() {
+		return leftTime;
+	}
+
+	public void setLeftTime(long leftTime) {
+		this.leftTime = leftTime;
 	}
 
 	@Override
@@ -66,5 +78,4 @@ public class Chrono implements Animable {
 	public void reset() {
 		leftTime = totalTime;
 	}
-
 }

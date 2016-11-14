@@ -31,6 +31,7 @@ public class Client implements ConnectionHandler {
 		HelloFromServer m = (HelloFromServer) connection.read();
 		System.out.println(m);
 		party = new Party(m.createMap());
+		party.addChrono(m.createChrono());
 
 		// Create you player
 		Player you = new Player(name, m.yourId, true);

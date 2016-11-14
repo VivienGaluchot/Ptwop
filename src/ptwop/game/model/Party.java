@@ -98,46 +98,6 @@ public class Party implements Animable {
 		return map;
 	}
 
-	private void checkWinner() {
-		int winner = 0;
-		ArrayList<Mobile> blueList = new ArrayList<>();
-		ArrayList<Mobile> redList = new ArrayList<>();
-		ArrayList<Mobile> midList = new ArrayList<>();
-		for (int id : mobiles.keySet()) {
-			Mobile p = mobiles.get(id);
-			int score = map.whereItIs(p);
-			if (score == 1) {
-				blueList.add(p);
-			} else if (score == -1) {
-				redList.add(p);
-			} else
-				midList.add(p);
-			winner = winner + score;
-		}
-		if (winner > 0) {
-			addScore(redList);
-			System.out.println("People in red camp win");
-		} else if (winner < 0) {
-			addScore(blueList);
-			System.out.println("People in blue camp win");
-		} else {
-			System.out.println("This is a draw");
-		}
-	}
-
-	private void addScore(ArrayList<Mobile> list) {
-		for (Mobile m : list) {
-			if (m instanceof Player) {
-				Player p = (Player) m;
-				p.setScore(p.getScore() + 1);
-				if (p == you)
-					System.out.println("Your Score is " + p.getScore());
-			}
-		}
-
-		Action.getInstance().handleAction(Action.PARTY_UPDATE);
-	}
-
 	@Override
 	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
@@ -179,6 +139,40 @@ public class Party implements Animable {
 				// End of a round, need to see who win it
 				checkWinner();
 				chrono.reset();
+				Action.getInstance().handleAction(Action.PARTY_UPDATE);
+			}
+		}
+	}
+
+	public void checkWinner() {
+		int winner = 0;
+		ArrayList<Mobile> blueList = new ArrayList<>();
+		ArrayList<Mobile> redList = new ArrayList<>();
+		for (int id : mobiles.keySet()) {
+			Mobile p = mobiles.get(id);
+			int score = map.whereIs(p);
+			if (score == 1)
+				blueList.add(p);
+			else if (score == -1)
+				redList.add(p);
+			winner = winner + score;
+		}
+		if (winner > 0) {
+			addScore(redList);
+			System.out.println("People in red camp win");
+		} else if (winner < 0) {
+			addScore(blueList);
+			System.out.println("People in blue camp win");
+		} else {
+			System.out.println("This is a draw");
+		}
+	}
+
+	private void addScore(ArrayList<Mobile> list) {
+		for (Mobile m : list) {
+			if (m instanceof Player) {
+				Player p = (Player) m;
+				p.setScore(p.getScore() + 1);
 			}
 		}
 	}

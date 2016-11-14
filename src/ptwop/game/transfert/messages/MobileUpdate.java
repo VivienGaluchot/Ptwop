@@ -19,7 +19,7 @@ public class MobileUpdate extends Message {
 	public void applyUpdate(Mobile m) {
 		if (m.getId() != id)
 			throw new IllegalArgumentException("Wrong mobile id...");
-		
+
 		m.setPos(pos);
 		m.setSpeed(speed);
 	}

@@ -12,7 +12,7 @@ public class DrivableMobileUpdate extends MobileUpdate {
 		super(mobile);
 		moveTo = mobile.getMoveTo();
 	}
-	
+
 	public void applyUpdate(DrivableMobile mobile) {
 		super.applyUpdate(mobile);
 		mobile.setMoveTo(moveTo);

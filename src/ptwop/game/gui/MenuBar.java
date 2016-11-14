@@ -17,14 +17,14 @@ public class MenuBar extends JMenuBar {
 	public MenuBar() {
 		JMenu menu = new JMenu("Jeu");
 		menu.setMnemonic(KeyEvent.VK_J);
-		
+
 		JMenuItem item = new JMenuItem("Connexion");
 		item.setActionCommand(Action.ACTION_CONNECT);
 		item.addActionListener(Action.getInstance());
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
 		item.getAccessibleContext().setAccessibleDescription("Connexion a une partie");
 		menu.add(item);
-		
+
 		item = new JMenuItem("Lancer le serveur");
 		item.setActionCommand(Action.ACTION_LAUNCH_SERVER);
 		item.addActionListener(Action.getInstance());

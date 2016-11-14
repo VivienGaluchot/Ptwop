@@ -13,9 +13,9 @@ public class Dialog {
 		return (String) JOptionPane.showInputDialog(frame, "Entrer l'adresse ip du serveur :", "Connexion",
 				JOptionPane.PLAIN_MESSAGE, null, null, "127.0.0.1");
 	}
-	
+
 	public static String NameDialog(Component frame) {
-		return (String) JOptionPane.showInputDialog(frame, "Entrer votre nom :", "Nom",
-				JOptionPane.PLAIN_MESSAGE, null, null, "patrick");
+		return (String) JOptionPane.showInputDialog(frame, "Entrer votre nom :", "Nom", JOptionPane.PLAIN_MESSAGE, null,
+				null, "patrick");
 	}
 }
