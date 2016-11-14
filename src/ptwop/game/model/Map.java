@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 import ptwop.game.Animable;
+import ptwop.game.physic.Mobile;
 
 public class Map implements Animable {
 	public enum Type {
@@ -22,7 +23,7 @@ public class Map implements Animable {
 	private static Color redCampColor = new Color(255, 210, 200);
 	private static Color blueEdgeColor = new Color(0, 0, 200).darker().darker();
 	private static Color redEdgeColor = new Color(255, 0, 0).darker().darker();
-	
+
 	private boolean blueEdge = false;
 	private boolean redEdge = false;
 
@@ -40,8 +41,8 @@ public class Map implements Animable {
 		} else
 			System.out.println("Undefined map type");
 	}
-	
-	public String getTitle(){
+
+	public String getTitle() {
 		return title;
 	}
 
@@ -61,14 +62,14 @@ public class Map implements Animable {
 
 		g2d.setColor(blueCampColor);
 		g2d.fill(blueCamp);
-		if (blueEdge){
+		if (blueEdge) {
 			g2d.setColor(blueEdgeColor);
 			g2d.draw(blueCamp);
 		}
 
 		g2d.setColor(redCampColor);
 		g2d.fill(redCamp);
-		if (redEdge){
+		if (redEdge) {
 			g2d.setColor(redEdgeColor);
 			g2d.draw(redCamp);
 		}
@@ -91,7 +92,7 @@ public class Map implements Animable {
 		return mapShape;
 	}
 
-	public void isInCamp(Player p) {
+	public void isInCamp(Mobile p) {
 		blueEdge = false;
 		redEdge = false;
 		if (blueCamp.contains(p.getPos().toPoint2D())) {
@@ -104,13 +105,21 @@ public class Map implements Animable {
 	}
 
 	// positive for blue, negative for red, zero for none
-	public int whereItIs(Player p) {
+	public int whereItIs(Mobile p) {
 		if (blueCamp.contains(p.getPos().toPoint2D())) {
 			return 1;
 		} else if (redCamp.contains(p.getPos().toPoint2D())) {
-			redEdge = true;
 			return -1;
-		} else return 0;
+		} else
+			return 0;
+	}
+
+	public boolean isInRed(Mobile m) {
+		return whereItIs(m) < 0;
+	}
+
+	public boolean isInBlue(Mobile m) {
+		return whereItIs(m) > 0;
 	}
 
 	public Type getType() {

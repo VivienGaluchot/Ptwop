@@ -3,8 +3,6 @@ package ptwop.game.model;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import ptwop.game.physic.DrivableMobile;
@@ -15,9 +13,6 @@ public class Player extends DrivableMobile {
 
 	private int score = 0;
 
-	// Display
-	private Color fillColor;
-
 	public Player(String name, int id) {
 		this(name, id, false);
 	}
@@ -27,24 +22,18 @@ public class Player extends DrivableMobile {
 		this.name = name;
 		this.you = you;
 		if (you)
-			fillColor = Color.white;
+			setFillColor(Color.white);
 		else
-			fillColor = Color.gray;
-
-		this.setShape(new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius));
+			setFillColor(Color.gray);
+		setDrawColor(Color.darkGray);
 	}
 
 	@Override
 	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
-
-		// Shape
-		Shape shape = getTranslatedShape();
-		g2d.setColor(fillColor);
-		g2d.fill(shape);
-
-		g2d.setColor(Color.darkGray);
-		g2d.draw(shape);
+		
+		// Mobile
+		super.paint(g2d);
 
 		// Name
 		String dispName = (name.length() > 3) ? name.substring(0, 3) : name;

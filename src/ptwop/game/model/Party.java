@@ -1,5 +1,6 @@
 package ptwop.game.model;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -15,12 +16,12 @@ import ptwop.game.physic.Mobile;
 
 public class Party implements Animable {
 	private Map map;
-	
+
 	private Collider collider;
 	private HashMap<Integer, Mobile> mobiles;
 	private Player you;
-	
-	private Chrono chrono = null;
+
+	private Chrono chrono;
 
 	public Party(Map map) {
 		this(map, null);
@@ -98,21 +99,19 @@ public class Party implements Animable {
 
 	private void checkWinner() {
 		int winner = 0;
-		ArrayList<Player> blueList = new ArrayList<>();
-		ArrayList<Player> redList = new ArrayList<>();
-		ArrayList<Player> midList = new ArrayList<>();
+		ArrayList<Mobile> blueList = new ArrayList<>();
+		ArrayList<Mobile> redList = new ArrayList<>();
+		ArrayList<Mobile> midList = new ArrayList<>();
 		for (int id : mobiles.keySet()) {
-			if (mobiles.get(id) instanceof Player) {
-				Player p = (Player) mobiles.get(id);
-				int score = map.whereItIs(p);
-				if (score == 1) {
-					blueList.add(p);
-				} else if (score == -1) {
-					redList.add(p);
-				} else
-					midList.add(p);
-				winner = winner + score;
-			}
+			Mobile p = mobiles.get(id);
+			int score = map.whereItIs(p);
+			if (score == 1) {
+				blueList.add(p);
+			} else if (score == -1) {
+				redList.add(p);
+			} else
+				midList.add(p);
+			winner = winner + score;
 		}
 		if (winner > 0) {
 			addScore(redList);
@@ -125,11 +124,14 @@ public class Party implements Animable {
 		}
 	}
 
-	private void addScore(ArrayList<Player> list) {
-		for (Player p : list) {
-			p.setScore(p.getScore() + 1);
-			if (p == you)
-				System.out.println("Your Score is " + p.getScore());
+	private void addScore(ArrayList<Mobile> list) {
+		for (Mobile m : list) {
+			if (m instanceof Player) {
+				Player p = (Player) m;
+				p.setScore(p.getScore() + 1);
+				if (p == you)
+					System.out.println("Your Score is " + p.getScore());
+			}
 		}
 
 		Action.getInstance().handleAction(Action.PARTY_UPDATE);
@@ -147,15 +149,8 @@ public class Party implements Animable {
 
 		collider.paint(g2d);
 
-		if (chrono != null) {
+		if (chrono != null)
 			chrono.paint(g2d);
-			if (chrono.getAlarm()) {
-				// End of a round, need to see who win it
-				checkWinner();
-				chrono.reset();
-			}
-		}
-		
 		g2d.dispose();
 	}
 
@@ -167,7 +162,23 @@ public class Party implements Animable {
 
 		collider.animate(timeStep);
 
-		if (chrono != null)
+		for (int id : mobiles.keySet()) {
+			Mobile m = mobiles.get(id);
+			if (map.isInBlue(m))
+				m.setDrawColor(Color.blue);
+			else if (map.isInRed(m))
+				m.setDrawColor(Color.red);
+			else
+				m.resetDrawColor();
+		}
+
+		if (chrono != null) {
 			chrono.animate(timeStep);
+			if (chrono.getAlarm()) {
+				// End of a round, need to see who win it
+				checkWinner();
+				chrono.reset();
+			}
+		}
 	}
 }
