@@ -3,8 +3,8 @@ package ptwop.networker.model;
 import java.util.Random;
 
 /**
- * A Link forward data between nodes according some properties of time, chance
- * of loss and bandwidth
+ * A Link forward data between nodes in a single way according some properties
+ * of time, chance of loss and bandwidth
  * 
  * @author Vivien
  */
@@ -20,16 +20,16 @@ public class Link implements Steppable {
 
 	/**
 	 * @param net
-	 *            : Network used to get current time
+	 *            Network used to get current time
 	 * @param destNode
-	 *            : Node which will receive data
+	 *            Node which will receive data
 	 * @param latency
-	 *            : number of time unit between the reception and the forward of
-	 *            a data
-	 * @param loss
-	 *            : data's loss probability
+	 *            number of time unit between the reception and the forward of a
+	 *            data
+	 * @param lossdata's
+	 *            loss probability
 	 * @param packetSize
-	 *            : number max of data who can be on the link at the same time
+	 *            number max of data who can be on the link at the same time
 	 */
 	public Link(Network net, Node destNode, long latency, float loss, int packetSize) {
 		this.net = net;

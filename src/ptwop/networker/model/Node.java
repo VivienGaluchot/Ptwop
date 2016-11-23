@@ -37,7 +37,7 @@ public class Node extends DataBuffer<Data> implements Steppable{
 
 	@Override
 	public void doTimeStep() {
-		// TODO - push data to links
+		// TODO - push data to the right links
 		
 		for(Link l : outLinks){
 			l.doTimeStep();
