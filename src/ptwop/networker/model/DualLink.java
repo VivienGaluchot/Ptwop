@@ -15,7 +15,7 @@ public class DualLink implements Steppable {
 	private Link ba;
 
 	/**
-	 * Create a dualBand link between two nodes A and B, and add it to the nodes
+	 * Create a dual band link between two nodes A and B, and add it to the nodes
 	 * link lists
 	 * 
 	 * @param net
