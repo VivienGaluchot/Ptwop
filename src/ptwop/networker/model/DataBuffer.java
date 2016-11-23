@@ -11,14 +11,23 @@ public class DataBuffer<E> {
 		buffer = new ArrayDeque<>(bufferSize);
 	}
 
+	/**
+	 * @return true only if the buffer is empty
+	 */
 	public boolean isEmpty() {
 		return buffer.isEmpty();
 	}
-
+	
+	/**
+	 * @return true only if the buffer is full
+	 */
 	public boolean isFull() {
 		return buffer.size() >= bufferSize;
 	}
-
+	
+	/**
+	 * Add element to the ordained buffer
+	 */
 	public boolean push(E data) {
 		if (isFull())
 			return false;
@@ -26,7 +35,10 @@ public class DataBuffer<E> {
 		buffer.add(data);
 		return true;
 	}
-
+	
+	/**
+	 * Get top element of the buffer and remove it from the buffer
+	 */
 	public E pop() {
 		if (isEmpty())
 			return null;
@@ -34,6 +46,9 @@ public class DataBuffer<E> {
 		return buffer.removeFirst();
 	}
 	
+	/**
+	 * Get top element of the buffer, don't remove it
+	 */
 	public E get(){
 		if (isEmpty())
 			return null;
@@ -41,6 +56,9 @@ public class DataBuffer<E> {
 		return buffer.getFirst();
 	}
 
+	/**
+	 * @return the maximum number of element the buffer can hold
+	 */
 	public int size() {
 		return bufferSize;
 	}
