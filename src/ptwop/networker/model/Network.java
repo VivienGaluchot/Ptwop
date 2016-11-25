@@ -2,17 +2,18 @@ package ptwop.networker.model;
 
 import java.util.ArrayList;
 
-public class Network implements Steppable{
+public class Network implements Steppable {
+
+	private long time;
 
 	ArrayList<Node> nodes;
-	long time;
 
 	public Network() {
 		nodes = new ArrayList<>();
 		time = 0;
 	}
-	
-	public long getTime(){
+
+	public long getTime() {
 		return time;
 	}
 
@@ -20,8 +21,8 @@ public class Network implements Steppable{
 	public void doTimeStep() {
 		time++;
 		// TODO generate data ?
-		
-		for(Node n : nodes){
+
+		for (Node n : nodes) {
 			n.doTimeStep();
 		}
 	}

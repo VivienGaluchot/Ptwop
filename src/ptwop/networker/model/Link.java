@@ -76,17 +76,4 @@ public class Link implements Steppable {
 				destNode.push(toPush.data);
 		}
 	}
-
-	/**
-	 * Class used to attach timeStamp along the data *
-	 */
-	private class TimedData {
-		long outTime;
-		Data data;
-
-		public TimedData(long outTime, Data data) {
-			this.outTime = outTime;
-			this.data = data;
-		}
-	}
 }
