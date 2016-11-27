@@ -1,6 +1,8 @@
 package ptwop.networker.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Node contain buffer of data to be sent to other node, they have to route it
@@ -37,6 +39,10 @@ public class Node implements Steppable {
 	 */
 	public void addLink(Link link) {
 		outLinks.add(link);
+	}
+	
+	public List<Link> getLinks(){
+		return Collections.unmodifiableList(outLinks);
 	}
 
 	public boolean isFull() {

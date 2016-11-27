@@ -44,7 +44,7 @@ public class Mobile implements Animable {
 		resetDrawColor();
 		drawAccSpeed = false;
 
-		this.mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
+		mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
 	}
 
 	public int getId() {

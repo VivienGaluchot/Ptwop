@@ -9,14 +9,14 @@ import java.util.Random;
  * @author Vivien
  */
 public class Link implements Steppable {
-	Network net;
+	private Network net;
 
 	private long latency;
 	private float loss;
 	private Random rand;
 
-	Node destNode;
-	DataBuffer<TimedData> buffer;
+	private Node destNode;
+	private DataBuffer<TimedData> buffer;
 
 	/**
 	 * @param net
@@ -43,6 +43,10 @@ public class Link implements Steppable {
 
 	public boolean isFull() {
 		return buffer.isFull();
+	}
+	
+	public Node getDestNode() {
+		return destNode;
 	}
 
 	/**
