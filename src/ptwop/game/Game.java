@@ -3,10 +3,12 @@ package ptwop.game;
 import java.awt.Point;
 import java.io.IOException;
 
-import ptwop.game.gui.AnimationPanel;
-import ptwop.game.gui.AnimationThread;
-import ptwop.game.gui.Dialog;
-import ptwop.game.gui.Frame;
+import ptwop.common.gui.AnimationPanel;
+import ptwop.common.gui.AnimationThread;
+import ptwop.common.gui.Dialog;
+import ptwop.common.gui.Frame;
+import ptwop.common.gui.SpaceTransform;
+import ptwop.common.math.Vector2D;
 import ptwop.game.gui.InfoLayer;
 import ptwop.game.gui.SideBar;
 import ptwop.game.model.Chrono;
@@ -14,7 +16,6 @@ import ptwop.game.model.Map;
 import ptwop.game.model.Ball;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
-import ptwop.game.physic.Vector2D;
 import ptwop.game.transfert.Client;
 import ptwop.game.transfert.Server;
 
@@ -31,6 +32,8 @@ public class Game {
 	private Frame frame;
 	private AnimationThread thread;
 	private AnimationPanel animationPanel;
+	private SpaceTransform spaceTransform;
+	private InfoLayer infoLayer;
 	private SideBar sideBar;
 
 	private Party currentParty;
@@ -58,7 +61,11 @@ public class Game {
 		state = State.DISCONNECTED;
 		System.out.println("Game state : DISCONNECTED");
 
-		animationPanel = new AnimationPanel();
+		infoLayer = new InfoLayer(null);
+		animationPanel = new AnimationPanel(infoLayer);
+		spaceTransform = new SpaceTransform(null, animationPanel);
+		infoLayer.setAnimable(spaceTransform);
+		
 		thread = new AnimationThread(animationPanel);
 		thread.startAnimation();
 
@@ -103,11 +110,11 @@ public class Game {
 	public void playParty(Party party, Client client) {
 		currentParty = party;
 
-		animationPanel.setAnimable(party);
-		animationPanel.setGraphicSize(party.getMap().getGraphicSize());
-
-		InfoLayer infoLayer = new InfoLayer(party, client);
-		animationPanel.setInfoLayer(infoLayer);
+		spaceTransform.setAnimable(party);
+		spaceTransform.setGraphicSize(party.getMap().getGraphicSize());
+		
+		infoLayer.setClient(client);
+		infoLayer.setParty(party);
 
 		sideBar.setParty(party);
 		sideBar.update();
@@ -115,7 +122,7 @@ public class Game {
 
 	public void mouseMoved(Point mousePosition) {
 		if (currentParty != null) {
-			Vector2D pos = animationPanel.transformMousePosition(mousePosition);
+			Vector2D pos = spaceTransform.transformMousePosition(mousePosition);
 			if (currentParty.getYou() != null && pos != null)
 				currentParty.getYou().setMoveTo(pos);
 		}

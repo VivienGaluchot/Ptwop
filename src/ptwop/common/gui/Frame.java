@@ -1,4 +1,4 @@
-package ptwop.game.gui;
+package ptwop.common.gui;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -7,6 +7,8 @@ import java.awt.Insets;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import ptwop.game.gui.MenuBar;
 
 public class Frame extends JFrame {
 	private static final long serialVersionUID = 1L;

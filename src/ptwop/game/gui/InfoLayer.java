@@ -12,19 +12,37 @@ public class InfoLayer implements Animable {
 
 	private Party party;
 	private Client client;
+	private Animable animable;
 
 	// Frame per second measurement
 	private long lastFpsMesure = 0;
 	private long fpsCounter = 0;
 	private long fps = 0;
 
-	public InfoLayer(Party party, Client client) {
+	public InfoLayer(Animable animable) {
+		party = null;
+		client = null;
+		this.animable = animable;
+	}
+	
+	public synchronized void setParty(Party party){
 		this.party = party;
-		this.client = client;
+	}
+	
+	public synchronized void setClient(Client client){
+		this.client = client;		
+	}
+	
+	public synchronized void setAnimable(Animable animable) {
+		this.animable = animable;
+	}
+
+	public Animable getAnimable() {
+		return animable;
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -39,10 +57,13 @@ public class InfoLayer implements Animable {
 		g2d.drawString(fps + " fps", 10, 12 * i++);
 
 		g2d.dispose();
+
+		if (animable != null)
+			animable.paint(g);
 	}
 
 	@Override
-	public void animate(long timeStep) {
+	public synchronized void animate(long timeStep) {
 		if (System.currentTimeMillis() - lastFpsMesure > 500) {
 			lastFpsMesure = System.currentTimeMillis();
 			fps = fpsCounter * 2;
@@ -50,6 +71,9 @@ public class InfoLayer implements Animable {
 		} else {
 			fpsCounter++;
 		}
+
+		if (animable != null)
+			animable.animate(timeStep);
 	}
 
 }

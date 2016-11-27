@@ -1,4 +1,4 @@
-package ptwop.game.gui;
+package ptwop.common.gui;
 
 import java.lang.reflect.InvocationTargetException;
 
