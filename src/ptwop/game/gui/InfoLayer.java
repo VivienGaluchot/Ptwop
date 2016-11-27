@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
-import ptwop.game.Animable;
+import ptwop.common.Animable;
 import ptwop.game.model.Party;
 import ptwop.game.transfert.Client;
 

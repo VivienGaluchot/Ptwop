@@ -10,6 +10,7 @@ import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.Vector2D;
 import ptwop.game.gui.InfoLayer;
+import ptwop.game.gui.MenuBar;
 import ptwop.game.gui.SideBar;
 import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
@@ -66,12 +67,15 @@ public class Game {
 		spaceTransform = new SpaceTransform(null, animationPanel);
 		infoLayer.setAnimable(spaceTransform);
 		
+		animationPanel.addMouseMotionListener(Action.getInstance());
+		
 		thread = new AnimationThread(animationPanel);
 		thread.startAnimation();
 
 		sideBar = new SideBar(null);
 
 		frame = new Frame(animationPanel, sideBar);
+		frame.setJMenuBar(new MenuBar());
 
 		// Create waitingParty
 		waitingParty = new Party(new Map(Map.Type.DEFAULT_MAP, "Map d'attente..."));

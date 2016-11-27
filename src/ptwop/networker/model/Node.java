@@ -51,7 +51,8 @@ public class Node implements Steppable {
 	public void doTimeStep() {
 		while (!buffer.isEmpty() && buffer.get().outTime > net.getTime()) {
 			// TODO - push data to the right links
-			TimedData toPush = buffer.pop();
+			// TimedData toPush = buffer.pop();
+			buffer.pop();
 		}
 		
 		for (Link l : outLinks) {

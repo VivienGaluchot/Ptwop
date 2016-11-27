@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
 
+import ptwop.common.Animable;
 import ptwop.game.Action;
-import ptwop.game.Animable;
 import ptwop.game.physic.Collider;
 import ptwop.game.physic.Mobile;
 

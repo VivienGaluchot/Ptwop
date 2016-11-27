@@ -1,7 +1,7 @@
 package ptwop.game.transfert.messages;
 
+import ptwop.common.math.Vector2D;
 import ptwop.game.physic.Mobile;
-import ptwop.game.physic.Vector2D;
 
 public class MobileUpdate extends Message {
 	private static final long serialVersionUID = 1L;

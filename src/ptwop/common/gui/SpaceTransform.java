@@ -13,8 +13,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
+import ptwop.common.Animable;
 import ptwop.common.math.Vector2D;
-import ptwop.game.Animable;
 
 public class SpaceTransform implements Animable, ComponentListener {
 
@@ -22,15 +22,26 @@ public class SpaceTransform implements Animable, ComponentListener {
 	private AffineTransform currentTransform;
 	private int graphicSize;
 	private Component father;
+	
+	public SpaceTransform(){
+		this(null, null);
+	}
 
 	public SpaceTransform(Animable animable, Component father) {
 		this.animable = animable;
 		this.father = father;
 
-		graphicSize = 25;
-		computeTransform();
+		graphicSize = 10; 
 
-		father.addComponentListener(this);
+		setFather(father);
+	}
+	
+	public synchronized void setFather(Component father){
+		this.father = father;
+		if(father != null){
+			father.addComponentListener(this);
+			computeTransform();
+		}
 	}
 	
 	public synchronized void setAnimable(Animable animable) {

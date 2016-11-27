@@ -7,8 +7,7 @@ import java.awt.RenderingHints;
 
 import javax.swing.JPanel;
 
-import ptwop.game.Action;
-import ptwop.game.Animable;
+import ptwop.common.Animable;
 
 public class AnimationPanel extends JPanel implements Animable {
 	private static final long serialVersionUID = 1L;
@@ -20,8 +19,6 @@ public class AnimationPanel extends JPanel implements Animable {
 
 		setPreferredSize(new Dimension(500, 500));
 		setMinimumSize(new Dimension(200, 200));
-
-		addMouseMotionListener(Action.getInstance());
 	}
 
 	@Override

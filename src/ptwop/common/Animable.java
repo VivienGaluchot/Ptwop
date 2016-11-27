@@ -1,4 +1,4 @@
-package ptwop.game;
+package ptwop.common;
 
 import java.awt.Graphics;
 

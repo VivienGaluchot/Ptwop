@@ -1,4 +1,4 @@
-package ptwop.game.physic;
+package ptwop.common.math;
 
 import java.awt.geom.Point2D;
 import java.io.Serializable;
@@ -41,7 +41,7 @@ public class Vector2D implements Serializable {
 		return Math.sqrt(x * x + y * y);
 	}
 
-	protected void capModule(double module) {
+	public void capModule(double module) {
 		double absModule = getLength();
 		if (absModule > module) {
 			double correctedSpeed = module / absModule;
