@@ -7,6 +7,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import ptwop.common.Animable;
@@ -28,7 +29,7 @@ public class NodeWrapper implements Animable {
 		this.node = node;
 		this.netWrapper = netWrapper;
 		pos = new Vector2D(0, 0);
-		radius = 1;
+		radius = 0.8;
 		mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
 		fillColor = Color.white;
 		drawColor = Color.darkGray;
@@ -58,7 +59,7 @@ public class NodeWrapper implements Animable {
 		for (Link l : links) {
 			NodeWrapper dest = netWrapper.getWrapper(l.getDestNode());
 			Vector2D v = dest.pos.subtract(pos);
-			v.capModule(radius + 0.4);
+			v.capModule(radius + 0.2);
 			Vector2D p2 = dest.pos.subtract(v);
 			v.capModule(radius);
 			Vector2D p1 = pos.add(v);
@@ -81,6 +82,11 @@ public class NodeWrapper implements Animable {
 		g2d.fill(shape);
 		g2d.setColor(drawColor);
 		g2d.draw(shape);
+
+		// Name
+		String dispName = node.getName();
+		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
+		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 0.25f);
 
 		g2d.dispose();
 	}

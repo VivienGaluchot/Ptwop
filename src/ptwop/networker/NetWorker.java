@@ -21,20 +21,15 @@ public class NetWorker {
 		Node n3 = new Node(net, 0, "n3", 1);
 
 		// n1 -> n2
-		Link l = new Link(net, n2, 10, 0.1f, 5);
-		n1.addLink(l);
+		Link.connect(net, n1, n2);
 		// n2 -> n1
-		l = new Link(net, n1, 10, 0.1f, 5);
-		n2.addLink(l);
+		Link.connect(net, n2, n1);
 		// n0 -> n2
-		l = new Link(net, n2, 10, 0.1f, 10);
-		n0.addLink(l);
+		Link.connect(net, n0, n2);
 		// n0 -> n3
-		l = new Link(net, n3, 10, 0.1f, 10);
-		n0.addLink(l);
+		Link.connect(net, n0, n3);
 		// n3 -> n1
-		l = new Link(net, n1, 10, 0.1f, 10);
-		n3.addLink(l);
+		Link.connect(net, n3, n1);
 
 		net.addNode(n0);
 		net.addNode(n1);
@@ -43,11 +38,12 @@ public class NetWorker {
 
 		NetworkWrapper mainWrapper = new NetworkWrapper(net);
 		spaceTransform.setAnimable(mainWrapper);
-		spaceTransform.setGraphicSize(30);
+		spaceTransform.setGraphicSize(20);
 
-		mainWrapper.getWrapper(n0).setPos(10, 1);
-		mainWrapper.getWrapper(n1).setPos(-10, -3);
-		mainWrapper.getWrapper(n2).setPos(0, -10);
+		mainWrapper.getWrapper(n0).setPos(4, 0);
+		mainWrapper.getWrapper(n1).setPos(-4, 0);
+		mainWrapper.getWrapper(n2).setPos(0, -4);
+		mainWrapper.getWrapper(n3).setPos(0, 4);
 
 		new Frame(mainPanel);
 	}

@@ -12,19 +12,19 @@ import java.util.List;
  * @author Vivien
  */
 public class Node implements Steppable {
-	Network net;
+	private Network net;
 
-	String name;
-	int id;
+	private String name;
+	private int id;
 
-	ArrayList<Link> outLinks;
-	DataBuffer<TimedData> buffer;
-	long processTime;
+	private ArrayList<Link> outLinks;
+	private DataBuffer<TimedData> buffer;
+	private long processTime;
 
 	public Node(Network net, int id, String name, long processTime) {
 		this.net = net;
-		this.id = id;
-		this.name = name;
+		this.setId(id);
+		this.setName(name);
 		this.processTime = processTime;
 
 		outLinks = new ArrayList<>();
@@ -64,5 +64,21 @@ public class Node implements Steppable {
 		for (Link l : outLinks) {
 			l.doTimeStep();
 		}
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	protected void setId(int id) {
+		this.id = id;
 	}
 }

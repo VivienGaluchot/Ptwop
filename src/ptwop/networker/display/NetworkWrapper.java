@@ -30,7 +30,7 @@ public class NetworkWrapper implements Animable {
 	@Override
 	public void paint(Graphics g) {
 		long time = network.getTime();
-		g.drawString("time " + time, -12, -12);
+		g.drawString("time " + time, -9, -9);
 		for (Node n : nodes.keySet())
 			nodes.get(n).paint(g);
 	}

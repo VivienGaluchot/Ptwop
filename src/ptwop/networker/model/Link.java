@@ -18,6 +18,16 @@ public class Link implements Steppable {
 	private Node destNode;
 	private DataBuffer<TimedData> buffer;
 
+	public static Link connect(Network net, Node source, Node dest) {
+		Link l = new Link(net, dest);
+		source.addLink(l);
+		return l;
+	}
+
+	public Link(Network net, Node destNode) {
+		this(net, destNode, 10, 0, 4);
+	}
+
 	/**
 	 * @param net
 	 *            Network used to get current time
@@ -44,7 +54,7 @@ public class Link implements Steppable {
 	public boolean isFull() {
 		return buffer.isFull();
 	}
-	
+
 	public Node getDestNode() {
 		return destNode;
 	}
