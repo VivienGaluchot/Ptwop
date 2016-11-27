@@ -56,11 +56,23 @@ public class NodeWrapper implements Animable {
 		// Links
 		List<Link> links = node.getLinks();
 		for (Link l : links) {
-			// TODO placer les liens au bon endroit sans chevauchement
 			NodeWrapper dest = netWrapper.getWrapper(l.getDestNode());
-			Line2D line = new Line2D.Double(pos.x, pos.y, dest.pos.x, dest.pos.y);
-			g2d.setColor(drawColor);
-			g2d.draw(line);
+			Vector2D v = dest.pos.subtract(pos);
+			v.capModule(radius + 0.4);
+			Vector2D p2 = dest.pos.subtract(v);
+			v.capModule(radius);
+			Vector2D p1 = pos.add(v);
+			Vector2D v2 = p2.subtract(p1);
+			if (v.dot(v2) > 0) {
+				Vector2D slide = v2.getOrthogonal();
+				System.out.println(slide);
+				slide = slide.multiply(0.2);
+				p1 = p1.add(slide);
+				p2 = p2.add(slide);
+				Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+				g2d.setColor(drawColor);
+				g2d.draw(line);
+			}
 		}
 
 		// Node

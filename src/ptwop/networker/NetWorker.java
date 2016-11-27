@@ -49,6 +49,6 @@ public class NetWorker {
 		mainWrapper.getWrapper(n1).setPos(-10, -3);
 		mainWrapper.getWrapper(n2).setPos(0, -10);
 
-		Frame frame = new Frame(mainPanel);
+		new Frame(mainPanel);
 	}
 }
