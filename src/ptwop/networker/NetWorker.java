@@ -1,6 +1,7 @@
 package ptwop.networker;
 
 import ptwop.common.gui.AnimationPanel;
+import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.networker.display.NetworkWrapper;
@@ -36,7 +37,7 @@ public class NetWorker {
 		net.addNode(n2);
 		net.addNode(n3);
 
-		NetworkWrapper mainWrapper = new NetworkWrapper(net);
+		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform);
 		spaceTransform.setAnimable(mainWrapper);
 		spaceTransform.setGraphicSize(20);
 
@@ -44,7 +45,14 @@ public class NetWorker {
 		mainWrapper.getWrapper(n1).setPos(-4, 0);
 		mainWrapper.getWrapper(n2).setPos(0, -4);
 		mainWrapper.getWrapper(n3).setPos(0, 4);
-
+		
+		mainPanel.setFocusable(true);
+		mainPanel.requestFocus();
+		mainPanel.addMouseListener(mainWrapper);
+		mainPanel.addMouseMotionListener(mainWrapper);
+		
+		AnimationThread thread = new AnimationThread(mainPanel);
+		thread.startAnimation();
 		new Frame(mainPanel);
 	}
 }

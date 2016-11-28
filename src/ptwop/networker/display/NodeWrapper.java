@@ -66,7 +66,6 @@ public class NodeWrapper implements Animable {
 			Vector2D v2 = p2.subtract(p1);
 			if (v.dot(v2) > 0) {
 				Vector2D slide = v2.getOrthogonal();
-				System.out.println(slide);
 				slide = slide.multiply(0.2);
 				p1 = p1.add(slide);
 				p2 = p2.add(slide);
