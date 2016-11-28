@@ -1,5 +1,6 @@
 package ptwop.networker.display;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -52,17 +53,29 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	// Mouse listener
 
-	NodeWrapper selected = null;
+	private NodeWrapper selected = null;
+	private Color oldColor = null;
+
+	private void setSelected(NodeWrapper selected) {
+		if (this.selected != null) {
+			this.selected.setDrawColor(oldColor);
+		}
+		this.selected = selected;
+		if (this.selected != null) {
+			oldColor = selected.getDrawColor();
+			this.selected.setDrawColor(Color.red);
+		}
+	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
-		selected.setPos(mousePos.x, mousePos.y);
+		if (selected != null)
+			selected.setPos(mousePos.x, mousePos.y);
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-
 	}
 
 	@Override
@@ -82,7 +95,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		for (Node n : nodes.keySet()) {
 			if (nodes.get(n).getTranslatedShape().contains(mousePos.x, mousePos.y)) {
-				selected = nodes.get(n);
+				setSelected(nodes.get(n));
 				break;
 			}
 		}
@@ -90,7 +103,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		selected = null;
+		setSelected(null);
 	}
 
 }

@@ -44,6 +44,22 @@ public class NodeWrapper implements Animable {
 		radius = r;
 	}
 
+	public Color getFillColor() {
+		return fillColor;
+	}
+
+	public void setFillColor(Color fillColor) {
+		this.fillColor = fillColor;
+	}
+
+	public Color getDrawColor() {
+		return drawColor;
+	}
+
+	public void setDrawColor(Color drawColor) {
+		this.drawColor = drawColor;
+	}
+
 	public Shape getTranslatedShape() {
 		AffineTransform transformShape = new AffineTransform();
 		transformShape.translate(pos.x, pos.y);
