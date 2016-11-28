@@ -70,23 +70,8 @@ public class Vector2D implements Serializable {
 	}
 
 	public Vector2D getOrthogonal() {
-		Vector2D orth = new Vector2D(0, 0);
-		if (y != 0) {
-			if (x > 0)
-				orth.x = 1;
-			else
-				orth.x = -1;
-			orth.y = -(x * orth.x) / y;
-			orth = orth.normalize();
-		} else if (x != 0) {
-			if (y > 0)
-				orth.y = 1;
-			else
-				orth.y = -1;
-			orth.x = -(y * orth.y) / x;
-			orth = orth.normalize();
-		}
-		return orth;
+		Vector2D orth = new Vector2D(-y, x);
+		return orth.normalize();
 	}
 
 	public boolean isNull() {

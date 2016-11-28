@@ -1,6 +1,5 @@
 package ptwop.networker.display;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -51,19 +50,27 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 			nodes.get(n).animate(timeStep);
 	}
 
+	public NodeWrapper getNodeAtPos(Vector2D pos) {
+		for (Node n : nodes.keySet()) {
+			if (nodes.get(n).getTranslatedShape().contains(pos.x, pos.y)) {
+				return nodes.get(n);
+			}
+		}
+		return null;
+	}
+
 	// Mouse listener
 
 	private NodeWrapper selected = null;
-	private Color oldColor = null;
+	private NodeWrapper hovered = null;
 
 	private void setSelected(NodeWrapper selected) {
 		if (this.selected != null) {
-			this.selected.setDrawColor(oldColor);
+			this.selected.setSelected(false);
 		}
 		this.selected = selected;
 		if (this.selected != null) {
-			oldColor = selected.getDrawColor();
-			this.selected.setDrawColor(Color.red);
+			this.selected.setSelected(true);
 		}
 	}
 
@@ -76,6 +83,14 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
+		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
+		if (n != hovered && hovered != null)
+			hovered.setSelected(false);
+
+		hovered = n;
+		if (hovered != null)
+			hovered.setHovered(true);
 	}
 
 	@Override
@@ -93,17 +108,14 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	@Override
 	public void mousePressed(MouseEvent e) {
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
-		for (Node n : nodes.keySet()) {
-			if (nodes.get(n).getTranslatedShape().contains(mousePos.x, mousePos.y)) {
-				setSelected(nodes.get(n));
-				break;
-			}
-		}
+		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
+		setSelected(n);
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		setSelected(null);
+		mouseMoved(e);
 	}
 
 }

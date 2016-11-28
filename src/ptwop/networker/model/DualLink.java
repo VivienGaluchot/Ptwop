@@ -14,9 +14,13 @@ public class DualLink implements Steppable {
 	private Link ab;
 	private Link ba;
 
+	public static DualLink connect(Network net, Node a, Node b) {
+		return new DualLink(net, a, b);
+	}
+
 	/**
-	 * Create a dual band link between two nodes A and B, and add it to the nodes
-	 * link lists
+	 * Create a dual band link between two nodes A and B, and add it to the
+	 * nodes link lists
 	 * 
 	 * @param net
 	 *            Network used to get current time
@@ -39,6 +43,15 @@ public class DualLink implements Steppable {
 		this.b = b;
 		ab = new Link(net, b, latency, loss, packetSize);
 		ba = new Link(net, a, latency, loss, packetSize);
+		a.addLink(ab);
+		b.addLink(ba);
+	}
+
+	public DualLink(Network net, Node a, Node b) {
+		this.a = a;
+		this.b = b;
+		ab = new Link(net, b);
+		ba = new Link(net, a);
 		a.addLink(ab);
 		b.addLink(ba);
 	}

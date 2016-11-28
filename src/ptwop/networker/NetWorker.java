@@ -5,6 +5,7 @@ import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.networker.display.NetworkWrapper;
+import ptwop.networker.model.DualLink;
 import ptwop.networker.model.Link;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.Node;
@@ -31,6 +32,8 @@ public class NetWorker {
 		Link.connect(net, n0, n3);
 		// n3 -> n1
 		Link.connect(net, n3, n1);
+		// n1 <-> n0
+		DualLink.connect(net, n1, n0);
 
 		net.addNode(n0);
 		net.addNode(n1);

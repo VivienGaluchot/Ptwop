@@ -22,8 +22,16 @@ public class NodeWrapper implements Animable {
 	private Vector2D pos;
 	private double radius;
 	private Ellipse2D.Double mobileShape;
+
 	private Color fillColor;
 	private Color drawColor;
+	private Color selectedDrawColor;
+	private Color hoveredDrawColor;
+	private boolean selected;
+	private boolean hovered;
+	
+	private float arrowSize;
+	private float arrowSpace;
 
 	public NodeWrapper(Node node, NetworkWrapper netWrapper) {
 		this.node = node;
@@ -33,6 +41,13 @@ public class NodeWrapper implements Animable {
 		mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
 		fillColor = Color.white;
 		drawColor = Color.darkGray;
+		selectedDrawColor = new Color(80, 140, 200);
+		hoveredDrawColor = new Color(80, 140, 200);
+		setSelected(false);
+		setHovered(false);
+		
+		arrowSize = 0.5f;
+		arrowSpace = 0.1f;
 	}
 
 	public void setPos(double x, double y) {
@@ -60,6 +75,40 @@ public class NodeWrapper implements Animable {
 		this.drawColor = drawColor;
 	}
 
+	public Color getSelectedDrawColor() {
+		return selectedDrawColor;
+	}
+
+	public void setSelectedDrawColor(Color selectedDrawColor) {
+		this.selectedDrawColor = selectedDrawColor;
+	}
+
+	public Color getHoveredDrawColor() {
+		return hoveredDrawColor;
+	}
+
+	public void setHoveredDrawColor(Color hoveredDrawColor) {
+		this.hoveredDrawColor = hoveredDrawColor;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+		hovered = false;
+	}
+
+	public boolean isHovered() {
+		return hovered;
+	}
+
+	public void setHovered(boolean hovered) {
+		this.hovered = hovered;
+		selected = false;
+	}
+
 	public Shape getTranslatedShape() {
 		AffineTransform transformShape = new AffineTransform();
 		transformShape.translate(pos.x, pos.y);
@@ -69,6 +118,12 @@ public class NodeWrapper implements Animable {
 	@Override
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
+
+		Color drawC = drawColor;
+		if (hovered)
+			drawC = hoveredDrawColor;
+		if (selected)
+			drawC = selectedDrawColor;
 
 		// Links
 		List<Link> links = node.getLinks();
@@ -81,13 +136,23 @@ public class NodeWrapper implements Animable {
 			Vector2D p1 = pos.add(v);
 			Vector2D v2 = p2.subtract(p1);
 			if (v.dot(v2) > 0) {
-				Vector2D slide = v2.getOrthogonal();
-				slide = slide.multiply(0.2);
+				// Line
+				Vector2D slideNorm = v2.getOrthogonal();
+				Vector2D slide = slideNorm.multiply(arrowSpace);
 				p1 = p1.add(slide);
 				p2 = p2.add(slide);
 				Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-				g2d.setColor(drawColor);
+				g2d.setColor(drawC);
 				g2d.draw(line);
+				
+				// Arrow
+				v = p2.clone();
+				slide = slideNorm.multiply(arrowSize/2);
+				v2 = p2.subtract(p1).normalize().multiply(arrowSize);
+				v = v.subtract(v2);
+				Vector2D arrowSide = v.add(slide);
+				line = new Line2D.Double(arrowSide.x, arrowSide.y, p2.x, p2.y);
+				g2d.draw(line);				
 			}
 		}
 
@@ -95,7 +160,7 @@ public class NodeWrapper implements Animable {
 		Shape shape = getTranslatedShape();
 		g2d.setColor(fillColor);
 		g2d.fill(shape);
-		g2d.setColor(drawColor);
+		g2d.setColor(drawC);
 		g2d.draw(shape);
 
 		// Name
@@ -111,5 +176,4 @@ public class NodeWrapper implements Animable {
 		// TODO Auto-generated method stub
 
 	}
-
 }
