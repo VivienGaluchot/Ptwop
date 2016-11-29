@@ -1,9 +1,12 @@
 package ptwop.networker.display;
 
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 
 import ptwop.common.Animable;
@@ -14,13 +17,18 @@ import ptwop.networker.model.Network;
 import ptwop.networker.model.Node;
 import ptwop.networker.model.Steppable;
 
-public class NetworkWrapper implements Animable, MouseListener, MouseMotionListener, Steppable {
+public class NetworkWrapper implements Animable, MouseListener, MouseMotionListener, Steppable, MouseWheelListener {
 
 	private SpaceTransform spaceTransform;
 	private Command command;
 
 	private Network network;
 	private HashMap<Node, NodeWrapper> nodes;
+
+	// Mouse
+	private NodeWrapper selected = null;
+	private NodeWrapper hovered = null;
+	private Vector2D lastMousePos;
 
 	public NetworkWrapper(Network network, SpaceTransform spaceTransform, Command command) {
 		this.network = network;
@@ -29,6 +37,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		nodes = new HashMap<>();
 		for (Node n : network.getNodes())
 			addNode(n);
+		lastMousePos = null;
 	}
 
 	private void addNode(Node n) {
@@ -66,9 +75,6 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	// Mouse listener
 
-	private NodeWrapper selected = null;
-	private NodeWrapper hovered = null;
-
 	private void setSelected(NodeWrapper selected) {
 		if (this.selected != null) {
 			this.selected.setSelected(false);
@@ -82,8 +88,14 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
-		if (selected != null)
-			selected.setPos(Math.round(mousePos.x * 2) / 2, Math.round(mousePos.y * 2) / 2);
+		Vector2D deltaMousPos = mousePos.subtract(lastMousePos);
+		lastMousePos = mousePos;
+		if (selected != null) {
+			Vector2D newPos = selected.getPos().add(deltaMousPos);
+			selected.setPos(newPos);
+		} else {
+			spaceTransform.updateMouseDrag(e.getPoint());
+		}
 	}
 
 	@Override
@@ -113,18 +125,28 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	@Override
 	public void mousePressed(MouseEvent e) {
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
+		lastMousePos = mousePos;
+
 		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
 		setSelected(n);
 		if (n != null)
 			command.displayNode(n.getNode());
-		else
+		else {
+			spaceTransform.startMouseDrag(e.getPoint());
 			command.displayNode(null);
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		setSelected(null);
 		mouseMoved(e);
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		int rotation = e.getWheelRotation();
+		spaceTransform.zoom(rotation);
 	}
 
 }

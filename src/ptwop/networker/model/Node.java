@@ -107,7 +107,7 @@ public class Node implements Steppable {
 			if (k != getId() && (lengths[k] > msg.length + msg.lengths[k])) {
 				lengths[k] = msg.length + msg.lengths[k];
 				routingTo[k] = msg.source.getId();
-				Link sourceLink = routingMap.get(net.getNode(k));
+				Link sourceLink = routingMap.get(msg.source);
 				routingMap.put(net.getNode(k), sourceLink);
 				updated = true;
 			}

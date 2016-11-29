@@ -49,14 +49,22 @@ public class NodeWrapper implements Animable {
 		arrowSize = 0.5f;
 		arrowSpace = 0.1f;
 	}
-	
-	public Node getNode(){
+
+	public Node getNode() {
 		return node;
 	}
 
 	public void setPos(double x, double y) {
 		pos.x = x;
 		pos.y = y;
+	}
+
+	public void setPos(Vector2D pos) {
+		this.pos = pos;
+	}
+
+	public Vector2D getPos() {
+		return pos;
 	}
 
 	public void setRadius(double r) {
@@ -152,7 +160,7 @@ public class NodeWrapper implements Animable {
 				// Msg
 				String dispMsg = l.getNumberOfElements() + "";
 				Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-				Vector2D mspPos = p1.add(p2).multiply(1/2.0);
+				Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
 				mspPos = mspPos.add(slideNorm.multiply(0.4));
 				g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
 

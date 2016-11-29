@@ -62,6 +62,7 @@ public class NetWorker {
 		mainPanel.requestFocus();
 		mainPanel.addMouseListener(mainWrapper);
 		mainPanel.addMouseMotionListener(mainWrapper);
+		mainPanel.addMouseWheelListener(mainWrapper);
 
 		mainPanel.addKeyListener(new KeyAdapter() {
 			@Override
