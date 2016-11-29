@@ -1,9 +1,11 @@
 package ptwop.networker.display;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -137,6 +139,8 @@ public class NodeWrapper implements Animable {
 		if (selected)
 			drawC = selectedDrawColor;
 
+		Stroke initStroke = g2d.getStroke();
+
 		// Links
 		List<Link> links = node.getLinks();
 		for (Link l : links) {
@@ -148,6 +152,7 @@ public class NodeWrapper implements Animable {
 			Vector2D p1 = pos.add(v);
 			Vector2D v2 = p2.subtract(p1);
 			if (v.dot(v2) > 0) {
+				g2d.setStroke(new BasicStroke(0.05f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 				// Line
 				Vector2D slideNorm = v2.getOrthogonal();
 				Vector2D slide = slideNorm.multiply(arrowSpace);
@@ -174,6 +179,8 @@ public class NodeWrapper implements Animable {
 				g2d.draw(line);
 			}
 		}
+
+		g2d.setStroke(initStroke);
 
 		// Node
 		Shape shape = getTranslatedShape();
