@@ -19,12 +19,26 @@ public class Network implements Steppable {
 		return time;
 	}
 	
+	public int numberOfNodes(){
+		return nodes.size();
+	}
+	
 	public void addNode(Node n){
+		n.setId(nodes.size());
 		nodes.add(n);
+	}
+	
+	public Node getNode(int i){
+		return nodes.get(i);
 	}
 	
 	public List<Node> getNodes(){
 		return Collections.unmodifiableList(nodes);
+	}
+	
+	public void initBellmanFord(){
+		for(Node n : nodes)
+			n.startBellmanFord();
 	}
 
 	@Override

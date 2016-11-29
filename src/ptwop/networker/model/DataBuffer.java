@@ -62,4 +62,11 @@ public class DataBuffer<E> {
 	public int size() {
 		return bufferSize;
 	}
+	
+	/**
+	 * @return the current number of element in the buffer
+	 */
+	public int numerOfElements(){
+		return buffer.size();
+	}
 }

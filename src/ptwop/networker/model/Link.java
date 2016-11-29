@@ -18,14 +18,12 @@ public class Link implements Steppable {
 	private Node destNode;
 	private DataBuffer<TimedData> buffer;
 
+	private float weight;
+
 	public static Link connect(Network net, Node source, Node dest) {
 		Link l = new Link(net, dest);
 		source.addLink(l);
 		return l;
-	}
-
-	public Link(Network net, Node destNode) {
-		this(net, destNode, 10, 0, 4);
 	}
 
 	/**
@@ -49,6 +47,11 @@ public class Link implements Steppable {
 		rand = new Random();
 
 		buffer = new DataBuffer<>(packetSize);
+		weight = latency / (packetSize * (1 - loss));
+	}
+
+	public Link(Network net, Node destNode) {
+		this(net, destNode, 10, 0, 4);
 	}
 
 	public boolean isFull() {
@@ -57,6 +60,14 @@ public class Link implements Steppable {
 
 	public Node getDestNode() {
 		return destNode;
+	}
+
+	public int getNumberOfElements() {
+		return buffer.numerOfElements();
+	}
+
+	public float getWeight() {
+		return weight;
 	}
 
 	/**
@@ -80,7 +91,7 @@ public class Link implements Steppable {
 	@Override
 	public void doTimeStep() {
 		// push data to node it's time
-		while (!buffer.isEmpty() && buffer.get().outTime > net.getTime()) {
+		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
 			TimedData toPush = buffer.pop();
 
 			// x float in [0:1[

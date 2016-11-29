@@ -29,7 +29,7 @@ public class NodeWrapper implements Animable {
 	private Color hoveredDrawColor;
 	private boolean selected;
 	private boolean hovered;
-	
+
 	private float arrowSize;
 	private float arrowSpace;
 
@@ -45,9 +45,13 @@ public class NodeWrapper implements Animable {
 		hoveredDrawColor = new Color(80, 140, 200);
 		setSelected(false);
 		setHovered(false);
-		
+
 		arrowSize = 0.5f;
 		arrowSpace = 0.1f;
+	}
+	
+	public Node getNode(){
+		return node;
 	}
 
 	public void setPos(double x, double y) {
@@ -144,15 +148,22 @@ public class NodeWrapper implements Animable {
 				Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
 				g2d.setColor(drawC);
 				g2d.draw(line);
-				
+
+				// Msg
+				String dispMsg = l.getNumberOfElements() + "";
+				Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
+				Vector2D mspPos = p1.add(p2).multiply(1/2.0);
+				mspPos = mspPos.add(slideNorm.multiply(0.4));
+				g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
+
 				// Arrow
 				v = p2.clone();
-				slide = slideNorm.multiply(arrowSize/2);
+				slide = slideNorm.multiply(arrowSize / 2);
 				v2 = p2.subtract(p1).normalize().multiply(arrowSize);
 				v = v.subtract(v2);
 				Vector2D arrowSide = v.add(slide);
 				line = new Line2D.Double(arrowSide.x, arrowSide.y, p2.x, p2.y);
-				g2d.draw(line);				
+				g2d.draw(line);
 			}
 		}
 
@@ -167,6 +178,11 @@ public class NodeWrapper implements Animable {
 		String dispName = node.getName();
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
 		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 0.25f);
+
+		// Msg
+		String dispMsg = node.getNumberOfElements() + "";
+		bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
+		g2d.drawString(dispMsg, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 1.5f);
 
 		g2d.dispose();
 	}

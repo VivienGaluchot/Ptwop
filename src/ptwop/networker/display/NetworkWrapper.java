@@ -9,18 +9,23 @@ import java.util.HashMap;
 import ptwop.common.Animable;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.Vector2D;
+import ptwop.networker.Command;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.Node;
+import ptwop.networker.model.Steppable;
 
-public class NetworkWrapper implements Animable, MouseListener, MouseMotionListener {
+public class NetworkWrapper implements Animable, MouseListener, MouseMotionListener, Steppable {
+
+	private SpaceTransform spaceTransform;
+	private Command command;
 
 	private Network network;
-	private SpaceTransform spaceTransform;
 	private HashMap<Node, NodeWrapper> nodes;
 
-	public NetworkWrapper(Network network, SpaceTransform spaceTransform) {
+	public NetworkWrapper(Network network, SpaceTransform spaceTransform, Command command) {
 		this.network = network;
 		this.spaceTransform = spaceTransform;
+		this.command = command;
 		nodes = new HashMap<>();
 		for (Node n : network.getNodes())
 			addNode(n);
@@ -36,18 +41,18 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	@Override
 	public void paint(Graphics g) {
-		long time = network.getTime();
-		g.drawString("time " + time, -9, -9);
 		for (Node n : nodes.keySet())
 			nodes.get(n).paint(g);
 	}
 
 	@Override
 	public void animate(long timeStep) {
-		network.doTimeStep();
-
 		for (Node n : nodes.keySet())
 			nodes.get(n).animate(timeStep);
+	}
+
+	public void doTimeStep() {
+		network.doTimeStep();
 	}
 
 	public NodeWrapper getNodeAtPos(Vector2D pos) {
@@ -78,7 +83,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	public void mouseDragged(MouseEvent e) {
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		if (selected != null)
-			selected.setPos(mousePos.x, mousePos.y);
+			selected.setPos(Math.round(mousePos.x * 2) / 2, Math.round(mousePos.y * 2) / 2);
 	}
 
 	@Override
@@ -110,6 +115,10 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
 		setSelected(n);
+		if (n != null)
+			command.displayNode(n.getNode());
+		else
+			command.displayNode(null);
 	}
 
 	@Override

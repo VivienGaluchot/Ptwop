@@ -1,10 +1,10 @@
 package ptwop.networker.model;
 
 public class Data {
-	Node source;
-	Node dest;
+	public Node source;
+	public Node dest;
 
-	int hop;
+	public int hop;
 
 	private long creationTime;
 
