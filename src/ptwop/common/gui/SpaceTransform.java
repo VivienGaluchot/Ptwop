@@ -21,7 +21,8 @@ public class SpaceTransform implements Animable, ComponentListener {
 	private Animable animable;
 
 	private AffineTransform currentTransform;
-
+	
+	private Vector2D initMousePos;
 	private Vector2D afterTranslate;
 	private float afterScale;
 
@@ -37,6 +38,7 @@ public class SpaceTransform implements Animable, ComponentListener {
 		this.father = father;
 
 		currentTransform = new AffineTransform();
+		initMousePos = null;
 		afterTranslate = new Vector2D(0, 0);
 		afterScale = 1;
 
@@ -88,20 +90,13 @@ public class SpaceTransform implements Animable, ComponentListener {
 		computeTransform();
 	}
 
-	private AffineTransform initTransf;
-	private Vector2D lastMousePos;
-
 	public void startMouseDrag(Point mouse) {
-		initTransf = currentTransform;
-		this.lastMousePos = new Vector2D(mouse);
+		initMousePos = transformMousePosition(mouse);
 	}
 
 	public void updateMouseDrag(Point mouse) {
-		Vector2D vecMouse = new Vector2D(mouse);
-		Vector2D deltaPos = vecMouse.subtract(lastMousePos);
-		lastMousePos = vecMouse;
-		
-		// TODO
+		Vector2D vecMouse = transformMousePosition(mouse);
+		setTranslate(afterTranslate.add(vecMouse.subtract(initMousePos)));
 	}
 
 	public synchronized void setGraphicSize(int drawSize) {
