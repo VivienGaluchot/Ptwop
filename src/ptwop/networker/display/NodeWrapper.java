@@ -162,13 +162,14 @@ public class NodeWrapper implements Animable {
 				g2d.setColor(drawC);
 				g2d.draw(line);
 
-				// Msg
-				String dispMsg = l.getNumberOfElements() + "";
-				Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-				Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
-				mspPos = mspPos.add(slideNorm.multiply(0.4));
-				g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
-
+				if (isHovered() || isSelected()) {
+					// Msg
+					String dispMsg = l.getNumberOfElements() + "";
+					Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
+					Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
+					mspPos = mspPos.add(slideNorm.multiply(0.4));
+					g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
+				}
 				// Arrow
 				v = p2.clone();
 				slide = slideNorm.multiply(arrowSize / 2);
@@ -195,9 +196,11 @@ public class NodeWrapper implements Animable {
 		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 0.25f);
 
 		// Msg
-		String dispMsg = node.getNumberOfElements() + "";
-		bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-		g2d.drawString(dispMsg, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 1.5f);
+		if (isHovered() || isSelected()) {
+			String dispMsg = node.getNumberOfElements() + "";
+			bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
+			g2d.drawString(dispMsg, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 1.5f);
+		}
 
 		g2d.dispose();
 	}
