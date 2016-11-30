@@ -39,8 +39,9 @@ public class NetWorker {
 		// n1 <-> n0
 		new DualLink(net, n1, n0, 200, 0, 2);
 		new DualLink(net, n1, n2, 100, 0, 2);
-		new DualLink(net, n2, n0, 50, 0, 4);
-		new DualLink(net, n3, n0, 10, 0, 8);
+		new DualLink(net, n2, n0, 50, 0, 2);
+		new DualLink(net, n3, n0, 50, 0, 2);
+		new DualLink(net, n1, n3, 60, 0, 4);
 
 		net.addNode(n0);
 		net.addNode(n1);
