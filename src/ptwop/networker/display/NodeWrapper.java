@@ -129,6 +129,20 @@ public class NodeWrapper implements Animable {
 		return transformShape.createTransformedShape(mobileShape);
 	}
 
+	private static float linkWeightTransform(float weight) {
+		float maxsize = 0.15f;
+		float minsize = 0.05f;
+		float range = 100;
+		float x;
+		if (0 <= weight && weight < range)
+			x = (float) (Math.cos(10 * weight / (Math.PI * range)) + 1f) / 2f;
+		else if (weight >= range)
+			x = 0;
+		else
+			x = 1;
+		return x * (maxsize - minsize) + minsize;
+	}
+
 	@Override
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
@@ -152,7 +166,8 @@ public class NodeWrapper implements Animable {
 			Vector2D p1 = pos.add(v);
 			Vector2D v2 = p2.subtract(p1);
 			if (v.dot(v2) > 0) {
-				g2d.setStroke(new BasicStroke(0.05f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g2d.setStroke(new BasicStroke(linkWeightTransform(l.getWeight()), BasicStroke.CAP_ROUND,
+						BasicStroke.JOIN_ROUND));
 				// Line
 				Vector2D slideNorm = v2.getOrthogonal();
 				Vector2D slide = slideNorm.multiply(arrowSpace);

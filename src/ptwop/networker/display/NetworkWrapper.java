@@ -146,6 +146,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		int rotation = e.getWheelRotation();
 		spaceTransform.zoom(rotation);
+		mouseMoved(e);
 	}
 
 }

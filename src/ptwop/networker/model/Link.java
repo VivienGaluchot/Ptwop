@@ -47,11 +47,15 @@ public class Link implements Steppable {
 		rand = new Random();
 
 		buffer = new DataBuffer<>(packetSize);
-		weight = latency / (packetSize * (1 - loss));
+		computeWeight();
 	}
 
 	public Link(Network net, Node destNode) {
 		this(net, destNode, 10, 0, 4);
+	}
+	
+	public void computeWeight(){
+		weight = latency / (buffer.size() * (1 - loss));
 	}
 
 	public boolean isFull() {
@@ -64,6 +68,10 @@ public class Link implements Steppable {
 
 	public int getNumberOfElements() {
 		return buffer.numerOfElements();
+	}
+	
+	public int getSize() {
+		return buffer.size();
 	}
 
 	public float getWeight() {
