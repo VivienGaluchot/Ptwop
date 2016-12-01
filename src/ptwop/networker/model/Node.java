@@ -15,8 +15,7 @@ import java.util.Map;
  */
 public class Node implements Steppable {
 	private Network net;
-
-	private String name;
+	
 	private int id;
 
 	private ArrayList<Link> outLinks;
@@ -67,11 +66,7 @@ public class Node implements Steppable {
 	}
 
 	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+		return "n" + id;
 	}
 
 	public int getId() {
@@ -80,7 +75,6 @@ public class Node implements Steppable {
 
 	protected void setId(int id) {
 		this.id = id;
-		this.setName("n" + id);
 	}
 
 	public void startBellmanFord() {

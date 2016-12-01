@@ -78,6 +78,14 @@ public class Link implements Steppable {
 		return weight;
 	}
 
+	public long getLatency() {
+		return latency;
+	}
+
+	public float getLoss() {
+		return loss;
+	}
+
 	/**
 	 * Add a data to the buffer, this data will be pushed to destNode when the
 	 * latency time will be reached. The data have a probability to be lost,

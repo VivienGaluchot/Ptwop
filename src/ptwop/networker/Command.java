@@ -34,7 +34,7 @@ public class Command extends JPanel {
 	private DefaultTableModel linksInfoModel;
 	private DefaultTableModel routageInfoModel;
 
-	String[] linksColumnNames = { "Dest", "Charge", "Poids" };
+	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
 	String[] routingColumnNames = { "Dest", "Next" };
 
 	public Command(Network net) {
@@ -157,10 +157,12 @@ public class Command extends JPanel {
 			Object[][] infos = new Object[links.size()][];
 			for (int i = 0; i < links.size(); i++) {
 				Link l = links.get(i);
-				infos[i] = new Object[3];
+				infos[i] = new Object[5];
 				infos[i][0] = new String(l.getDestNode().getName());
 				infos[i][1] = new String(l.getNumberOfElements() + "/" + l.getSize());
-				infos[i][2] = new Float(l.getWeight());
+				infos[i][2] = new Float(l.getLoss());
+				infos[i][3] = new Float(l.getLatency());
+				infos[i][4] = new Float(l.getWeight());
 			}
 			linksInfoModel.setDataVector(infos, linksColumnNames);
 			// routing
