@@ -19,12 +19,16 @@ public class Data {
 	public void incrHop() {
 		hop++;
 	}
-	
-	public int getHop(){
+
+	public int getHop() {
 		return hop;
 	}
 
 	public long getEllapsedTime(long currentTime) {
 		return currentTime - creationTime;
+	}
+
+	public String toString() {
+		return source.getName() + "->" + dest.getName() + ", " + hop + " hop";
 	}
 }

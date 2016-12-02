@@ -8,7 +8,7 @@ public class DataBuffer<E> {
 
 	public DataBuffer(int bufferSize) {
 		this.bufferSize = bufferSize;
-		buffer = new ArrayDeque<>(bufferSize);
+		buffer = new ArrayDeque<>(10);
 	}
 
 	/**
@@ -33,6 +33,14 @@ public class DataBuffer<E> {
 			return false;
 
 		buffer.add(data);
+		return true;
+	}
+	
+	public boolean addOnTop(E data){
+		if (isFull())
+			return false;
+
+		buffer.addFirst(data);
 		return true;
 	}
 	

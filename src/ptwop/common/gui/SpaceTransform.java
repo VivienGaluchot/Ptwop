@@ -1,17 +1,21 @@
 package ptwop.common.gui;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 
 import ptwop.common.Animable;
 import ptwop.common.math.Vector2D;
@@ -21,7 +25,10 @@ public class SpaceTransform implements Animable, ComponentListener {
 	private Animable animable;
 
 	private AffineTransform currentTransform;
-	
+
+	private boolean displayGrid;
+	private float gridSize;
+
 	private Vector2D initMousePos;
 	private Vector2D afterTranslate;
 	private float afterScale;
@@ -44,6 +51,8 @@ public class SpaceTransform implements Animable, ComponentListener {
 
 		graphicSize = 10;
 
+		gridSize = 1;
+
 		setFather(father);
 	}
 
@@ -61,6 +70,24 @@ public class SpaceTransform implements Animable, ComponentListener {
 
 	public Animable getAnimable() {
 		return animable;
+	}
+
+	public boolean isDisplayGrid() {
+		return displayGrid;
+	}
+
+	public void setDisplayGrid(boolean displayGrid) {
+		this.displayGrid = displayGrid;
+	}
+
+	public float getGridSize() {
+		return gridSize;
+	}
+
+	public void setGridSize(float gridSize) {
+		if (gridSize <= 0)
+			throw new IllegalArgumentException("gridSize have to be strictly positive");
+		this.gridSize = gridSize;
 	}
 
 	public void computeTransform() {
@@ -133,6 +160,33 @@ public class SpaceTransform implements Animable, ComponentListener {
 		Font newFont = currentFont.deriveFont(currentFont.getSize() * 0.06f);
 		g2d.setFont(newFont);
 		g2d.setStroke(new BasicStroke(0.06f));
+
+		if (displayGrid) {
+			g2d.setColor(new Color(0, 0, 0, 0.05f));
+			Point2D.Float topLeft = new Point2D.Float(0, 0);
+			Point2D.Float botRight = new Point2D.Float(father.getWidth(), father.getHeight());
+			try {
+				currentTransform.inverseTransform(topLeft, topLeft);
+				currentTransform.inverseTransform(botRight, botRight);
+				float x = 0;
+				float y = 0;
+				x = topLeft.x;
+				y = topLeft.y;
+				x = Math.round(x / gridSize) * gridSize;
+				y = Math.round(y / gridSize) * gridSize;
+				while (x < botRight.x) {
+					Line2D line = new Line2D.Float(x, topLeft.y, x, botRight.y);
+					g2d.draw(line);
+					x += gridSize;
+				}
+				while (y < botRight.y) {
+					Line2D line = new Line2D.Float(topLeft.x, y, botRight.x, y);
+					g2d.draw(line);
+					y += gridSize;
+				}
+			} catch (NoninvertibleTransformException e) {
+			}
+		}
 
 		if (animable != null) {
 			animable.paint(g2d);

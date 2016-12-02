@@ -15,12 +15,13 @@ import java.util.Map;
  */
 public class Node implements Steppable {
 	private Network net;
-	
+
 	private int id;
 
 	private ArrayList<Link> outLinks;
 	private HashMap<Node, Link> routingMap;
-	private DataBuffer<TimedData> buffer;
+	private HashMap<Link, DataBuffer<TimedData>> outBuffers;
+	private DataBuffer<TimedData> localBuffer;
 	private long processTime;
 
 	// BellmanFord
@@ -36,7 +37,8 @@ public class Node implements Steppable {
 		outLinks = new ArrayList<>();
 		routingMap = new HashMap<>();
 
-		buffer = new DataBuffer<>(1000);
+		outBuffers = new HashMap<>();
+		localBuffer = new DataBuffer<TimedData>(1000);
 	}
 
 	/**
@@ -46,23 +48,35 @@ public class Node implements Steppable {
 	 */
 	public void addLink(Link link) {
 		outLinks.add(link);
+		DataBuffer<TimedData> buffer = new DataBuffer<>(1000);
+		outBuffers.put(link, buffer);
 		routingMap.put(link.getDestNode(), link);
 	}
 
 	public List<Link> getLinks() {
 		return Collections.unmodifiableList(outLinks);
 	}
-	
-	public Map<Node, Link> getRoutingMap(){
+
+	public Map<Node, Link> getRoutingMap() {
 		return Collections.unmodifiableMap(routingMap);
 	}
 
 	public boolean isFull() {
-		return buffer.isFull();
+		if (localBuffer.isFull())
+			return true;
+
+		for (Link l : outBuffers.keySet())
+			if (outBuffers.get(l).isFull())
+				return true;
+
+		return false;
 	}
 
 	public int getNumberOfElements() {
-		return buffer.numerOfElements();
+		int n = localBuffer.numerOfElements();
+		for (Link l : outBuffers.keySet())
+			n += outBuffers.get(l).numerOfElements();
+		return n;
 	}
 
 	public String getName() {
@@ -75,6 +89,10 @@ public class Node implements Steppable {
 
 	protected void setId(int id) {
 		this.id = id;
+	}
+
+	public long getProcessTime() {
+		return processTime;
 	}
 
 	public void startBellmanFord() {
@@ -90,7 +108,7 @@ public class Node implements Steppable {
 
 		for (Link l : outLinks) {
 			Data msg = new BellmanFortUpdateMsg(this, l.getDestNode(), net.getTime(), lengths, l.getWeight());
-			l.push(msg);
+			push(msg);
 		}
 	}
 
@@ -110,34 +128,56 @@ public class Node implements Steppable {
 		if (updated) {
 			for (Link l : outLinks) {
 				Data msg2 = new BellmanFortUpdateMsg(this, l.getDestNode(), net.getTime(), lengths, l.getWeight());
-				l.push(msg2);
+				push(msg2);
 			}
 		}
 	}
 
 	public boolean push(Data data) {
+		// Routing
+		DataBuffer<TimedData> buffer = null;
+		if (data.dest == this)
+			buffer = localBuffer;
+		else
+			buffer = outBuffers.get(routingMap.get(data.dest));
+
+		if (buffer == null) {
+			System.out.println("on node " + this.getName() + " : data " + data + " - unknown destination");
+			return false;
+		}
 		return buffer.push(new TimedData(net.getTime() + processTime, data));
 	}
 
 	@Override
 	public void doTimeStep() {
-		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
-			Data toPush = buffer.pop().data;
-			toPush.incrHop();
-			if (toPush instanceof BellmanFortUpdateMsg)
-				updateBellmanFord((BellmanFortUpdateMsg) toPush);
-			else {
-				// Routing
-				Link link = routingMap.get(toPush.dest);
-				if (link != null)
-					link.push(toPush);
+		// LocalBuffer
+		while (!localBuffer.isEmpty() && localBuffer.get().outTime < net.getTime()) {
+			TimedData toPush = localBuffer.pop();
+			if (toPush.data instanceof BellmanFortUpdateMsg)
+				updateBellmanFord((BellmanFortUpdateMsg) toPush.data);
+		}
+
+		// OutBuffers
+		for (Link l : outBuffers.keySet()) {
+			DataBuffer<TimedData> buffer = outBuffers.get(l);
+			while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
+				TimedData toPush = buffer.get();
+				toPush.data.incrHop();
+				if (l.push(toPush.data) == true)
+					buffer.pop();
 				else
-					System.out.println("Node out of routingMap");
+					break;
 			}
 		}
 
-		for (Link l : outLinks) {
+		for (
+
+		Link l : outLinks) {
 			l.doTimeStep();
 		}
+	}
+
+	public String toString() {
+		return getName();
 	}
 }

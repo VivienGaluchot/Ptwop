@@ -19,12 +19,12 @@ public class NetWorker {
 		spaceTransform.setFather(mainPanel);
 
 		Network net = new Network();
-		Command command = new Command(net);
 
 		Node n0 = new Node(net, 1);
-		Node n1 = new Node(net, 1);
+		Node n1 = new Node(net, 7);
 		Node n2 = new Node(net, 1);
-		Node n3 = new Node(net, 1);
+		Node n3 = new Node(net, 5);
+		Node n4 = new Node(net, 2);
 
 		// // n1 -> n2
 		// Link.connect(net, n1, n2);
@@ -42,14 +42,15 @@ public class NetWorker {
 		new DualLink(net, n2, n0, 50, 0, 2);
 		new DualLink(net, n3, n0, 50, 0, 2);
 		new DualLink(net, n1, n3, 60, 0, 4);
+		new DualLink(net, n3, n4, 100, 0, 4);
 
 		net.addNode(n0);
 		net.addNode(n1);
 		net.addNode(n2);
 		net.addNode(n3);
+		net.addNode(n4);
 
-		net.initBellmanFord();
-
+		Command command = new Command(net);
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform, command);
 		spaceTransform.setAnimable(mainWrapper);
 		spaceTransform.setGraphicSize(30);
@@ -58,6 +59,7 @@ public class NetWorker {
 		mainWrapper.getWrapper(n1).setPos(-4, 0);
 		mainWrapper.getWrapper(n2).setPos(0, -4);
 		mainWrapper.getWrapper(n3).setPos(0, 4);
+		mainWrapper.getWrapper(n4).setPos(0, 8);
 
 		mainPanel.setFocusable(true);
 		mainPanel.requestFocus();
@@ -72,6 +74,9 @@ public class NetWorker {
 				command.update();
 			}
 		});
+		
+		spaceTransform.setDisplayGrid(true);
+		spaceTransform.setGridSize(2);
 
 		AnimationThread thread = new AnimationThread(mainPanel);
 		thread.startAnimation();
