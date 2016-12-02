@@ -177,6 +177,7 @@ public class Node implements Steppable {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}

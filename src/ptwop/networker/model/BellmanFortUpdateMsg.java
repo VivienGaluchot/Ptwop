@@ -1,7 +1,7 @@
 package ptwop.networker.model;
 
-public class BellmanFortUpdateMsg extends Data{
-	
+public class BellmanFortUpdateMsg extends Data {
+
 	public float[] lengths;
 	public float length;
 

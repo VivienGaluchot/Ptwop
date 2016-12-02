@@ -8,14 +8,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 
 import ptwop.common.Animable;
 import ptwop.common.math.Vector2D;
@@ -51,6 +49,7 @@ public class SpaceTransform implements Animable, ComponentListener {
 
 		graphicSize = 10;
 
+		displayGrid = false;
 		gridSize = 1;
 
 		setFather(father);
@@ -149,6 +148,7 @@ public class SpaceTransform implements Animable, ComponentListener {
 
 	// Animable
 
+	@Override
 	public synchronized void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

@@ -61,11 +61,11 @@ public class Command extends JPanel {
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
 		subPanel.setBorder(BorderFactory.createTitledBorder("Reseau"));
-		
+
 		subPanel.add(new JLabel("time : "), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(timeLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-				new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(timeLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
 		JButton button = new JButton("+1");
 		button.addActionListener(new ActionListener() {

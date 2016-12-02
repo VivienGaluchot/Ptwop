@@ -74,7 +74,7 @@ public class NetWorker {
 				command.update();
 			}
 		});
-		
+
 		spaceTransform.setDisplayGrid(true);
 		spaceTransform.setGridSize(2);
 

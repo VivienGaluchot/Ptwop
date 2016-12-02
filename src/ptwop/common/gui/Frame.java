@@ -12,8 +12,8 @@ public class Frame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private JPanel contentPane;
-	
-	public Frame(JPanel main){
+
+	public Frame(JPanel main) {
 		this(main, null);
 	}
 

@@ -59,6 +59,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 			nodes.get(n).animate(timeStep);
 	}
 
+	@Override
 	public void doTimeStep() {
 		network.doTimeStep();
 	}

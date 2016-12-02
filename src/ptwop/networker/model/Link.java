@@ -53,8 +53,8 @@ public class Link implements Steppable {
 	public Link(Network net, Node destNode) {
 		this(net, destNode, 10, 0, 4);
 	}
-	
-	public void computeWeight(){
+
+	public void computeWeight() {
 		weight = latency / (buffer.size() * (1 - loss));
 	}
 
@@ -69,7 +69,7 @@ public class Link implements Steppable {
 	public int getNumberOfElements() {
 		return buffer.numerOfElements();
 	}
-	
+
 	public int getSize() {
 		return buffer.size();
 	}

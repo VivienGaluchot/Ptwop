@@ -66,9 +66,9 @@ public class Game {
 		animationPanel = new AnimationPanel(infoLayer);
 		spaceTransform = new SpaceTransform(null, animationPanel);
 		infoLayer.setAnimable(spaceTransform);
-		
+
 		animationPanel.addMouseMotionListener(Action.getInstance());
-		
+
 		thread = new AnimationThread(animationPanel);
 		thread.startAnimation();
 
@@ -116,7 +116,7 @@ public class Game {
 
 		spaceTransform.setAnimable(party);
 		spaceTransform.setGraphicSize(party.getMap().getGraphicSize());
-		
+
 		infoLayer.setClient(client);
 		infoLayer.setParty(party);
 

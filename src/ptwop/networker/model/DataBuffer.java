@@ -17,14 +17,14 @@ public class DataBuffer<E> {
 	public boolean isEmpty() {
 		return buffer.isEmpty();
 	}
-	
+
 	/**
 	 * @return true only if the buffer is full
 	 */
 	public boolean isFull() {
 		return buffer.size() >= bufferSize;
 	}
-	
+
 	/**
 	 * Add element to the ordained buffer
 	 */
@@ -35,15 +35,15 @@ public class DataBuffer<E> {
 		buffer.add(data);
 		return true;
 	}
-	
-	public boolean addOnTop(E data){
+
+	public boolean addOnTop(E data) {
 		if (isFull())
 			return false;
 
 		buffer.addFirst(data);
 		return true;
 	}
-	
+
 	/**
 	 * Get top element of the buffer and remove it from the buffer
 	 */
@@ -53,11 +53,11 @@ public class DataBuffer<E> {
 
 		return buffer.removeFirst();
 	}
-	
+
 	/**
 	 * Get top element of the buffer, don't remove it
 	 */
-	public E get(){
+	public E get() {
 		if (isEmpty())
 			return null;
 
@@ -70,11 +70,11 @@ public class DataBuffer<E> {
 	public int size() {
 		return bufferSize;
 	}
-	
+
 	/**
 	 * @return the current number of element in the buffer
 	 */
-	public int numerOfElements(){
+	public int numerOfElements() {
 		return buffer.size();
 	}
 }

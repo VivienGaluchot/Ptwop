@@ -24,15 +24,15 @@ public class InfoLayer implements Animable {
 		client = null;
 		this.animable = animable;
 	}
-	
-	public synchronized void setParty(Party party){
+
+	public synchronized void setParty(Party party) {
 		this.party = party;
 	}
-	
-	public synchronized void setClient(Client client){
-		this.client = client;		
+
+	public synchronized void setClient(Client client) {
+		this.client = client;
 	}
-	
+
 	public synchronized void setAnimable(Animable animable) {
 		this.animable = animable;
 	}
