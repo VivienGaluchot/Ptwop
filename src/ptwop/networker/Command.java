@@ -34,6 +34,7 @@ public class Command extends JPanel {
 	private Node node;
 	private JLabel nodeName;
 	private JLabel nodeNumberOfElements;
+	private JLabel nodeProcessType;
 	private DefaultTableModel linksInfoModel;
 	private DefaultTableModel routageInfoModel;
 
@@ -53,6 +54,7 @@ public class Command extends JPanel {
 		timeLabel = new JLabel();
 		nodeName = new JLabel();
 		nodeNumberOfElements = new JLabel();
+		nodeProcessType = new JLabel();
 
 		setLayout(new GridBagLayout());
 		int line = 0;
@@ -131,6 +133,11 @@ public class Command extends JPanel {
 		subPanel.add(new JLabel("charge : "), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(nodeNumberOfElements, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		
+		subPanel.add(new JLabel("process time : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(nodeProcessType, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
 		line++;
@@ -213,6 +220,8 @@ public class Command extends JPanel {
 		if (node != null) {
 			nodeName.setText(node.getName());
 			nodeNumberOfElements.setText(node.getNumberOfElements() + "");
+			nodeProcessType.setText(node.getProcessTime() + "");
+			
 			// linksInfo
 			List<Link> links = node.getLinks();
 			Object[][] infos = new Object[links.size()][];

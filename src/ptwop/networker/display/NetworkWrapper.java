@@ -7,6 +7,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
+import java.util.Vector;
 
 import ptwop.common.Animable;
 import ptwop.common.gui.SpaceTransform;
@@ -43,6 +44,24 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		nodes.put(n, new NodeWrapper(n, this));
 	}
 
+	public void putInCircle() {
+		double space = 1;
+
+		Vector2D[] positions = new Vector2D[nodes.size()];
+		for (int i = 0; i < positions.length; i++) {
+			double angle = i * 2 * Math.PI / positions.length;
+			positions[i] = new Vector2D(Math.cos(angle), Math.sin(angle));
+			positions[i] = positions[i].multiply(positions.length * space);
+		}
+
+		int i = 0;
+		for (Node n : nodes.keySet()) {
+			NodeWrapper nw = nodes.get(n);
+			nw.setPos(positions[i % positions.length]);
+			i++;
+		}
+	}
+
 	public NodeWrapper getWrapper(Node n) {
 		return nodes.get(n);
 	}
@@ -65,12 +84,14 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	}
 
 	public NodeWrapper getNodeAtPos(Vector2D pos) {
+		NodeWrapper res = null;
+		// get the last of the set
 		for (Node n : nodes.keySet()) {
 			if (nodes.get(n).getTranslatedShape().contains(pos.x, pos.y)) {
-				return nodes.get(n);
+				res = nodes.get(n);
 			}
 		}
-		return null;
+		return res;
 	}
 
 	// Mouse listener

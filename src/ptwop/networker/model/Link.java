@@ -55,7 +55,7 @@ public class Link implements Steppable {
 	}
 
 	public void computeWeight() {
-		weight = latency / (buffer.size() * (1 - loss));
+		weight = latency / ((1 - loss));
 	}
 
 	public boolean isFull() {

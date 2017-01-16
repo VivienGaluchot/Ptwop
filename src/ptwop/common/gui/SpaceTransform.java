@@ -105,6 +105,7 @@ public class SpaceTransform implements Animable, ComponentListener {
 	}
 
 	public void zoom(int unit) {
+		unit = -unit;
 		while (unit > 0) {
 			afterScale = 1.1f * afterScale;
 			unit--;
