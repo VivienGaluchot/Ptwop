@@ -7,7 +7,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
-import java.util.Vector;
 
 import ptwop.common.Animable;
 import ptwop.common.gui.SpaceTransform;
