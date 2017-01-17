@@ -45,7 +45,7 @@ public class Command extends JPanel {
 
 	private JButton msgButton;
 
-	public Command(Network net) {
+	public Command(final Network net) {
 		this.net = net;
 
 		this.setPreferredSize(new Dimension(250, 300));

@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-import ptwop.game.transfert.Connection;
-import ptwop.game.transfert.ConnectionHandler;
+import ptwop.p2p.Connection;
+import ptwop.p2p.ConnectionHandler;
 import ptwop.game.transfert.messages.Message;
 import ptwop.p2p.Constants;
 import ptwop.p2p.P2P;

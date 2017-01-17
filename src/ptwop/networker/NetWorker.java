@@ -19,7 +19,7 @@ public class NetWorker {
 		AnimationPanel mainPanel = new AnimationPanel(spaceTransform);
 		spaceTransform.setFather(mainPanel);
 
-		Network net = new Network();
+		final Network net = new Network();
 		int nodeNumber = 25;
 		GaussianRandom nodeLatency = new GaussianRandom(1,100,10,5);
 		float connex = 2f;
@@ -58,7 +58,7 @@ public class NetWorker {
 //		net.addNode(n3);
 //		net.addNode(n4);
 
-		Command command = new Command(net);
+		final Command command = new Command(net);
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform, command);
 		spaceTransform.setAnimable(mainWrapper);
 		spaceTransform.setGraphicSize(nodeNumber*2+10);
