@@ -20,13 +20,13 @@ public class NetWorker {
 		spaceTransform.setFather(mainPanel);
 
 		Network net = new Network();
-		int nodeNumber = 200;
+		int nodeNumber = 25;
 		GaussianRandom nodeLatency = new GaussianRandom(1,100,10,5);
-		float probLink = 0.02f;
+		float connex = 2f;
 		GaussianRandom linkLatency = new GaussianRandom(5,1000,50,40);
 		GaussianRandom linkLoss = new GaussianRandom(0,0,0,1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1,100,10,5);
-		net.randomize(nodeNumber, nodeLatency, probLink, linkLatency, linkLoss, linkPacketSize);
+		net.randomize(nodeNumber, nodeLatency, connex, linkLatency, linkLoss, linkPacketSize);
 
 //		Node n0 = new Node(net, 1);
 //		Node n1 = new Node(net, 7);
@@ -61,7 +61,7 @@ public class NetWorker {
 		Command command = new Command(net);
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform, command);
 		spaceTransform.setAnimable(mainWrapper);
-		spaceTransform.setGraphicSize(30);
+		spaceTransform.setGraphicSize(nodeNumber*2+10);
 
 //		mainWrapper.getWrapper(n0).setPos(4, 0);
 //		mainWrapper.getWrapper(n1).setPos(-4, 0);
@@ -85,7 +85,7 @@ public class NetWorker {
 		});
 
 		spaceTransform.setDisplayGrid(true);
-		spaceTransform.setGridSize(2);
+		spaceTransform.setGridSize(5);
 
 		AnimationThread thread = new AnimationThread(mainPanel);
 		thread.startAnimation();

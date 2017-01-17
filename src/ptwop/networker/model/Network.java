@@ -45,15 +45,31 @@ public class Network implements Steppable {
 	}
 
 	/**
+	 * Create a random network
+	 * 
 	 * @param n
 	 *            number of nodes
+	 * @param nodeLatency
+	 *            random generator for node latency
+	 * @param connex
+	 *            medium connexity
+	 * @param linkLatency
+	 *            random generator for link latency
+	 * @param linkLoss
+	 *            random generator for link loss
+	 * @param linkPacketSize
+	 *            random generator for link packet size max
 	 */
-	public void randomize(int n, GaussianRandom nodeLatency, float probLink, GaussianRandom linkLatency,
+	public void randomize(int n, GaussianRandom nodeLatency, float connex, GaussianRandom linkLatency,
 			GaussianRandom linkLoss, GaussianRandom linkPacketSize) {
 		nodes.clear();
 		time = 0;
 
+		float probLink = connex / (n - 1);
+
 		Random random = new Random();
+		
+		int nl = 0;
 
 		for (int i = 0; i < n; i++) {
 			long latency = Math.round(nodeLatency.nextDouble());
@@ -64,11 +80,14 @@ public class Network implements Steppable {
 				if (random.nextFloat() < probLink) {
 					new DualLink(this, node, prevNode, linkLatency.nextLong(), linkLoss.nextFloat(),
 							linkPacketSize.nextInt());
+					nl++;
 				}
 			}
 
 			addNode(node);
 		}
+		
+		System.out.println("true connexity "+ ((float) 2*nl)/(n));
 
 	}
 
