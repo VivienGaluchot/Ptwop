@@ -1,17 +1,20 @@
 package ptwop.game.transfert;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
+import ptwop.game.model.Map;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.physic.DrivableMobile;
 import ptwop.game.physic.Mobile;
-import ptwop.game.transfert.messages.RequireUpdate;
+import ptwop.game.transfert.messages.UserJoin;
+import ptwop.p2p.MessageHandler;
+import ptwop.p2p.P2P;
+import ptwop.p2p.User;
 import ptwop.game.transfert.messages.DrivableMobileUpdate;
-import ptwop.game.transfert.messages.HelloFromClient;
-import ptwop.game.transfert.messages.HelloFromServer;
+import ptwop.game.transfert.messages.GetPartyParameters;
+import ptwop.game.transfert.messages.PartyParameters;
 import ptwop.game.transfert.messages.Message;
 import ptwop.game.transfert.messages.MessagePack;
 import ptwop.game.transfert.messages.MobileJoin;
@@ -19,55 +22,67 @@ import ptwop.game.transfert.messages.MobileQuit;
 import ptwop.game.transfert.messages.MobileUpdate;
 import ptwop.game.transfert.messages.PlayerJoin;
 
-public class Client implements ConnectionHandler {
+public class GameMessageHandler implements MessageHandler {
 
-	private Connection connection;
+	private P2P p2p;
 	private Party party;
 
-	public Client(String ip, String name) throws UnknownHostException, IOException {
-		connection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
+	private String pseudo;
 
-		// Read HelloMessage and create party
-		HelloFromServer m = (HelloFromServer) connection.read();
-		System.out.println(m);
-		party = new Party(m.createMap());
-		party.addChrono(m.createChrono());
+	public GameMessageHandler(P2P p2p, String pseudo) throws UnknownHostException, IOException {
+		this.p2p = p2p;
+		this.pseudo = pseudo;
 
-		// Create you player
-		Player you = new Player(name, m.yourId, true);
-		party.addMobile(you);
+		p2p.setMessageHandler(this);
+		p2p.connect();
 
-		connection.start();
-		connection.send(new HelloFromClient(name));
+		// send name & ask for party parameters
+		if (!p2p.getUsers().isEmpty()) {
+			p2p.broadcast(new UserJoin(pseudo));
+
+			User randuser = p2p.getUsers().iterator().next();
+			p2p.sendTo(randuser, new GetPartyParameters());
+		} else {
+			// first, create a perso party
+			party = new Party(new Map(Map.Type.DEFAULT_MAP, "Default generated map"));
+		}
 	}
 
 	public void disconnect() {
-		connection.disconnect();
+		p2p.disconnect();
 	}
 
 	public Party getJoinedParty() {
 		return party;
 	}
 
-	public long getPingTime() {
-		if (connection != null)
-			return connection.getPingTime();
-		else
-			return 0;
-	}
-
 	@Override
-	public void handleMessage(Connection connection, Message o) throws IOException {
-		if (o instanceof RequireUpdate) {
-			Player you = party.getYou();
-			connection.send(MessageFactory.generateUpdate(you));
+	public void handleMessage(User sender, Message o) throws IOException {
+		if (o instanceof UserJoin) {
+			// add player to party
+			Player other = new Player(((UserJoin) o).name, sender.getId(), false);
+			party.addMobile(other);
+		} else if (o instanceof GetPartyParameters) {
+			// send party parameters
+			p2p.sendTo(sender, new PartyParameters(party.getMap(), party.getChrono()));
+		} else if (o instanceof PartyParameters) {
+			if (party != null)
+				return;
+
+			// create party
+			PartyParameters m = (PartyParameters) o;
+			System.out.println(m);
+			party = new Party(m.createMap());
+			party.addChrono(m.createChrono());
+
+			// Create you player
+			Player you = new Player(pseudo, p2p.getYou().getId(), true);
+			party.addMobile(you);
 		} else if (o instanceof DrivableMobileUpdate) {
 			DrivableMobileUpdate m = (DrivableMobileUpdate) o;
 			Mobile mobile = party.getMobile(m.id);
 			if (mobile != null && mobile instanceof DrivableMobile) {
 				m.applyUpdate((DrivableMobile) mobile);
-				// delay compensation
-				mobile.animate(connection.getPingTime() / 2);
 			} else
 				throw new IllegalArgumentException("DrivableMobileUpdate wrong id");
 		} else if (o instanceof MobileUpdate) {
@@ -75,8 +90,6 @@ public class Client implements ConnectionHandler {
 			Mobile mobile = party.getMobile(m.id);
 			if (mobile != null) {
 				m.applyUpdate(mobile);
-				// delay compensation
-				mobile.animate(connection.getPingTime() / 2);
 			}
 		} else if (o instanceof PlayerJoin) {
 			PlayerJoin m = (PlayerJoin) o;
@@ -92,14 +105,14 @@ public class Client implements ConnectionHandler {
 		} else if (o instanceof MessagePack) {
 			MessagePack pack = (MessagePack) o;
 			for (Message m : pack.messages)
-				handleMessage(connection, m);
+				handleMessage(sender, m);
 		} else {
 			System.out.println("Unhandled message : " + o);
 		}
 	}
 
 	@Override
-	public void connectionClosed(Connection connection) {
+	public void connectionClosed(User user) {
 		// TODO Auto-generated method stub
 
 	}

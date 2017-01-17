@@ -6,12 +6,12 @@ import java.awt.RenderingHints;
 
 import ptwop.common.Animable;
 import ptwop.game.model.Party;
-import ptwop.game.transfert.Client;
+import ptwop.game.transfert.GameMessageHandler;
 
 public class InfoLayer implements Animable {
 
 	private Party party;
-	private Client client;
+	private GameMessageHandler client;
 	private Animable animable;
 
 	// Frame per second measurement
@@ -29,7 +29,7 @@ public class InfoLayer implements Animable {
 		this.party = party;
 	}
 
-	public synchronized void setClient(Client client) {
+	public synchronized void setClient(GameMessageHandler client) {
 		this.client = client;
 	}
 
@@ -52,8 +52,6 @@ public class InfoLayer implements Animable {
 		int i = 2;
 		if (party != null)
 			g2d.drawString("id : " + party.getYou().getId(), 10, 12 * i++);
-		if (client != null)
-			g2d.drawString("ping : " + client.getPingTime() + " ms", 10, 12 * i++);
 		g2d.drawString(fps + " fps", 10, 12 * i++);
 
 		g2d.dispose();

@@ -3,19 +3,17 @@ package ptwop.game.transfert.messages;
 import ptwop.game.model.Chrono;
 import ptwop.game.model.Map;
 
-public class HelloFromServer extends Message {
+public class PartyParameters extends Message {
 	private static final long serialVersionUID = 0L;
 
 	public Map.Type mapType;
 	public String mapTitle;
-	public int yourId;
 	public long chronoPeriod;
 	public long chronoLeftTime;
 
-	public HelloFromServer(Map map, int yourId, Chrono chrono) {
+	public PartyParameters(Map map, Chrono chrono) {
 		this.mapType = map.getType();
 		this.mapTitle = map.getTitle();
-		this.yourId = yourId;
 		this.chronoPeriod = chrono.getPeriod();
 		this.chronoLeftTime = chrono.getLeftTime();
 	}
@@ -31,6 +29,6 @@ public class HelloFromServer extends Message {
 
 	@Override
 	public String toString() {
-		return "HelloFromServer > MapType : " + mapType + " yourId : " + yourId;
+		return "HelloFromServer > MapType : " + mapType;
 	}
 }

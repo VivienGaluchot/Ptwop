@@ -16,7 +16,6 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 	public static final String ACTION_QUIT = "quit";
 	public static final String ACTION_PARAM = "param";
 	public static final String ACTION_CTRL = "control";
-	public static final String ACTION_LAUNCH_SERVER = "launch-server";
 
 	// Programm action
 	public static final String PARTY_UPDATE = "party-update";
@@ -46,8 +45,6 @@ public class Action implements ActionListener, ItemListener, MouseMotionListener
 			Game.getInstance().connect();
 		else if (action == ACTION_DISCONNECT && !Game.isInstanciating())
 			Game.getInstance().disconnect();
-		else if (action == ACTION_LAUNCH_SERVER && !Game.isInstanciating())
-			Game.getInstance().launchServer();
 		else if (action == PARTY_UPDATE && !Game.isInstanciating())
 			Game.getInstance().partyUpdate();
 	}
