@@ -38,6 +38,10 @@ public class Party implements Animable {
 		this.chrono = chrono;
 	}
 
+	public Chrono getChrono() {
+		return chrono;
+	}
+
 	public synchronized void addMobile(Mobile m) {
 		if (mobiles.containsKey(m.getId())) {
 			throw new IllegalArgumentException("Mobile's id already used");

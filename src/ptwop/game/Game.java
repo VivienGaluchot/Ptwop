@@ -17,8 +17,7 @@ import ptwop.game.model.Map;
 import ptwop.game.model.Ball;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
-import ptwop.game.transfert.Client;
-import ptwop.game.transfert.Server;
+import ptwop.game.transfert.GameMessageHandler;
 
 public class Game {
 	public enum State {
@@ -26,9 +25,8 @@ public class Game {
 	}
 
 	private State state;
-
-	private Server server;
-	private Client client;
+	
+	private GameMessageHandler client;
 
 	private Frame frame;
 	private AnimationThread thread;
@@ -111,7 +109,7 @@ public class Game {
 		playParty(waitingParty, null);
 	}
 
-	public void playParty(Party party, Client client) {
+	public void playParty(Party party, GameMessageHandler client) {
 		currentParty = party;
 
 		spaceTransform.setAnimable(party);
@@ -136,25 +134,25 @@ public class Game {
 		if (state == State.CONNECTED)
 			return;
 		else {
-			String ip = Dialog.IPDialog(frame);
-			if (ip == null)
-				return;
-			String name = Dialog.NameDialog(frame);
-			if (name == null)
-				return;
-			try {
-				// Client connection
-				client = new Client(ip, name);
-				Party party = client.getJoinedParty();
-				playParty(party, client);
-
-				// Update game state
-				state = State.CONNECTED;
-				System.out.println("Game state : CONNECTED");
-			} catch (IOException e) {
-				Dialog.displayError(null, e.toString());
-				e.printStackTrace();
-			}
+//			String ip = Dialog.IPDialog(frame);
+//			if (ip == null)
+//				return;
+//			String name = Dialog.NameDialog(frame);
+//			if (name == null)
+//				return;
+//			try {
+//				// Client connection
+//				client = new GameMessageHandler(ip, name);
+//				Party party = client.getJoinedParty();
+//				playParty(party, client);
+//
+//				// Update game state
+//				state = State.CONNECTED;
+//				System.out.println("Game state : CONNECTED");
+//			} catch (IOException e) {
+//				Dialog.displayError(null, e.toString());
+//				e.printStackTrace();
+//			}
 		}
 	}
 
@@ -173,19 +171,5 @@ public class Game {
 
 	public void partyUpdate() {
 		sideBar.update();
-	}
-
-	public void launchServer() {
-		if (server != null) {
-			Dialog.displayError(frame, "Serveur existant");
-			return;
-		}
-
-		server = new Server();
-		server.startListener();
-	}
-
-	public void stopServer() {
-
 	}
 }

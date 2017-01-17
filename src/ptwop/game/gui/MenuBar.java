@@ -25,13 +25,6 @@ public class MenuBar extends JMenuBar {
 		item.getAccessibleContext().setAccessibleDescription("Connexion a une partie");
 		menu.add(item);
 
-		item = new JMenuItem("Lancer le serveur");
-		item.setActionCommand(Action.ACTION_LAUNCH_SERVER);
-		item.addActionListener(Action.getInstance());
-		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		item.getAccessibleContext().setAccessibleDescription("Lancement d'un serveur");
-		menu.add(item);
-
 		item = new JMenuItem("Deconnexion");
 		item.setActionCommand(Action.ACTION_DISCONNECT);
 		item.addActionListener(Action.getInstance());

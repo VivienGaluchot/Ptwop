@@ -1,16 +1,16 @@
 package ptwop.game.transfert.messages;
 
-public class HelloFromClient extends Message {
+public class UserJoin extends Message{
 	private static final long serialVersionUID = 0L;
 
 	public String name;
 
-	public HelloFromClient(String name) {
+	public UserJoin(String name) {
 		this.name = name;
 	}
 
 	@Override
 	public String toString() {
-		return "HelloFromClient > Pseudo : " + name;
+		return "UserJoin > Pseudo : " + name;
 	}
 }
