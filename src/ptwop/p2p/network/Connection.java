@@ -31,8 +31,8 @@ public class Connection implements Runnable {
 	public boolean isRunning() {
 		return run;
 	}
-	
-	public void setHandler(ConnectionHandler handler){
+
+	public void setHandler(ConnectionHandler handler) {
 		this.handler = handler;
 	}
 
@@ -67,5 +67,9 @@ public class Connection implements Runnable {
 
 	public synchronized Object read() throws IOException, ClassNotFoundException {
 		return in.readObject();
+	}
+
+	public Socket getSocket() {
+		return socket;
 	}
 }

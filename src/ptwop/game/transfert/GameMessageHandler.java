@@ -9,7 +9,7 @@ import ptwop.game.model.Player;
 import ptwop.game.physic.DrivableMobile;
 import ptwop.game.physic.Mobile;
 import ptwop.game.transfert.messages.UserJoin;
-import ptwop.p2p.MessageHandler;
+import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
 import ptwop.game.transfert.messages.DrivableMobileUpdate;
@@ -22,7 +22,7 @@ import ptwop.game.transfert.messages.MobileQuit;
 import ptwop.game.transfert.messages.MobileUpdate;
 import ptwop.game.transfert.messages.PlayerJoin;
 
-public class GameMessageHandler implements MessageHandler {
+public class GameMessageHandler implements P2PHandler {
 
 	private P2P p2p;
 	private Party party;
@@ -57,7 +57,7 @@ public class GameMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public void handleMessage(P2PUser sender, Object o) throws IOException {
+	public void handleMessage(P2PUser sender, Object o) {
 		if (o instanceof UserJoin) {
 			// add player to party
 			Player other = new Player(((UserJoin) o).name, sender.getId(), false);
@@ -112,7 +112,7 @@ public class GameMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public void connectionClosed(P2PUser user) {
+	public void userDisconnect(P2PUser user) {
 		// TODO Auto-generated method stub
 
 	}

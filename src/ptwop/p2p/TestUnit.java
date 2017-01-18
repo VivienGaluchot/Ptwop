@@ -23,11 +23,16 @@ public class TestUnit {
 				try {
 					Connection c = new Connection(socket, new ConnectionHandler() {
 						@Override
-						public void handleMessage(Connection connection, Object o) throws IOException {
+						public void handleMessage(Connection connection, Object o) {
 							System.out.println("Listener side : New message");
 							if (o instanceof String) {
 								System.out.println(((String) o));
-								connection.send(new String("réponse de la part du serveur"));
+								try {
+									System.out.println("Listener side : replying...");
+									connection.send(new String("réponse de la part du serveur"));
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 
@@ -50,7 +55,7 @@ public class TestUnit {
 		try {
 			Connection c = new Connection(new Socket("localhost", 123), new ConnectionHandler() {
 				@Override
-				public void handleMessage(Connection connection, Object o) throws IOException {
+				public void handleMessage(Connection connection, Object o) {
 					System.out.println("Client side : New message");
 					if (o instanceof String) {
 						System.out.println(((String) o));
@@ -67,6 +72,7 @@ public class TestUnit {
 			c.start();
 			System.out.println("Client side : connected");
 
+			System.out.println("Client side : sending message...");
 			c.send(new String("message du client"));
 		} catch (IOException e) {
 			e.printStackTrace();

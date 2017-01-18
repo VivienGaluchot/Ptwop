@@ -7,8 +7,9 @@ import java.util.Set;
 public interface P2P {
 	/**
 	 * Connect to a p2p network
-	 * @throws IOException 
-	 * @throws UnknownHostException 
+	 * 
+	 * @throws IOException
+	 * @throws UnknownHostException
 	 */
 	public void connect() throws UnknownHostException, IOException;
 
@@ -19,12 +20,14 @@ public interface P2P {
 
 	/**
 	 * send msg to all users
+	 * 
 	 * @param msg
 	 */
 	public void broadcast(Object msg);
-	
+
 	/**
 	 * send the message msg to user dest
+	 * 
 	 * @param dest
 	 * @param msg
 	 */
@@ -32,19 +35,22 @@ public interface P2P {
 
 	/**
 	 * get the p2p network user set
+	 * 
 	 * @return
 	 */
 	public Set<P2PUser> getUsers();
-	
+
 	/**
 	 * Get your User object
+	 * 
 	 * @return
 	 */
 	public P2PUser getMyself();
 
 	/**
 	 * set the message handler, it will be used when a message is received
+	 * 
 	 * @param handler
 	 */
-	public void setMessageHandler(MessageHandler handler);
+	public void setMessageHandler(P2PHandler handler);
 }

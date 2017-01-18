@@ -9,7 +9,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import ptwop.common.gui.Dialog;
-import ptwop.p2p.MessageHandler;
+import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
 import ptwop.p2p.network.Connection;
@@ -30,7 +30,7 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	private ArrayList<P2PUser> connectingToNetwork;
 
-	private MessageHandler messageHandler;
+	private P2PHandler p2pHandler;
 
 	public Flood() throws IOException {
 		otherUsers = HashBiMap.create();
@@ -46,7 +46,15 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 		try {
 			newConnection = new Connection(socket, this);
 			newConnection.start();
-			// send other users to newuser
+
+			// send ids to user
+			newConnection.send(new FirstIdPair(myself.getId(), newUser.getId()));
+
+			// send other users
+			for (P2PUser u : otherUsers.keySet()) {
+				String ip = otherUsers.get(u).getSocket().getInetAddress().getHostAddress();
+				newConnection.send(new ConnectTo(u.getId(), ip));
+			}
 
 			connectingToNetwork.add(newUser);
 			otherUsers.put(newUser, newConnection);
@@ -123,12 +131,12 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	}
 
 	@Override
-	public void setMessageHandler(MessageHandler handler) {
-		messageHandler = handler;
+	public void setMessageHandler(P2PHandler handler) {
+		p2pHandler = handler;
 	}
 
 	@Override
-	public void handleMessage(Connection sender, Object o) throws IOException {
+	public void handleMessage(Connection sender, Object o) {
 		if (o instanceof FirstIdPair) {
 			FirstIdPair m = (FirstIdPair) o;
 			myself = new P2PUser(m.you);
@@ -138,7 +146,7 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 			connectToUser(m.id, m.ip);
 		} else if (o instanceof MessageToApp) {
 			MessageToApp m = (MessageToApp) o;
-			messageHandler.handleMessage(otherUsers.inverse().get(sender), m.msg);
+			p2pHandler.handleMessage(otherUsers.inverse().get(sender), m.msg);
 		} else {
 			System.out.println("Flood>handleMessage : Unknown message class");
 		}
@@ -147,7 +155,7 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	@Override
 	public void connectionClosed(Connection user) {
 		otherUsers.remove(user);
-		messageHandler.connectionClosed(otherUsers.inverse().get(user));
+		p2pHandler.userDisconnect(otherUsers.inverse().get(user));
 	}
 
 }
