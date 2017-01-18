@@ -26,7 +26,7 @@ public class Game {
 	}
 
 	private State state;
-	
+
 	private GameMessageHandler client;
 
 	private Frame frame;
@@ -116,7 +116,6 @@ public class Game {
 		spaceTransform.setAnimable(party);
 		spaceTransform.setGraphicSize(party.getMap().getGraphicSize());
 
-		infoLayer.setClient(client);
 		infoLayer.setParty(party);
 
 		sideBar.setParty(party);

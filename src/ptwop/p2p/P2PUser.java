@@ -1,9 +1,9 @@
 package ptwop.p2p;
 
-public class User {
+public class P2PUser {
 	int id;
 
-	public User(int id) {
+	public P2PUser(int id) {
 		this.id = id;
 	}
 
@@ -17,6 +17,6 @@ public class User {
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof User && ((User) o).id == id;
+		return o instanceof P2PUser && ((P2PUser) o).id == id;
 	}
 }

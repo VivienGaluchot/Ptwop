@@ -11,7 +11,7 @@ import ptwop.game.physic.Mobile;
 import ptwop.game.transfert.messages.UserJoin;
 import ptwop.p2p.MessageHandler;
 import ptwop.p2p.P2P;
-import ptwop.p2p.User;
+import ptwop.p2p.P2PUser;
 import ptwop.game.transfert.messages.DrivableMobileUpdate;
 import ptwop.game.transfert.messages.GetPartyParameters;
 import ptwop.game.transfert.messages.PartyParameters;
@@ -40,7 +40,7 @@ public class GameMessageHandler implements MessageHandler {
 		if (!p2p.getUsers().isEmpty()) {
 			p2p.broadcast(new UserJoin(pseudo));
 
-			User randuser = p2p.getUsers().iterator().next();
+			P2PUser randuser = p2p.getUsers().iterator().next();
 			p2p.sendTo(randuser, new GetPartyParameters());
 		} else {
 			// first, create a perso party
@@ -57,7 +57,7 @@ public class GameMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public void handleMessage(User sender, Message o) throws IOException {
+	public void handleMessage(P2PUser sender, Object o) throws IOException {
 		if (o instanceof UserJoin) {
 			// add player to party
 			Player other = new Player(((UserJoin) o).name, sender.getId(), false);
@@ -112,7 +112,7 @@ public class GameMessageHandler implements MessageHandler {
 	}
 
 	@Override
-	public void connectionClosed(User user) {
+	public void connectionClosed(P2PUser user) {
 		// TODO Auto-generated method stub
 
 	}

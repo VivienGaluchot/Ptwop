@@ -1,26 +1,21 @@
-package ptwop.p2p.v0;
+package ptwop.p2p.network;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import ptwop.p2p.MessageHandler;
-import ptwop.p2p.User;
-
 public class Connection implements Runnable {
 	private Socket socket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
-	MessageHandler handler;
+	ConnectionHandler handler;
 
 	private Thread runner;
 	private boolean run;
-	private User user;
 
-	public Connection(User user, Socket socket, MessageHandler handler) throws IOException {
-		this.user = user;
+	public Connection(Socket socket, ConnectionHandler handler) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
 		out = new ObjectOutputStream(socket.getOutputStream());
@@ -37,7 +32,7 @@ public class Connection implements Runnable {
 		return run;
 	}
 	
-	public void setHandler(MessageHandler handler){
+	public void setHandler(ConnectionHandler handler){
 		this.handler = handler;
 	}
 
@@ -47,15 +42,14 @@ public class Connection implements Runnable {
 		while (run) {
 			try {
 				Object o = this.read();
-				handler.handleMessage(user, o);
+				handler.handleMessage(this, o);
 			} catch (IOException e) {
-				e.printStackTrace();
 				run = false;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
-		handler.connectionClosed(user);
+		handler.connectionClosed(this);
 	}
 
 	public void disconnect() {

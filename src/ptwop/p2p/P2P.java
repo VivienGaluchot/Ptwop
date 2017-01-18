@@ -28,19 +28,19 @@ public interface P2P {
 	 * @param dest
 	 * @param msg
 	 */
-	public void sendTo(User dest, Object msg);
+	public void sendTo(P2PUser dest, Object msg);
 
 	/**
 	 * get the p2p network user set
 	 * @return
 	 */
-	public Set<User> getUsers();
+	public Set<P2PUser> getUsers();
 	
 	/**
 	 * Get your User object
 	 * @return
 	 */
-	public User getMyself();
+	public P2PUser getMyself();
 
 	/**
 	 * set the message handler, it will be used when a message is received

@@ -1,10 +1,8 @@
-package ptwop.p2p.v0;
+package ptwop.p2p.network;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import ptwop.p2p.SocketHandler;
 
 public class NetworkListener {
 	ServerSocket listener;
@@ -35,7 +33,7 @@ public class NetworkListener {
 		};
 	}
 
-	public void startListening() {
+	public void start() {
 		runner.start();
 	}
 

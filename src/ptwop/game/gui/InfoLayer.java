@@ -6,12 +6,10 @@ import java.awt.RenderingHints;
 
 import ptwop.common.Animable;
 import ptwop.game.model.Party;
-import ptwop.game.transfert.GameMessageHandler;
 
 public class InfoLayer implements Animable {
 
 	private Party party;
-	private GameMessageHandler client;
 	private Animable animable;
 
 	// Frame per second measurement
@@ -21,18 +19,13 @@ public class InfoLayer implements Animable {
 
 	public InfoLayer(Animable animable) {
 		party = null;
-		client = null;
 		this.animable = animable;
 	}
 
 	public synchronized void setParty(Party party) {
 		this.party = party;
 	}
-
-	public synchronized void setClient(GameMessageHandler client) {
-		this.client = client;
-	}
-
+	
 	public synchronized void setAnimable(Animable animable) {
 		this.animable = animable;
 	}
