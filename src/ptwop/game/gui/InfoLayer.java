@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
-import ptwop.common.Animable;
+import ptwop.common.gui.Animable;
 import ptwop.game.model.Party;
 
 public class InfoLayer implements Animable {

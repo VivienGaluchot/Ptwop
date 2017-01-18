@@ -1,4 +1,4 @@
-package ptwop.common;
+package ptwop.common.gui;
 
 import java.awt.Graphics;
 

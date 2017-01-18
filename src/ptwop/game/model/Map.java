@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
-import ptwop.common.Animable;
+import ptwop.common.gui.Animable;
 import ptwop.game.physic.Mobile;
 
 public class Map implements Animable {

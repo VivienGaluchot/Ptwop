@@ -6,8 +6,6 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
-import ptwop.common.Animable;
-
 public class AnimationPanel extends JPanel implements Animable {
 	private static final long serialVersionUID = 1L;
 

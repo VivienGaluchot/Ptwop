@@ -12,7 +12,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
-import ptwop.common.Animable;
+import ptwop.common.gui.Animable;
 import ptwop.common.math.Vector2D;
 import ptwop.networker.model.Link;
 import ptwop.networker.model.Node;

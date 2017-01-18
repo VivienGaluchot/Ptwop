@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import ptwop.common.Animable;
+import ptwop.common.gui.Animable;
 import ptwop.game.model.LayerComparator;
 
 public class Collider implements Animable {

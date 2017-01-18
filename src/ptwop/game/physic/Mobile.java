@@ -8,7 +8,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 
-import ptwop.common.Animable;
+import ptwop.common.gui.Animable;
 import ptwop.common.math.Vector2D;
 
 public class Mobile implements Animable {

@@ -15,7 +15,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
-import ptwop.common.Animable;
 import ptwop.common.math.Vector2D;
 
 public class SpaceTransform implements Animable, ComponentListener {

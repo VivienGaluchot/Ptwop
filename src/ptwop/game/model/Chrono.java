@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
-import ptwop.common.Animable;
+import ptwop.common.gui.Animable;
 
 public class Chrono implements Animable {
 
