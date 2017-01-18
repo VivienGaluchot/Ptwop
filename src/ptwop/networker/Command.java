@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -134,7 +136,7 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(nodeNumberOfElements, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		
+
 		subPanel.add(new JLabel("process time : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(nodeProcessType, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.WEST,
@@ -221,7 +223,7 @@ public class Command extends JPanel {
 			nodeName.setText(node.getName());
 			nodeNumberOfElements.setText(node.getNumberOfElements() + "");
 			nodeProcessType.setText(node.getProcessTime() + "");
-			
+
 			// linksInfo
 			List<Link> links = node.getLinks();
 			Object[][] infos = new Object[links.size()][];
@@ -239,7 +241,17 @@ public class Command extends JPanel {
 			Map<Node, Link> routingMap = node.getRoutingMap();
 			infos = new Object[routingMap.size()][];
 			int i = 0;
-			for (Node n : routingMap.keySet()) {
+			Object[] sortedNodes = routingMap.keySet().toArray();
+			Arrays.sort(sortedNodes, new Comparator<Object>() {
+				@Override
+				public int compare(Object arg0, Object arg1) {
+					Node n1 = (Node) arg0;
+					Node n2 = (Node) arg1;
+					return n1.getId() - n2.getId();
+				}
+			});
+			for (Object o : sortedNodes) {
+				Node n = (Node) o;
 				infos[i] = new Object[2];
 				infos[i][0] = n.getName();
 				if (routingMap.get(n) != null)

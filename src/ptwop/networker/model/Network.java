@@ -68,8 +68,6 @@ public class Network implements Steppable {
 		float probLink = connex / (n - 1);
 
 		Random random = new Random();
-		
-		int nl = 0;
 
 		for (int i = 0; i < n; i++) {
 			long latency = Math.round(nodeLatency.nextDouble());
@@ -80,15 +78,11 @@ public class Network implements Steppable {
 				if (random.nextFloat() < probLink) {
 					new DualLink(this, node, prevNode, linkLatency.nextLong(), linkLoss.nextFloat(),
 							linkPacketSize.nextInt());
-					nl++;
 				}
 			}
 
 			addNode(node);
 		}
-		
-		System.out.println("true connexity "+ ((float) 2*nl)/(n));
-
 	}
 
 	@Override
