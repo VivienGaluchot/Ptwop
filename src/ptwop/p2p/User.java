@@ -10,4 +10,13 @@ public class User {
 	public int getId() {
 		return id;
 	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return o instanceof User && ((User) o).id == id;
+	}
 }

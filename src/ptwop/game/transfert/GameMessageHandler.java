@@ -76,7 +76,7 @@ public class GameMessageHandler implements MessageHandler {
 			party.addChrono(m.createChrono());
 
 			// Create you player
-			Player you = new Player(pseudo, p2p.getYou().getId(), true);
+			Player you = new Player(pseudo, p2p.getMyself().getId(), true);
 			party.addMobile(you);
 		} else if (o instanceof DrivableMobileUpdate) {
 			DrivableMobileUpdate m = (DrivableMobileUpdate) o;

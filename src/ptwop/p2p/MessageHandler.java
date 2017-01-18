@@ -10,7 +10,7 @@ public interface MessageHandler {
 	 * 
 	 * @throws IOException
 	 */
-	void handleMessage(User sender, Message o) throws IOException;
+	void handleMessage(User sender, Object o) throws IOException;
 
 	void connectionClosed(User user);
 }

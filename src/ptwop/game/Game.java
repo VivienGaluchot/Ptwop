@@ -18,6 +18,7 @@ import ptwop.game.model.Ball;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.transfert.GameMessageHandler;
+import ptwop.p2p.v0.Flood;
 
 public class Game {
 	public enum State {
@@ -134,25 +135,22 @@ public class Game {
 		if (state == State.CONNECTED)
 			return;
 		else {
-//			String ip = Dialog.IPDialog(frame);
-//			if (ip == null)
-//				return;
-//			String name = Dialog.NameDialog(frame);
-//			if (name == null)
-//				return;
-//			try {
-//				// Client connection
-//				client = new GameMessageHandler(ip, name);
-//				Party party = client.getJoinedParty();
-//				playParty(party, client);
-//
-//				// Update game state
-//				state = State.CONNECTED;
-//				System.out.println("Game state : CONNECTED");
-//			} catch (IOException e) {
-//				Dialog.displayError(null, e.toString());
-//				e.printStackTrace();
-//			}
+			String name = Dialog.NameDialog(frame);
+			if (name == null)
+				return;
+			try {
+				// Client connection
+				client = new GameMessageHandler(new Flood(), name);
+				Party party = client.getJoinedParty();
+				playParty(party, client);
+
+				// Update game state
+				state = State.CONNECTED;
+				System.out.println("Game state : CONNECTED");
+			} catch (IOException e) {
+				Dialog.displayError(null, e.toString());
+				e.printStackTrace();
+			}
 		}
 	}
 
