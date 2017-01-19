@@ -61,11 +61,12 @@ public class Connection implements Runnable {
 		}
 	}
 
-	public synchronized void send(Object o) throws IOException {
+	public void send(Object o) throws IOException {
+		System.out.println("sending");
 		out.writeObject(o);
 	}
 
-	public synchronized Object read() throws IOException, ClassNotFoundException {
+	public Object read() throws IOException, ClassNotFoundException {
 		return in.readObject();
 	}
 

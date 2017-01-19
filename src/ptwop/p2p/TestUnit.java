@@ -21,7 +21,6 @@ public class TestUnit {
 	public static void main(String[] args) {
 		P2P floodP2P = new Flood();
 		floodP2P.connect();
-
 		floodP2P.setMessageHandler(new Handler());
 
 		Scanner keyboard = new Scanner(System.in);
