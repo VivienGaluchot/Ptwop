@@ -14,10 +14,9 @@ public class NetworkListener {
 		try {
 			listener = new ServerSocket(port);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("NewtorkListener error \"" + e.getMessage() + "\"");
+			return;
 		}
-
-		stop = false;
 
 		runner = new Thread() {
 			public void run() {
@@ -25,7 +24,8 @@ public class NetworkListener {
 				while (!stop) {
 					try {
 						Socket newSocket = listener.accept();
-						System.out.println("Listener : new socket on " + newSocket.getInetAddress());
+						System.out.println("Listener : new socket on " + newSocket.getInetAddress() + " "
+								+ newSocket.getLocalPort() + " " + newSocket.getPort());
 						handler.handleSocket(newSocket);
 					} catch (IOException e) {
 						stop = true;
@@ -37,15 +37,20 @@ public class NetworkListener {
 	}
 
 	public void start() {
-		runner.start();
+		if (runner != null) {
+			stop = false;
+			runner.start();
+		}
 	}
 
 	public void close() {
-		try {
-			listener.close();
-			stop = true;
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (runner != null) {
+			try {
+				listener.close();
+				stop = true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
