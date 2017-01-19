@@ -2,7 +2,6 @@ package ptwop.p2p.v0;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Set;
 
 import com.google.common.collect.BiMap;
@@ -19,6 +18,8 @@ import ptwop.p2p.network.NetworkListener;
 import ptwop.p2p.network.SocketHandler;
 import ptwop.p2p.v0.messages.ConnectTo;
 import ptwop.p2p.v0.messages.FirstIdPair;
+import ptwop.p2p.v0.messages.FloodMessage;
+import ptwop.p2p.v0.messages.MessagePack;
 import ptwop.p2p.v0.messages.MessageToApp;
 
 public class Flood implements P2P, ConnectionHandler, SocketHandler {
@@ -28,18 +29,28 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	private BiMap<P2PUser, Connection> otherUsers;
 	private P2PUser myself;
 
-	private ArrayList<P2PUser> connectingToNetwork;
-
 	private P2PHandler p2pHandler;
 
-	public Flood() throws IOException {
+	public Flood() {
+		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
 		myself = new P2PUser(0);
-		connectingToNetwork = new ArrayList<P2PUser>();
+
+		showUsers();
+	}
+
+	public void showUsers() {
+		System.out.println("--- myself : " + myself.getId());
+		synchronized (otherUsers) {
+			for (P2PUser u : otherUsers.keySet()) {
+				System.out.println("--- " + u.getId() + " - " + otherUsers.get(u).getSocket().getInetAddress());
+			}
+		}
 	}
 
 	@Override
 	public void handleSocket(Socket socket) {
+		System.out.println("handleSocket() " + socket.getInetAddress());
 		// TODO new id election
 		P2PUser newUser = new P2PUser(0);
 		Connection newConnection;
@@ -51,13 +62,20 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 			newConnection.send(new FirstIdPair(myself.getId(), newUser.getId()));
 
 			// send other users
-			for (P2PUser u : otherUsers.keySet()) {
-				String ip = otherUsers.get(u).getSocket().getInetAddress().getHostAddress();
-				newConnection.send(new ConnectTo(u.getId(), ip));
+			MessagePack otherUsersPack = new MessagePack();
+			synchronized (otherUsers) {
+				for (P2PUser u : otherUsers.keySet()) {
+					String ip = otherUsers.get(u).getSocket().getInetAddress().getHostAddress();
+					otherUsersPack.messages.add(new ConnectTo(u.getId(), ip));
+				}
+			}
+			newConnection.send(otherUsersPack);
+
+			synchronized (otherUsers) {
+				otherUsers.put(newUser, newConnection);
 			}
 
-			connectingToNetwork.add(newUser);
-			otherUsers.put(newUser, newConnection);
+			showUsers();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -65,31 +83,43 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	@Override
 	public void connect() {
+		System.out.println("Connect()");
 		String ip = Dialog.IPDialog(null);
-		if (ip == null) {
+		if (ip == null || ip.length() == 0) {
+			System.out.println("Creating new network");
 			// new network, alone
 			myself = new P2PUser(1);
-			listener = new NetworkListener(Constants.NETWORK_PORT, this);
 		} else {
 			// id not set already
 			connectToUser(0, ip);
-
-			// start listener
-			listener = new NetworkListener(Constants.NETWORK_PORT, this);
 		}
+		listener = new NetworkListener(Constants.NETWORK_PORT, this);
+		listener.start();
+		showUsers();
 	}
 
 	public void connectToUser(int id, String ip) {
+		System.out.println("Connecting to " + id + " " + ip + "...");
 		P2PUser newUser = new P2PUser(id);
 		if (!otherUsers.containsKey(newUser)) {
-			Connection newConnection;
-			try {
-				newConnection = new Connection(new Socket(ip, Constants.NETWORK_PORT), this);
-				newConnection.start();
-				otherUsers.put(newUser, newConnection);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			// new thread
+			Thread connector = new Thread() {
+				public void run() {
+					Connection newConnection;
+					try {
+						newConnection = new Connection(new Socket(ip, Constants.NETWORK_PORT), Flood.this);
+						newConnection.start();
+						synchronized (otherUsers) {
+							otherUsers.put(newUser, newConnection);
+						}
+						System.out.println("Connected to " + id + " " + ip);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			connector.setName("Connector thread to " + ip);
+			connector.start();
 		} else {
 			System.out.println("id already known : " + id);
 		}
@@ -97,11 +127,16 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	@Override
 	public void disconnect() {
-		for (P2PUser u : otherUsers.keySet()) {
-			otherUsers.get(u).disconnect();
+		System.out.println("disconnect()");
+		synchronized (otherUsers) {
+			for (P2PUser u : otherUsers.keySet()) {
+				otherUsers.get(u).disconnect();
+			}
+			otherUsers.clear();
 		}
-		otherUsers.clear();
 		listener.close();
+
+		showUsers();
 	}
 
 	@Override
@@ -137,6 +172,11 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	@Override
 	public void handleMessage(Connection sender, Object o) {
+		if (!(o instanceof FloodMessage)) {
+			System.out.println("Flood>handleMessage : Unknown message class");
+			return;
+		}
+
 		if (o instanceof FirstIdPair) {
 			FirstIdPair m = (FirstIdPair) o;
 			myself = new P2PUser(m.you);
@@ -147,6 +187,10 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 		} else if (o instanceof MessageToApp) {
 			MessageToApp m = (MessageToApp) o;
 			p2pHandler.handleMessage(otherUsers.inverse().get(sender), m.msg);
+		} else if (o instanceof MessagePack) {
+			MessagePack m = (MessagePack) o;
+			for (Object unitMsg : m.messages)
+				handleMessage(sender, unitMsg);
 		} else {
 			System.out.println("Flood>handleMessage : Unknown message class");
 		}
@@ -154,8 +198,10 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	@Override
 	public void connectionClosed(Connection user) {
+		System.out.println("connectionClosed()");
 		otherUsers.remove(user);
 		p2pHandler.userDisconnect(otherUsers.inverse().get(user));
+		showUsers();
 	}
 
 }

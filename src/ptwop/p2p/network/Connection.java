@@ -72,4 +72,39 @@ public class Connection implements Runnable {
 	public Socket getSocket() {
 		return socket;
 	}
+
+	/**
+	 * Test function
+	 */
+	public static void main(String args[]) {
+		try {
+			Connection c = new Connection(new Socket("127.0.0.1", 123), new ConnectionHandler() {
+				@Override
+				public void handleMessage(Connection connection, Object o) {
+					System.out.println("Client side : New message");
+					if (o instanceof String) {
+						System.out.println(((String) o));
+					}
+
+					connection.disconnect();
+				}
+
+				@Override
+				public void connectionClosed(Connection connection) {
+					System.out.println("Client side : Closed");
+				}
+			});
+			c.start();
+			System.out.println("Client side : connected");
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Client side : sending message...");
+			c.send(new String("message du client"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

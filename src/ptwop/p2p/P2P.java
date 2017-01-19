@@ -11,7 +11,7 @@ public interface P2P {
 	 * @throws IOException
 	 * @throws UnknownHostException
 	 */
-	public void connect() throws UnknownHostException, IOException;
+	public void connect();
 
 	/**
 	 * disconnect from the p2p network

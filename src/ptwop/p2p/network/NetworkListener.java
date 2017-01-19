@@ -21,14 +21,17 @@ public class NetworkListener {
 
 		runner = new Thread() {
 			public void run() {
+				System.out.println("Listener running...");
 				while (!stop) {
 					try {
 						Socket newSocket = listener.accept();
+						System.out.println("Listener : new socket on " + newSocket.getInetAddress());
 						handler.handleSocket(newSocket);
 					} catch (IOException e) {
-						e.printStackTrace();
+						stop = true;
 					}
 				}
+				System.out.println("Listener stopped");
 			}
 		};
 	}
@@ -44,5 +47,44 @@ public class NetworkListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Test function : launch a listener handling new sockets on 123 port
+	 * Connection are created and reply when a message is received
+	 */
+	public static void main(String[] args) {
+		NetworkListener listener = new NetworkListener(123, new SocketHandler() {
+			@Override
+			public void handleSocket(Socket socket) {
+				try {
+					Connection c = new Connection(socket, new ConnectionHandler() {
+						@Override
+						public void handleMessage(Connection connection, Object o) {
+							System.out.println("Listener side : New message");
+							if (o instanceof String) {
+								System.out.println(((String) o));
+								try {
+									System.out.println("Listener side : replying...");
+									connection.send(new String("réponse de la part du serveur"));
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
+							}
+						}
+
+						@Override
+						public void connectionClosed(Connection connection) {
+							System.out.println("Listener side : Closed");
+						}
+					});
+					c.start();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		listener.start();
 	}
 }
