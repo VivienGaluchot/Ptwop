@@ -43,12 +43,6 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 	@Override
 	public void send(Object o) {
 		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
 			out.writeObject(o);
 		} catch (IOException e) {
 			e.printStackTrace();
