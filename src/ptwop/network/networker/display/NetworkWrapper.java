@@ -1,4 +1,4 @@
-package ptwop.networker.display;
+package ptwop.network.networker.display;
 
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
@@ -11,10 +11,10 @@ import java.util.HashMap;
 import ptwop.common.gui.Animable;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.Vector2D;
-import ptwop.networker.Command;
-import ptwop.networker.model.Network;
-import ptwop.networker.model.Node;
-import ptwop.networker.model.Steppable;
+import ptwop.network.networker.Command;
+import ptwop.network.networker.model.Network;
+import ptwop.network.networker.model.Node;
+import ptwop.network.networker.model.Steppable;
 
 public class NetworkWrapper implements Animable, MouseListener, MouseMotionListener, Steppable, MouseWheelListener {
 

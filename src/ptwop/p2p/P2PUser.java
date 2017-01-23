@@ -14,6 +14,11 @@ public class P2PUser {
 	public void setId(int id) {
 		this.id = id;
 	}
+	
+	@Override
+	public int hashCode(){
+		return id;
+	}
 
 	@Override
 	public boolean equals(Object o) {

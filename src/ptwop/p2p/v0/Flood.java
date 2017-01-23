@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.BiMap;
@@ -14,22 +16,23 @@ import ptwop.common.gui.Dialog;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.network.Connection;
-import ptwop.p2p.network.ConnectionHandler;
-import ptwop.p2p.network.Constants;
+import ptwop.p2p.network.Pair;
+import ptwop.p2p.network.MessageHandler;
 import ptwop.p2p.network.NetworkListener;
-import ptwop.p2p.network.SocketHandler;
+import ptwop.p2p.network.NewPairHandler;
 import ptwop.p2p.v0.messages.ConnectTo;
 import ptwop.p2p.v0.messages.FirstIdPair;
 import ptwop.p2p.v0.messages.FloodMessage;
+import ptwop.p2p.v0.messages.Hello;
 import ptwop.p2p.v0.messages.MessagePack;
 import ptwop.p2p.v0.messages.MessageToApp;
 
-public class Flood implements P2P, ConnectionHandler, SocketHandler {
+public class Flood implements P2P, MessageHandler, NewPairHandler {
 
 	private NetworkListener listener;
 
-	private BiMap<P2PUser, Connection> otherUsers;
+	private BiMap<P2PUser, Pair> otherUsers;
+	private Map<P2PUser, Integer> otherUsersPort;
 	private Set<InetAddress> connectedIp;
 	private P2PUser myself;
 
@@ -38,6 +41,7 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	public Flood() {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
+		otherUsersPort = new HashMap<>();
 		connectedIp = new HashSet<>();
 		myself = new P2PUser(0);
 
@@ -55,31 +59,31 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	}
 
 	@Override
-	public void handleSocket(Socket socket) {
-		System.out.println("handleSocket() " + socket.getInetAddress() + ":" + socket.getPort());
+	public void handlePair(Pair pair) {
+		System.out.println("handleSocket() " + pair.getSocket().getInetAddress() + ":" + pair.getSocket().getPort());
 		// TODO new id election
 		P2PUser newUser = new P2PUser(otherUsers.size() + 2);
-		Connection newConnection;
 		try {
-			newConnection = new Connection(socket, this);
-			newConnection.start();
+			pair.setHandler(this);
+			pair.startHandler();
 
 			// send ids to user
-			newConnection.send(new FirstIdPair(myself.getId(), newUser.getId()));
+			pair.send(new FirstIdPair(myself.getId(), newUser.getId()));
 
 			// send other users
 			MessagePack otherUsersPack = new MessagePack();
 			synchronized (otherUsers) {
 				for (P2PUser u : otherUsers.keySet()) {
-					String ip = otherUsers.get(u).getSocket().getInetAddress().getHostAddress();
-					otherUsersPack.messages.add(new ConnectTo(u.getId(), ip));
+					InetAddress ip = otherUsers.get(u).getSocket().getInetAddress();
+					int listenPort = otherUsersPort.get(u);
+					otherUsersPack.messages.add(new ConnectTo(u.getId(), ip, listenPort));
 				}
 			}
-			newConnection.send(otherUsersPack);
+			pair.send(otherUsersPack);
 
 			synchronized (otherUsers) {
-				otherUsers.put(newUser, newConnection);
-				connectedIp.add(socket.getInetAddress());
+				otherUsers.put(newUser, pair);
+				connectedIp.add(pair.getSocket().getInetAddress());
 			}
 
 			showUsers();
@@ -90,55 +94,76 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	@Override
 	public void connect() {
-		System.out.println("Connect()");
-		String ip = Dialog.IPDialog(null);
-		if (ip == null || ip.length() == 0) {
-			System.out.println("Creating new network");
-			// new network, alone
-			myself = new P2PUser(1);
+		System.out.println("connect()");
+		int listenPort = Dialog.PortDialog(null, "Entrer le port d'écoute :");
+		System.out.println("Port d'écoute " + listenPort);
+		listener = new NetworkListener(listenPort, this);
+		listener.startHandler();
+		if (!listener.isRunning())
+			return;
+
+		String strIp = Dialog.IPDialog(null, "Entrer l'adresse ip du pair :");
+		if (strIp != null && strIp.length() > 0) {
+			try {
+				InetAddress ip = InetAddress.getByName(strIp);
+				int pairPort = Dialog.PortDialog(null, "Entrer le port réseau du pair :");
+				connectToNetwork(ip, pairPort);
+			} catch (UnknownHostException e) {
+				createNetwork();
+			}
 		} else {
-			// id not set already
-			connectToUser(0, ip);
+			createNetwork();
 		}
-		listener = new NetworkListener(Constants.NETWORK_PORT, this);
-		listener.start();
 		showUsers();
 	}
 
-	public void connectToUser(int id, String ip) {
-		System.out.println("Connecting to " + id + " " + ip + "...");
-		P2PUser newUser = new P2PUser(id);
+	public void connectToNetwork(InetAddress ip, int port) {
+		System.out.println("Connect to newtork " + ip + ":" + port);
+		Pair c = blockingConnection(new P2PUser(0), ip, port);
 		try {
-			InetAddress userAdress = InetAddress.getByName(ip);
-
-			if (!otherUsers.containsKey(newUser) && !connectedIp.contains(userAdress)) {
-				// new thread
-				Thread connector = new Thread() {
-					public void run() {
-						Connection newConnection;
-						try {
-							Socket newSocket = new Socket(userAdress, Constants.NETWORK_PORT);
-							newConnection = new Connection(newSocket, Flood.this);
-							newConnection.start();
-							synchronized (otherUsers) {
-								otherUsers.put(newUser, newConnection);
-								connectedIp.add(userAdress);
-							}
-							System.out.println("Connected to " + id + " " + ip);
-							showUsers();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				};
-				connector.setName("Connector thread to " + ip);
-				connector.start();
-			} else {
-				System.out.println("Already connected to : " + id);
-			}
-		} catch (UnknownHostException e1) {
-			System.out.println("ConnectoToUser error : " + e1.getMessage());
+			c.send(new Hello(port));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+	}
+
+	public void createNetwork() {
+		System.out.println("Creating new network");
+		myself = new P2PUser(1);
+	}
+
+	public void nonBlockingConnection(P2PUser user, InetAddress ip, int port) {
+		System.out.println("Connecting to " + user.getId() + " " + ip + ":" + port);
+		//if (!otherUsers.containsKey(user) && (!connectedIp.contains(ip) || otherUsersPort.get(user) != port)) {
+			// new thread
+			Thread connector = new Thread() {
+				public void run() {
+					blockingConnection(user, ip, port);
+				}
+			};
+			connector.setName("Connector thread to " + ip);
+			connector.start();
+//		} else {
+//			System.out.println("Already connected to : " + user.getId());
+//		}
+	}
+
+	public Pair blockingConnection(P2PUser user, InetAddress ip, int port) {
+		Pair newConnection = null;
+		try {
+			Socket newSocket = new Socket(ip, port);
+			newConnection = new Pair(newSocket, Flood.this);
+			newConnection.startHandler();
+			synchronized (otherUsers) {
+				otherUsers.put(user, newConnection);
+				connectedIp.add(ip);
+			}
+			System.out.println("Connected to " + user.getId() + " " + ip + ":" + port);
+			showUsers();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return newConnection;
 	}
 
 	@Override
@@ -149,6 +174,7 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 				otherUsers.get(u).disconnect();
 			}
 			otherUsers.clear();
+			otherUsersPort.clear();
 			connectedIp.clear();
 		}
 		listener.close();
@@ -158,13 +184,13 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 
 	@Override
 	public void broadcast(Object msg) {
-		System.out.println("Broadcast");
 		synchronized (otherUsers) {
-			showUsers();
 			for (P2PUser u : otherUsers.keySet()) {
 				sendTo(u, msg);
 			}
 		}
+		System.out.println("message broadcasted to");
+		showUsers();
 	}
 
 	@Override
@@ -192,29 +218,33 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	}
 
 	@Override
-	public void handleMessage(Connection sender, Object o) {
-		System.out.println("Flood Handle Message from " + otherUsers.inverse().get(sender).getId());
+	public void handleMessage(Pair sender, Object o) {
+		P2PUser senderUser = otherUsers.inverse().get(sender);
 
 		if (!(o instanceof FloodMessage)) {
 			System.out.println("Flood>handleMessage : Unknown message class");
 			return;
 		}
 
-		if (o instanceof FirstIdPair) {
-			System.out.println("FirstIdPair");
+		if (o instanceof Hello) {
+			System.out.println("Message from " + senderUser.getId() + " : " + "Hello");
+			Hello m = (Hello) o;
+			otherUsersPort.put(senderUser, m.listenPort);
+		} else if (o instanceof FirstIdPair) {
+			System.out.println("Message from " + senderUser.getId() + " : " + "FirstIdPair");
 			FirstIdPair m = (FirstIdPair) o;
 			myself = new P2PUser(m.you);
 			otherUsers.inverse().get(sender).setId(m.me);
 		} else if (o instanceof ConnectTo) {
-			System.out.println("ConnectTo");
+			System.out.println("Message from " + senderUser.getId() + " : " + "ConnectTo");
 			ConnectTo m = (ConnectTo) o;
-			connectToUser(m.id, m.ip);
+			nonBlockingConnection(new P2PUser(m.id), m.ip, m.port);
 		} else if (o instanceof MessageToApp) {
-			System.out.println("MessageToApp");
+			System.out.println("Message from " + senderUser.getId() + " : " + "MessageToApp");
 			MessageToApp m = (MessageToApp) o;
 			p2pHandler.handleMessage(otherUsers.inverse().get(sender), m.msg);
 		} else if (o instanceof MessagePack) {
-			System.out.println("MessagePack");
+			System.out.println("Message from " + senderUser.getId() + " : " + "MessagePack");
 			MessagePack m = (MessagePack) o;
 			for (Object unitMsg : m.messages)
 				handleMessage(sender, unitMsg);
@@ -224,11 +254,13 @@ public class Flood implements P2P, ConnectionHandler, SocketHandler {
 	}
 
 	@Override
-	public void connectionClosed(Connection user) {
+	public void connectionClosed(Pair user) {
 		System.out.println("connectionClosed()");
-		otherUsers.remove(user);
+		P2PUser disconnectedUser = otherUsers.inverse().get(user);
+		otherUsers.remove(disconnectedUser);
+		otherUsersPort.remove(disconnectedUser);
 		connectedIp.remove(user.getSocket().getInetAddress());
-		p2pHandler.userDisconnect(otherUsers.inverse().get(user));
+		p2pHandler.userDisconnect(disconnectedUser);
 		showUsers();
 	}
 

@@ -1,4 +1,4 @@
-package ptwop.networker.display;
+package ptwop.network.networker.display;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -14,8 +14,8 @@ import java.util.List;
 
 import ptwop.common.gui.Animable;
 import ptwop.common.math.Vector2D;
-import ptwop.networker.model.Link;
-import ptwop.networker.model.Node;
+import ptwop.network.networker.model.Link;
+import ptwop.network.networker.model.Node;
 
 public class NodeWrapper implements Animable {
 	private NetworkWrapper netWrapper;

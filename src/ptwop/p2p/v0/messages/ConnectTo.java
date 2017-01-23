@@ -1,13 +1,17 @@
 package ptwop.p2p.v0.messages;
 
-public class ConnectTo extends FloodMessage{
-	private static final long serialVersionUID = 1L;
-	
-	public String ip;
-	public int id;
+import java.net.InetAddress;
 
-	public ConnectTo(int id, String ip) {
+public class ConnectTo extends FloodMessage {
+	private static final long serialVersionUID = 1L;
+
+	public int id;
+	public InetAddress ip;
+	public int port;
+
+	public ConnectTo(int id, InetAddress ip, int port) {
 		this.id = id;
 		this.ip = ip;
+		this.port = port;
 	}
 }
