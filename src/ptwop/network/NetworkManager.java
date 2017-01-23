@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class NetworkManager {
-	NetworkUserHandler handler;
-	Set<NetworkUser> users;
+	protected NetworkUserHandler handler;
+	protected Set<NetworkUser> users;
 
 	public NetworkManager() {
 		users = new HashSet<>();
@@ -16,10 +16,17 @@ public abstract class NetworkManager {
 	}
 
 	public abstract void connect();
+	
+	public abstract void connectTo(NetworkAdress adress);
 
 	protected void newUser(NetworkUser user) {
 		users.add(user);
 		handler.newUser(user);
+	}
+	
+	protected void connectedTo(NetworkUser user) {
+		users.add(user);
+		handler.connectedTo(user);
 	}
 
 	public void disconnect() {

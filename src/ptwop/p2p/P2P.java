@@ -1,15 +1,10 @@
 package ptwop.p2p;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Set;
 
 public interface P2P {
 	/**
 	 * Connect to a p2p network
-	 * 
-	 * @throws IOException
-	 * @throws UnknownHostException
 	 */
 	public void connect();
 

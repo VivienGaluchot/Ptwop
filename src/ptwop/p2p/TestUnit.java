@@ -2,6 +2,7 @@ package ptwop.p2p;
 
 import java.util.Scanner;
 
+import ptwop.network.tcp.TcpNetworkManager;
 import ptwop.p2p.v0.Flood;
 
 public class TestUnit {
@@ -19,7 +20,9 @@ public class TestUnit {
 	}
 
 	public static void main(String[] args) {
-		P2P floodP2P = new Flood();
+		TcpNetworkManager manager = new TcpNetworkManager();
+		P2P floodP2P = new Flood(manager);
+		
 		floodP2P.connect();
 		floodP2P.setMessageHandler(new Handler());
 
