@@ -43,7 +43,7 @@ public class InfoLayer implements Animable {
 		g2d.setFont(g2d.getFont().deriveFont(12f));
 
 		int i = 2;
-		if (party != null)
+		if (party != null && party.getYou() != null)
 			g2d.drawString("id : " + party.getYou().getId(), 10, 12 * i++);
 		g2d.drawString(fps + " fps", 10, 12 * i++);
 

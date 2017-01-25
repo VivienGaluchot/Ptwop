@@ -13,6 +13,11 @@ public class TcpNetworkAdress extends NetworkAdress {
 	public String toString() {
 		return ip + ":" + port;
 	}
+	
+	@Override
+	public int hashCode(){
+		return ip.hashCode() + port;
+	}
 
 	@Override
 	public boolean equals(Object o) {

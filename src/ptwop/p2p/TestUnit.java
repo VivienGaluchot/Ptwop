@@ -10,12 +10,12 @@ public class TestUnit {
 	public static class Handler implements P2PHandler {
 		@Override
 		public void handleMessage(P2PUser sender, Object o) {
-			System.out.println("message from " + sender.getId() + " : " + o.toString());
+			System.out.println("message from " + sender + " : " + o.toString());
 		}
 
 		@Override
 		public void userDisconnect(P2PUser user) {
-			System.out.println(user.getId() + "disconnected");
+			System.out.println(user + " disconnected");
 		}
 	}
 

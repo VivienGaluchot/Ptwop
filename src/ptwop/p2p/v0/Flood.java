@@ -5,6 +5,7 @@ import java.util.Set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import ptwop.common.gui.Dialog;
 import ptwop.network.NetworkManager;
 import ptwop.network.NetworkUser;
 import ptwop.network.NetworkUserHandler;
@@ -12,12 +13,10 @@ import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
 import ptwop.p2p.v0.messages.ConnectTo;
-import ptwop.p2p.v0.messages.FirstIdPair;
 import ptwop.p2p.v0.messages.FloodMessage;
 import ptwop.p2p.v0.messages.Hello;
 import ptwop.p2p.v0.messages.MessagePack;
 import ptwop.p2p.v0.messages.MessageToApp;
-import ptwop.p2p.v0.messages.MyId;
 
 public class Flood implements P2P, NetworkUserHandler {
 
@@ -31,18 +30,19 @@ public class Flood implements P2P, NetworkUserHandler {
 	public Flood(NetworkManager manager) {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
-		myself = new P2PUser(0);
+		myself = new P2PUser(Dialog.NameDialog(null));
 		this.manager = manager;
 		manager.setHandler(this);
 
 		showUsers();
 	}
 
-	public void showUsers() {
-		System.out.println("--- myself : " + myself.getId());
+	// TODO remove
+	private void showUsers() {
+		System.out.println("--- myself : " + myself);
 		synchronized (otherUsers) {
 			for (P2PUser u : otherUsers.keySet()) {
-				System.out.println("--- " + u.getId() + " - " + otherUsers.get(u));
+				System.out.println("--- " + u);
 			}
 		}
 	}
@@ -50,26 +50,29 @@ public class Flood implements P2P, NetworkUserHandler {
 	@Override
 	public void newUser(NetworkUser pair) {
 		System.out.println("newUser() " + pair);
-		pair.send(new MyId(myself.getId()));
+		P2PUser user = new P2PUser(pair.getAdress());
+		synchronized (otherUsers) {
+			otherUsers.put(user, pair);
+		}
 		showUsers();
 	}
 
 	@Override
 	public void connectedTo(NetworkUser pair) {
 		System.out.println("connectedTo() " + pair);
-		if (myself.getId() == 0) {
+		if (otherUsers.size() == 0) {
 			pair.send(new Hello());
-		} else {
-			pair.send(new MyId(myself.getId()));
 		}
-
+		P2PUser user = new P2PUser(pair.getAdress());
+		synchronized (otherUsers) {
+			otherUsers.put(user, pair);
+		}
 		showUsers();
 	}
 
 	@Override
 	public void connect() {
 		manager.connect();
-		myself = new P2PUser(1);
 		showUsers();
 	}
 
@@ -122,46 +125,16 @@ public class Flood implements P2P, NetworkUserHandler {
 		}
 
 		if (o instanceof Hello) {
-			// TODO new id election
-			P2PUser newUser = new P2PUser(otherUsers.size() + 2);
-
-			try {
-				MessagePack otherUsersPack = new MessagePack();
-				// send ids to user
-				otherUsersPack.messages.add(new FirstIdPair(myself.getId(), newUser.getId()));
-
-				// send other users
-				synchronized (otherUsers) {
-					for (NetworkUser u : otherUsers.inverse().keySet()) {
-						otherUsersPack.messages.add(new ConnectTo(u.getAdress()));
-					}
-				}
-				System.out.println("Sending connectTo to " + user.getAdress());
-				user.send(otherUsersPack);
-
-				synchronized (otherUsers) {
-					otherUsers.put(newUser, user);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else if (o instanceof FirstIdPair) {
-			System.out.println("Message from " + senderUser + " : " + "FirstIdPair");
-			FirstIdPair m = (FirstIdPair) o;
-			System.out.println(m.me + " " + m.you);
-			myself = new P2PUser(m.you);
-			// create other user
-			P2PUser newUser = new P2PUser(m.me);
+			// send other users
+			MessagePack otherUsersPack = new MessagePack();
 			synchronized (otherUsers) {
-				otherUsers.put(newUser, user);
+				for (NetworkUser u : otherUsers.inverse().keySet()) {
+					if (u != user)
+						otherUsersPack.messages.add(new ConnectTo(senderUser));
+				}
 			}
-		} else if (o instanceof MyId) {
-			System.out.println("Message from " + senderUser + " : " + "MyId");
-			MyId m = (MyId) o;
-			P2PUser newUser = new P2PUser(m.id);
-			synchronized (otherUsers) {
-				otherUsers.put(newUser, user);
-			}
+			System.out.println("Sending connectTo to " + user.getAdress());
+			user.send(otherUsersPack);
 		} else if (o instanceof ConnectTo) {
 			System.out.println("Message from " + senderUser + " : " + "ConnectTo");
 			ConnectTo m = (ConnectTo) o;
