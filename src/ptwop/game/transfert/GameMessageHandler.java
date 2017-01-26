@@ -34,7 +34,7 @@ public class GameMessageHandler implements P2PHandler {
 		this.pseudo = pseudo;
 
 		p2p.setMessageHandler(this);
-		p2p.connect();
+		p2p.start();
 
 		// send name & ask for party parameters
 		if (!p2p.getUsers().isEmpty()) {
@@ -49,7 +49,7 @@ public class GameMessageHandler implements P2PHandler {
 	}
 
 	public void disconnect() {
-		p2p.disconnect();
+		p2p.stop();
 	}
 
 	public Party getJoinedParty() {

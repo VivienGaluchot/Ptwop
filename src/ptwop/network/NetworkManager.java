@@ -1,5 +1,6 @@
 package ptwop.network;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,9 +16,9 @@ public abstract class NetworkManager {
 		this.handler = handler;
 	}
 
-	public abstract void connect();
+	public abstract void start();
 	
-	public abstract void connectTo(NetworkAdress adress);
+	public abstract void connectTo(NetworkAdress adress) throws IOException;
 
 	protected void newUser(NetworkUser user) {
 		users.add(user);
@@ -29,7 +30,7 @@ public abstract class NetworkManager {
 		handler.connectedTo(user);
 	}
 
-	public void disconnect() {
+	public void stop() {
 		for (NetworkUser user : users) {
 			user.disconnect();
 		}

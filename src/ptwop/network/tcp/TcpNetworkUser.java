@@ -36,17 +36,15 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 			runner.setName("TcpNetworkUser runner");
 			runner.start();
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			socket.close();
+			handler.userQuit(this);
+			throw new IOException("Cant get pair's listening port");
 		}
 	}
 
 	@Override
-	public void send(Object o) {
-		try {
-			out.writeObject(o);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void send(Object o) throws IOException {
+		out.writeObject(o);
 	}
 
 	@Override
@@ -77,7 +75,7 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 
 	@Override
 	public String toString() {
-		return socket.getInetAddress() + ":" + socket.getPort();
+		return getAdress().toString();
 	}
 
 	@Override

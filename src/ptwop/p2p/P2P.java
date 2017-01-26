@@ -1,17 +1,22 @@
 package ptwop.p2p;
 
+import java.io.IOException;
 import java.util.Set;
+
+import ptwop.network.NetworkAdress;
 
 public interface P2P {
 	/**
-	 * Connect to a p2p network
+	 * connect to a p2p network
 	 */
-	public void connect();
+	public void start();
+	
+	public void connectTo(NetworkAdress adress) throws IOException;
 
 	/**
 	 * disconnect from the p2p network
 	 */
-	public void disconnect();
+	public void stop();
 
 	/**
 	 * send msg to all users
@@ -25,8 +30,9 @@ public interface P2P {
 	 * 
 	 * @param dest
 	 * @param msg
+	 * @throws IOException 
 	 */
-	public void sendTo(P2PUser dest, Object msg);
+	public void sendTo(P2PUser dest, Object msg) throws IOException;
 
 	/**
 	 * get the p2p network user set

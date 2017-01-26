@@ -1,7 +1,11 @@
 package ptwop.p2p;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Scanner;
 
+import ptwop.common.gui.Dialog;
+import ptwop.network.tcp.TcpNetworkAdress;
 import ptwop.network.tcp.TcpNetworkManager;
 import ptwop.p2p.v0.Flood;
 
@@ -10,32 +14,49 @@ public class TestUnit {
 	public static class Handler implements P2PHandler {
 		@Override
 		public void handleMessage(P2PUser sender, Object o) {
-			System.out.println("message from " + sender + " : " + o.toString());
+			System.out.println("APP | message from " + sender + " : " + o.toString());
 		}
 
 		@Override
 		public void userDisconnect(P2PUser user) {
-			System.out.println(user + " disconnected");
+			System.out.println("APP | " + user + " disconnected");
 		}
 	}
 
 	public static void main(String[] args) {
-		TcpNetworkManager manager = new TcpNetworkManager();
+		TcpNetworkManager manager = null;
+		try {
+			manager = new TcpNetworkManager(Dialog.PortDialog(null, "Entrer le port d'écoute :"));
+		} catch (IOException e1) {
+			Dialog.displayError(null, "TcpNetworkManager : " + e1.getMessage());
+			return;
+		}
 		P2P floodP2P = new Flood(manager);
-		
-		floodP2P.connect();
+
+		floodP2P.start();
 		floodP2P.setMessageHandler(new Handler());
 
+		// First connect
+		String strIp = Dialog.IPDialog(null, "Entrer l'adresse ip du pair ou\nrien pour créer un nouveau réseau :");
+		if (strIp != null && strIp.length() > 0) {
+			try {
+				TcpNetworkAdress adress = new TcpNetworkAdress();
+				adress.ip = InetAddress.getByName(strIp);
+				adress.port = Dialog.PortDialog(null, "Entrer le port réseau du pair :");
+				floodP2P.connectTo(adress);
+			} catch (Exception e) {
+				Dialog.displayError(null, "Flood : " + e.getMessage());
+			}
+		}
+
 		Scanner keyboard = new Scanner(System.in);
-		System.out.println("message to flood : ");
 		String msg = keyboard.nextLine();
 		while (msg.length() > 0) {
 			floodP2P.broadcast(new String(msg));
-			System.out.println("message to flood : ");
 			msg = keyboard.nextLine();
 		}
 
-		floodP2P.disconnect();
+		floodP2P.stop();
 		keyboard.close();
 	}
 }

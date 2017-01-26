@@ -1,12 +1,9 @@
 package ptwop.network.tcp;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
-import ptwop.common.gui.Dialog;
 import ptwop.network.NetworkAdress;
 import ptwop.network.NetworkManager;
 import ptwop.network.NetworkUser;
@@ -16,41 +13,21 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 	Thread runner;
 	boolean stop;
 
-	public TcpNetworkManager() {
-		stop = false;
+	public TcpNetworkManager(int listenPort) throws IOException {
+		listener = new ServerSocket(listenPort);
+		System.out.println("TcpNetworkManager : ecoute sur " + listenPort);
+
 		runner = new Thread(this);
 	}
 
 	@Override
-	public void connect() {
-		int listenPort = Dialog.PortDialog(null, "Entrer le port d'écoute :");
-
-		try {
-			listener = new ServerSocket(listenPort);
-			System.out.println("TcpNetworkManager : ecoute sur " + listenPort);
-		} catch (IOException e) {
-			System.out.println("TcpNetworkManager error \"" + e.getMessage() + "\"");
-			return;
-		}
-
-		String strIp = Dialog.IPDialog(null, "Entrer l'adresse ip du pair ou\nrien pour créer un nouveau réseau :");
-		if (strIp != null && strIp.length() > 0) {
-			try {
-				TcpNetworkAdress adress = new TcpNetworkAdress();
-				adress.ip = InetAddress.getByName(strIp);
-				adress.port = Dialog.PortDialog(null, "Entrer le port réseau du pair :");
-				connectTo(adress);
-			} catch (UnknownHostException e) {
-				Dialog.displayError(null, "Flood : " + e.getMessage());
-			}
-		}
-
+	public void start() {
 		stop = false;
 		runner.start();
 	}
 
 	@Override
-	public void disconnect() {
+	public void stop() {
 		if (runner != null) {
 			try {
 				listener.close();
@@ -59,11 +36,11 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		super.disconnect();
+		super.stop();
 	}
 
 	@Override
-	public void connectTo(NetworkAdress adress) {
+	public void connectTo(NetworkAdress adress) throws IOException {
 		for (NetworkUser u : users) {
 			if (u.getAdress() == adress) {
 				System.out.println("Already connected to " + adress);
@@ -72,14 +49,9 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 		}
 		if (adress instanceof TcpNetworkAdress) {
 			TcpNetworkAdress a = (TcpNetworkAdress) adress;
-
-			System.out.println("connection to " + a.ip + ":" + a.port);
-			try {
-				Socket newSocket = new Socket(a.ip, a.port);
-				connectedTo(new TcpNetworkUser(listener.getLocalPort(), newSocket, handler));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			System.out.println("connection to " + a);
+			Socket newSocket = new Socket(a.ip, a.port);
+			connectedTo(new TcpNetworkUser(listener.getLocalPort(), newSocket, handler));
 		}
 	}
 
