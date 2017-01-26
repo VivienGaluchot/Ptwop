@@ -33,7 +33,7 @@ public class Flood implements P2P, NetworkUserHandler {
 	public Flood(NetworkManager manager) {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
-		myself = new P2PUser(Dialog.NameDialog(null));
+		myself = new P2PUser(Dialog.NameDialog(null), manager.getMyAdress());
 		this.manager = manager;
 		manager.setHandler(this);
 	}
@@ -90,6 +90,8 @@ public class Flood implements P2P, NetworkUserHandler {
 		p2pHandler = handler;
 	}
 
+	// NetworkUserHandler
+
 	@Override
 	public void newUser(NetworkUser pair) {
 		System.out.println("newUser() " + pair);
@@ -97,9 +99,12 @@ public class Flood implements P2P, NetworkUserHandler {
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
+		try {
+			pair.send(new MyNameIs(myself.getName()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-
-	// NetworkUserHandler
 
 	@Override
 	public void connectedTo(NetworkUser pair) {
@@ -107,7 +112,6 @@ public class Flood implements P2P, NetworkUserHandler {
 		if (otherUsers.size() == 0) {
 			try {
 				pair.send(new Hello());
-				pair.send(new MyNameIs(myself.getName()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -115,6 +119,11 @@ public class Flood implements P2P, NetworkUserHandler {
 		P2PUser user = new P2PUser(pair.getAdress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
+		}
+		try {
+			pair.send(new MyNameIs(myself.getName()));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -132,15 +141,13 @@ public class Flood implements P2P, NetworkUserHandler {
 			MessagePack otherUsersPack = new MessagePack();
 			synchronized (otherUsers) {
 				for (NetworkUser u : otherUsers.inverse().keySet()) {
-					if (u != user)
-						otherUsersPack.messages.add(new ConnectTo(senderUser));
+					if (u != user) {
+						otherUsersPack.messages.add(new ConnectTo(u.getAdress()));
+					}
 				}
 			}
-
-			System.out.println("Sending connectTo to " + user.getAdress());
 			try {
 				user.send(otherUsersPack);
-				user.send(new MyNameIs(myself.getName()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -149,8 +156,8 @@ public class Flood implements P2P, NetworkUserHandler {
 			senderUser.setName(m.name);
 			p2pHandler.userUpdate(senderUser);
 		} else if (o instanceof ConnectTo) {
-			System.out.println("Message from " + senderUser + " : " + "ConnectTo");
 			ConnectTo m = (ConnectTo) o;
+			System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.adress);
 			try {
 				manager.connectTo(m.adress);
 			} catch (IOException e) {

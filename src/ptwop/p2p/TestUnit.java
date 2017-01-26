@@ -45,9 +45,8 @@ public class TestUnit {
 		String strIp = Dialog.IPDialog(null, "Entrer l'adresse ip du pair ou\nrien pour créer un nouveau réseau :");
 		if (strIp != null && strIp.length() > 0) {
 			try {
-				TcpNetworkAdress adress = new TcpNetworkAdress();
-				adress.ip = InetAddress.getByName(strIp);
-				adress.port = Dialog.PortDialog(null, "Entrer le port réseau du pair :");
+				TcpNetworkAdress adress = new TcpNetworkAdress(InetAddress.getByName(strIp),
+						Dialog.PortDialog(null, "Entrer le port réseau du pair :"));
 				floodP2P.connectTo(adress);
 			} catch (Exception e) {
 				Dialog.displayError(null, "Flood : " + e.getMessage());

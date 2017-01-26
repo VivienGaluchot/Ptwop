@@ -18,7 +18,7 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 	private Thread runner;
 	private boolean run;
 
-	private int userListeningPort;
+	private int pairListeningPort;
 
 	public TcpNetworkUser(int listeningPort, Socket socket, NetworkUserHandler handler) throws IOException {
 		this.socket = socket;
@@ -29,8 +29,8 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 		// sharing listening port
 		out.writeObject(new Integer(listeningPort));
 		try {
-			userListeningPort = (Integer) in.readObject();
-			System.out.println("Pair listening port : " + userListeningPort);
+			pairListeningPort = (Integer) in.readObject();
+			System.out.println("Pair listening port : " + pairListeningPort);
 
 			runner = new Thread(this);
 			runner.setName("TcpNetworkUser runner");
@@ -80,9 +80,7 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 
 	@Override
 	public NetworkAdress getAdress() {
-		TcpNetworkAdress adress = new TcpNetworkAdress();
-		adress.ip = socket.getInetAddress();
-		adress.port = userListeningPort;
+		TcpNetworkAdress adress = new TcpNetworkAdress(socket.getInetAddress(), pairListeningPort);
 		return adress;
 	}
 }

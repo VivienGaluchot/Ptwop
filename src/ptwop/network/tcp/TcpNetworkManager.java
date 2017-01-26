@@ -27,6 +27,11 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 	}
 
 	@Override
+	public NetworkAdress getMyAdress() {
+		return new TcpNetworkAdress(listener.getInetAddress(), listener.getLocalPort());
+	}
+
+	@Override
 	public void stop() {
 		if (runner != null) {
 			try {
@@ -41,6 +46,10 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 
 	@Override
 	public void connectTo(NetworkAdress adress) throws IOException {
+		if (adress == getMyAdress()) {
+			System.out.println("Can't connect to myself " + adress);
+			return;
+		}
 		for (NetworkUser u : users) {
 			if (u.getAdress() == adress) {
 				System.out.println("Already connected to " + adress);

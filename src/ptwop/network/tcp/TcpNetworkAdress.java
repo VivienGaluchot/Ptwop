@@ -9,13 +9,18 @@ public class TcpNetworkAdress extends NetworkAdress {
 	public InetAddress ip;
 	public int port;
 
+	public TcpNetworkAdress(InetAddress ip, int port) {
+		this.ip = ip;
+		this.port = port;
+	}
+
 	@Override
 	public String toString() {
 		return ip + ":" + port;
 	}
-	
+
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return ip.hashCode() + port;
 	}
 
