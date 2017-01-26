@@ -14,12 +14,17 @@ public class TestUnit {
 	public static class Handler implements P2PHandler {
 		@Override
 		public void handleMessage(P2PUser sender, Object o) {
-			System.out.println("APP | message from " + sender + " : " + o.toString());
+			System.out.println("APP | " + sender + " : " + o.toString());
 		}
 
 		@Override
 		public void userDisconnect(P2PUser user) {
 			System.out.println("APP | " + user + " disconnected");
+		}
+
+		@Override
+		public void userUpdate(P2PUser user) {
+			System.out.println("APP | update of " + user);
 		}
 	}
 
@@ -52,6 +57,10 @@ public class TestUnit {
 		Scanner keyboard = new Scanner(System.in);
 		String msg = keyboard.nextLine();
 		while (msg.length() > 0) {
+			System.out.println("--- myself : " + floodP2P.getMyself());
+			for (P2PUser u : floodP2P.getUsers()) {
+				System.out.println("--- " + u);
+			}
 			floodP2P.broadcast(new String(msg));
 			msg = keyboard.nextLine();
 		}

@@ -12,6 +12,8 @@ public interface P2PHandler {
 	 * @throws IOException
 	 */
 	void handleMessage(P2PUser sender, Object o);
+	
+	void userUpdate(P2PUser user);
 
 	/**
 	 * Function called by the P2P system when a user is disconnected from the

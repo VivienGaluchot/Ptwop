@@ -36,18 +36,6 @@ public class Flood implements P2P, NetworkUserHandler {
 		myself = new P2PUser(Dialog.NameDialog(null));
 		this.manager = manager;
 		manager.setHandler(this);
-
-		showUsers();
-	}
-
-	// TODO remove
-	private void showUsers() {
-		System.out.println("--- myself : " + myself);
-		synchronized (otherUsers) {
-			for (P2PUser u : otherUsers.keySet()) {
-				System.out.println("--- " + u);
-			}
-		}
 	}
 
 	// P2P Interface
@@ -55,7 +43,6 @@ public class Flood implements P2P, NetworkUserHandler {
 	@Override
 	public void start() {
 		manager.start();
-		showUsers();
 	}
 
 	@Override
@@ -68,7 +55,6 @@ public class Flood implements P2P, NetworkUserHandler {
 		System.out.println("disconnect()");
 		manager.stop();
 		otherUsers.clear();
-		showUsers();
 	}
 
 	@Override
@@ -82,8 +68,6 @@ public class Flood implements P2P, NetworkUserHandler {
 				}
 			}
 		}
-		System.out.println("message broadcasted to");
-		showUsers();
 	}
 
 	@Override
@@ -113,7 +97,6 @@ public class Flood implements P2P, NetworkUserHandler {
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		showUsers();
 	}
 
 	// NetworkUserHandler
@@ -133,7 +116,6 @@ public class Flood implements P2P, NetworkUserHandler {
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		showUsers();
 	}
 
 	@Override
@@ -154,7 +136,7 @@ public class Flood implements P2P, NetworkUserHandler {
 						otherUsersPack.messages.add(new ConnectTo(senderUser));
 				}
 			}
-			
+
 			System.out.println("Sending connectTo to " + user.getAdress());
 			try {
 				user.send(otherUsersPack);
@@ -165,6 +147,7 @@ public class Flood implements P2P, NetworkUserHandler {
 		} else if (o instanceof MyNameIs) {
 			MyNameIs m = (MyNameIs) o;
 			senderUser.setName(m.name);
+			p2pHandler.userUpdate(senderUser);
 		} else if (o instanceof ConnectTo) {
 			System.out.println("Message from " + senderUser + " : " + "ConnectTo");
 			ConnectTo m = (ConnectTo) o;
@@ -191,7 +174,6 @@ public class Flood implements P2P, NetworkUserHandler {
 		P2PUser disconnectedUser = otherUsers.inverse().get(user);
 		otherUsers.remove(disconnectedUser);
 		p2pHandler.userDisconnect(disconnectedUser);
-		showUsers();
 	}
 
 }
