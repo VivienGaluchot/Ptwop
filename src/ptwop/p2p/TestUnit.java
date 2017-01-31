@@ -36,7 +36,7 @@ public class TestUnit {
 			Dialog.displayError(null, "TcpNetworkManager : " + e1.getMessage());
 			return;
 		}
-		P2P floodP2P = new Flood(manager);
+		P2P floodP2P = new Flood(manager, Dialog.NameDialog(null));
 
 		floodP2P.start();
 		floodP2P.setMessageHandler(new Handler());

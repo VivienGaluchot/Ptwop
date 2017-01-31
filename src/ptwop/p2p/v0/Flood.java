@@ -1,12 +1,12 @@
 package ptwop.p2p.v0;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import ptwop.common.gui.Dialog;
 import ptwop.network.NetworkAdress;
 import ptwop.network.NetworkManager;
 import ptwop.network.NetworkUser;
@@ -30,10 +30,10 @@ public class Flood implements P2P, NetworkUserHandler {
 
 	private P2PHandler p2pHandler;
 
-	public Flood(NetworkManager manager) {
+	public Flood(NetworkManager manager, String myName) {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
-		myself = new P2PUser(Dialog.NameDialog(null), manager.getMyAdress());
+		myself = new P2PUser(myName, manager.getMyAdress());
 		this.manager = manager;
 		manager.setHandler(this);
 	}
@@ -52,9 +52,14 @@ public class Flood implements P2P, NetworkUserHandler {
 
 	@Override
 	public void stop() {
-		System.out.println("disconnect()");
+		System.out.println("stop()");
 		manager.stop();
-		otherUsers.clear();
+		synchronized (otherUsers) {
+			for (NetworkUser u : otherUsers.inverse().keySet()) {
+				u.disconnect();
+			}
+			otherUsers.clear();
+		}
 	}
 
 	@Override
@@ -77,7 +82,7 @@ public class Flood implements P2P, NetworkUserHandler {
 
 	@Override
 	public Set<P2PUser> getUsers() {
-		return otherUsers.keySet();
+		return Collections.unmodifiableSet(otherUsers.keySet());
 	}
 
 	@Override

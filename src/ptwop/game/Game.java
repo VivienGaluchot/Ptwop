@@ -140,7 +140,7 @@ public class Game {
 				return;
 			try {
 				// Client connection
-				client = new GameMessageHandler(new Flood(new TcpNetworkManager()), name);
+				client = new GameMessageHandler(new Flood(new TcpNetworkManager(919), name), name);
 				Party party = client.getJoinedParty();
 				playParty(party, client);
 

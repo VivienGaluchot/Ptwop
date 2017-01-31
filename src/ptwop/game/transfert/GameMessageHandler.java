@@ -60,11 +60,16 @@ public class GameMessageHandler implements P2PHandler {
 	public void handleMessage(P2PUser sender, Object o) {
 		if (o instanceof UserJoin) {
 			// add player to party
-			Player other = new Player(((UserJoin) o).name, sender.getId(), false);
+			// TODO id
+			Player other = new Player(((UserJoin) o).name, 0, false);
 			party.addMobile(other);
 		} else if (o instanceof GetPartyParameters) {
 			// send party parameters
-			p2p.sendTo(sender, new PartyParameters(party.getMap(), party.getChrono()));
+			try {
+				p2p.sendTo(sender, new PartyParameters(party.getMap(), party.getChrono()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else if (o instanceof PartyParameters) {
 			if (party != null)
 				return;
@@ -76,7 +81,8 @@ public class GameMessageHandler implements P2PHandler {
 			party.addChrono(m.createChrono());
 
 			// Create you player
-			Player you = new Player(pseudo, p2p.getMyself().getId(), true);
+			// TODO id
+			Player you = new Player(pseudo, 0, true);
 			party.addMobile(you);
 		} else if (o instanceof DrivableMobileUpdate) {
 			DrivableMobileUpdate m = (DrivableMobileUpdate) o;
@@ -115,5 +121,11 @@ public class GameMessageHandler implements P2PHandler {
 	public void userDisconnect(P2PUser user) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void userUpdate(P2PUser user) {
+		// TODO Auto-generated method stub
+		
 	}
 }
