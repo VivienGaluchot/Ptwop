@@ -17,7 +17,6 @@ import ptwop.p2p.P2PUser;
 import ptwop.p2p.v0.messages.ConnectTo;
 import ptwop.p2p.v0.messages.FloodMessage;
 import ptwop.p2p.v0.messages.Hello;
-import ptwop.p2p.v0.messages.MessagePack;
 import ptwop.p2p.v0.messages.MessageToApp;
 import ptwop.p2p.v0.messages.MyNameIs;
 
@@ -144,25 +143,22 @@ public class Flood implements P2P, NUserHandler {
 			System.out.println("Flood>handleMessage : Unknown message class");
 			return;
 		}
-		
-		if(senderUser == null){
+
+		if (senderUser == null) {
 			System.out.println("Flood>handleMessage : Unknown sender");
 			return;
 		}
-			
 
 		if (o instanceof Hello) {
 			// send other users
-			MessagePack otherUsersPack = new MessagePack();
-			synchronized (otherUsers) {
-				for (NUser u : otherUsers.inverse().keySet()) {
-					if (u != user) {
-						otherUsersPack.messages.add(new ConnectTo(u.getAddress()));
+			try {
+				synchronized (otherUsers) {
+					for (NUser u : otherUsers.inverse().keySet()) {
+						if (u != user) {
+							user.send(new ConnectTo(u.getAddress()));
+						}
 					}
 				}
-			}
-			try {
-				user.send(otherUsersPack);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -181,10 +177,6 @@ public class Flood implements P2P, NUserHandler {
 		} else if (o instanceof MessageToApp) {
 			MessageToApp m = (MessageToApp) o;
 			p2pHandler.handleMessage(otherUsers.inverse().get(user), m.msg);
-		} else if (o instanceof MessagePack) {
-			MessagePack m = (MessagePack) o;
-			for (Object unitMsg : m.messages)
-				newMessage(user, unitMsg);
 		} else {
 			System.out.println("Flood>handleMessage : Unknown message class");
 		}

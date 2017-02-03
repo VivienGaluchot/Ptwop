@@ -29,14 +29,6 @@ public class NetWorker {
 		private final StringBuilder sb = new StringBuilder();
 
 		@Override
-		public void flush() {
-		}
-
-		@Override
-		public void close() {
-		}
-
-		@Override
 		public void write(int b) throws IOException {
 			if (b == '\r')
 				return;
