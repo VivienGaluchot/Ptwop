@@ -7,10 +7,10 @@ import java.util.Set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import ptwop.network.NetworkAdress;
-import ptwop.network.NetworkManager;
-import ptwop.network.NetworkUser;
-import ptwop.network.NetworkUserHandler;
+import ptwop.network.NAddress;
+import ptwop.network.NManager;
+import ptwop.network.NUser;
+import ptwop.network.NUserHandler;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
@@ -21,16 +21,16 @@ import ptwop.p2p.v0.messages.MessagePack;
 import ptwop.p2p.v0.messages.MessageToApp;
 import ptwop.p2p.v0.messages.MyNameIs;
 
-public class Flood implements P2P, NetworkUserHandler {
+public class Flood implements P2P, NUserHandler {
 
-	private NetworkManager manager;
+	private NManager manager;
 
-	private BiMap<P2PUser, NetworkUser> otherUsers;
+	private BiMap<P2PUser, NUser> otherUsers;
 	private P2PUser myself;
 
 	private P2PHandler p2pHandler;
 
-	public Flood(NetworkManager manager, String myName) {
+	public Flood(NManager manager, String myName) {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
 		myself = new P2PUser(myName, manager.getMyAdress());
@@ -46,7 +46,7 @@ public class Flood implements P2P, NetworkUserHandler {
 	}
 
 	@Override
-	public void connectTo(NetworkAdress adress) throws IOException {
+	public void connectTo(NAddress adress) throws IOException {
 		manager.connectTo(adress);
 	}
 
@@ -55,7 +55,7 @@ public class Flood implements P2P, NetworkUserHandler {
 		System.out.println("stop()");
 		manager.stop();
 		synchronized (otherUsers) {
-			for (NetworkUser u : otherUsers.inverse().keySet()) {
+			for (NUser u : otherUsers.inverse().keySet()) {
 				u.disconnect();
 			}
 			otherUsers.clear();
@@ -98,7 +98,7 @@ public class Flood implements P2P, NetworkUserHandler {
 	// NetworkUserHandler
 
 	@Override
-	public void newUser(NetworkUser pair) {
+	public void newUser(NUser pair) {
 		System.out.println("newUser() " + pair);
 		P2PUser user = new P2PUser(pair.getAdress());
 		synchronized (otherUsers) {
@@ -113,7 +113,7 @@ public class Flood implements P2P, NetworkUserHandler {
 	}
 
 	@Override
-	public void connectedTo(NetworkUser pair) {
+	public void connectedTo(NUser pair) {
 		System.out.println("connectedTo() " + pair);
 		if (otherUsers.size() == 0) {
 			try {
@@ -135,7 +135,7 @@ public class Flood implements P2P, NetworkUserHandler {
 	}
 
 	@Override
-	public void newMessage(NetworkUser user, Object o) {
+	public void newMessage(NUser user, Object o) {
 		P2PUser senderUser = otherUsers.inverse().get(user);
 
 		if (!(o instanceof FloodMessage)) {
@@ -147,7 +147,7 @@ public class Flood implements P2P, NetworkUserHandler {
 			// send other users
 			MessagePack otherUsersPack = new MessagePack();
 			synchronized (otherUsers) {
-				for (NetworkUser u : otherUsers.inverse().keySet()) {
+				for (NUser u : otherUsers.inverse().keySet()) {
 					if (u != user) {
 						otherUsersPack.messages.add(new ConnectTo(u.getAdress()));
 					}
@@ -183,7 +183,7 @@ public class Flood implements P2P, NetworkUserHandler {
 	}
 
 	@Override
-	public void userQuit(NetworkUser user) {
+	public void userQuit(NUser user) {
 		System.out.println("connectionClosed()");
 		P2PUser disconnectedUser = otherUsers.inverse().get(user);
 		otherUsers.remove(disconnectedUser);

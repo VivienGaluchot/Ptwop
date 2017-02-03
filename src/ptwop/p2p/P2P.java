@@ -3,7 +3,7 @@ package ptwop.p2p;
 import java.io.IOException;
 import java.util.Set;
 
-import ptwop.network.NetworkAdress;
+import ptwop.network.NAddress;
 
 public interface P2P {
 	/**
@@ -11,7 +11,7 @@ public interface P2P {
 	 */
 	public void start();
 	
-	public void connectTo(NetworkAdress adress) throws IOException;
+	public void connectTo(NAddress adress) throws IOException;
 
 	/**
 	 * disconnect from the p2p network

@@ -1,12 +1,12 @@
 package ptwop.p2p.v0.messages;
 
-import ptwop.network.NetworkAdress;
+import ptwop.network.NAddress;
 
 public class ConnectTo extends FloodMessage {
 	private static final long serialVersionUID = 1L;
-	public NetworkAdress adress;
+	public NAddress adress;
 
-	public ConnectTo(NetworkAdress adress) {
+	public ConnectTo(NAddress adress) {
 		this.adress = adress;
 	}
 }

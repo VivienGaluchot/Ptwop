@@ -1,4 +1,4 @@
-package ptwop.network.networker;
+package ptwop.networker;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,10 +21,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import ptwop.network.networker.model.Data;
-import ptwop.network.networker.model.Link;
-import ptwop.network.networker.model.Network;
-import ptwop.network.networker.model.Node;
+import ptwop.networker.model.Data;
+import ptwop.networker.model.Link;
+import ptwop.networker.model.Network;
+import ptwop.networker.model.Node;
 
 public class Command extends JPanel {
 	private static final long serialVersionUID = 1L;

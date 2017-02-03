@@ -1,4 +1,4 @@
-package ptwop.network.networker.model;
+package ptwop.networker.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +44,16 @@ public class Network implements Steppable {
 			n.startBellmanFord();
 	}
 
+	@Override
+	public void doTimeStep() {
+		time++;
+		// TODO generate data ?
+
+		for (Node n : nodes) {
+			n.doTimeStep();
+		}
+	}
+
 	/**
 	 * Create a random network
 	 * 
@@ -82,16 +92,6 @@ public class Network implements Steppable {
 			}
 
 			addNode(node);
-		}
-	}
-
-	@Override
-	public void doTimeStep() {
-		time++;
-		// TODO generate data ?
-
-		for (Node n : nodes) {
-			n.doTimeStep();
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package ptwop.network.networker;
+package ptwop.networker;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -8,8 +8,8 @@ import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
-import ptwop.network.networker.display.NetworkWrapper;
-import ptwop.network.networker.model.Network;
+import ptwop.networker.display.NetworkWrapper;
+import ptwop.networker.model.Network;
 
 public class NetWorker {
 	public static void main(String[] args) {

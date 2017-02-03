@@ -1,4 +1,4 @@
-package ptwop.network.networker.model;
+package ptwop.networker.model;
 
 public class BellmanFortUpdateMsg extends Data {
 

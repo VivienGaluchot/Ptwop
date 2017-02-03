@@ -2,14 +2,14 @@ package ptwop.network.tcp;
 
 import java.net.InetAddress;
 
-import ptwop.network.NetworkAdress;
+import ptwop.network.NAddress;
 
-public class TcpNetworkAdress extends NetworkAdress {
+public class TcpNAddress extends NAddress {
 	private static final long serialVersionUID = 1L;
 	public InetAddress ip;
 	public int port;
 
-	public TcpNetworkAdress(InetAddress ip, int port) {
+	public TcpNAddress(InetAddress ip, int port) {
 		this.ip = ip;
 		this.port = port;
 	}
@@ -26,8 +26,8 @@ public class TcpNetworkAdress extends NetworkAdress {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof TcpNetworkAdress) {
-			TcpNetworkAdress a = (TcpNetworkAdress) o;
+		if (o instanceof TcpNAddress) {
+			TcpNAddress a = (TcpNAddress) o;
 			return ip.equals(a.ip) && port == a.port;
 		}
 		return false;

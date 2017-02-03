@@ -1,4 +1,4 @@
-package ptwop.network.networker.model;
+package ptwop.networker.model;
 
 import java.util.Random;
 

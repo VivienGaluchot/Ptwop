@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import ptwop.network.NetworkAdress;
-import ptwop.network.NetworkManager;
-import ptwop.network.NetworkUser;
+import ptwop.network.NAddress;
+import ptwop.network.NManager;
+import ptwop.network.NUser;
 
-public class TcpNetworkManager extends NetworkManager implements Runnable {
+public class TcpNManager extends NManager implements Runnable {
 	ServerSocket listener;
 	Thread runner;
 	boolean stop;
 
-	public TcpNetworkManager(int listenPort) throws IOException {
+	public TcpNManager(int listenPort) throws IOException {
 		listener = new ServerSocket(listenPort);
 		System.out.println("TcpNetworkManager : ecoute sur " + listenPort);
 
@@ -27,8 +27,8 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 	}
 
 	@Override
-	public NetworkAdress getMyAdress() {
-		return new TcpNetworkAdress(listener.getInetAddress(), listener.getLocalPort());
+	public NAddress getMyAdress() {
+		return new TcpNAddress(listener.getInetAddress(), listener.getLocalPort());
 	}
 
 	@Override
@@ -45,22 +45,22 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 	}
 
 	@Override
-	public void connectTo(NetworkAdress adress) throws IOException {
+	public void connectTo(NAddress adress) throws IOException {
 		if (adress == getMyAdress()) {
 			System.out.println("Can't connect to myself " + adress);
 			return;
 		}
-		for (NetworkUser u : users) {
+		for (NUser u : users) {
 			if (u.getAdress() == adress) {
 				System.out.println("Already connected to " + adress);
 				return;
 			}
 		}
-		if (adress instanceof TcpNetworkAdress) {
-			TcpNetworkAdress a = (TcpNetworkAdress) adress;
+		if (adress instanceof TcpNAddress) {
+			TcpNAddress a = (TcpNAddress) adress;
 			System.out.println("connection to " + a);
 			Socket newSocket = new Socket(a.ip, a.port);
-			connectedTo(new TcpNetworkUser(listener.getLocalPort(), newSocket, handler));
+			connectedTo(new TcpNUser(listener.getLocalPort(), newSocket, handler));
 		}
 	}
 
@@ -69,7 +69,7 @@ public class TcpNetworkManager extends NetworkManager implements Runnable {
 		while (!stop) {
 			try {
 				Socket newSocket = listener.accept();
-				TcpNetworkManager.this.newUser(new TcpNetworkUser(listener.getLocalPort(), newSocket, handler));
+				TcpNManager.this.newUser(new TcpNUser(listener.getLocalPort(), newSocket, handler));
 			} catch (IOException e) {
 				stop = true;
 			}

@@ -1,4 +1,4 @@
-package ptwop.network.networker.model;
+package ptwop.networker.model;
 
 /**
  * Class used to attach timeStamp along the data *

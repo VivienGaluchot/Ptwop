@@ -1,20 +1,20 @@
 package ptwop.p2p;
 
-import ptwop.network.NetworkAdress;
+import ptwop.network.NAddress;
 
 public class P2PUser {
 	private String name;
-	private NetworkAdress adress;
+	private NAddress adress;
 
 	public P2PUser(String name) {
 		this(name, null);
 	}
 
-	public P2PUser(NetworkAdress adress) {
+	public P2PUser(NAddress adress) {
 		this("noname", adress);
 	}
 
-	public P2PUser(String name, NetworkAdress adress) {
+	public P2PUser(String name, NAddress adress) {
 		this.name = name;
 		this.adress = adress;
 	}
@@ -27,11 +27,11 @@ public class P2PUser {
 		this.name = name;
 	}
 
-	public NetworkAdress getAdress() {
+	public NAddress getAdress() {
 		return adress;
 	}
 
-	public void setAdress(NetworkAdress adress) {
+	public void setAdress(NAddress adress) {
 		this.adress = adress;
 	}
 

@@ -1,4 +1,4 @@
-package ptwop.network.networker.model;
+package ptwop.networker.model;
 
 /**
  * A Link forward data between nodes in a double way according some properties

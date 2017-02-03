@@ -5,22 +5,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import ptwop.network.NetworkAdress;
-import ptwop.network.NetworkUser;
-import ptwop.network.NetworkUserHandler;
+import ptwop.network.NAddress;
+import ptwop.network.NUser;
+import ptwop.network.NUserHandler;
 
-public class TcpNetworkUser implements NetworkUser, Runnable {
+public class TcpNUser implements NUser, Runnable {
 	private Socket socket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
-	NetworkUserHandler handler;
+	NUserHandler handler;
 
 	private Thread runner;
 	private boolean run;
 
 	private int pairListeningPort;
 
-	public TcpNetworkUser(int listeningPort, Socket socket, NetworkUserHandler handler) throws IOException {
+	public TcpNUser(int listeningPort, Socket socket, NUserHandler handler) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
 		out = new ObjectOutputStream(socket.getOutputStream());
@@ -58,6 +58,12 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 	}
 
 	@Override
+	public NAddress getAdress() {
+		TcpNAddress adress = new TcpNAddress(socket.getInetAddress(), pairListeningPort);
+		return adress;
+	}
+
+	@Override
 	public void run() {
 		run = true;
 		while (run) {
@@ -76,11 +82,5 @@ public class TcpNetworkUser implements NetworkUser, Runnable {
 	@Override
 	public String toString() {
 		return getAdress().toString();
-	}
-
-	@Override
-	public NetworkAdress getAdress() {
-		TcpNetworkAdress adress = new TcpNetworkAdress(socket.getInetAddress(), pairListeningPort);
-		return adress;
 	}
 }

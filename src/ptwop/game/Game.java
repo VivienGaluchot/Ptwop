@@ -18,7 +18,7 @@ import ptwop.game.model.Ball;
 import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.transfert.GameMessageHandler;
-import ptwop.network.tcp.TcpNetworkManager;
+import ptwop.network.tcp.TcpNManager;
 import ptwop.p2p.v0.Flood;
 
 public class Game {
@@ -140,7 +140,7 @@ public class Game {
 				return;
 			try {
 				// Client connection
-				client = new GameMessageHandler(new Flood(new TcpNetworkManager(919), name), name);
+				client = new GameMessageHandler(new Flood(new TcpNManager(919), name), name);
 				Party party = client.getJoinedParty();
 				playParty(party, client);
 
