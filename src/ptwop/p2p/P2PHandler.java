@@ -13,6 +13,8 @@ public interface P2PHandler {
 	 */
 	void handleMessage(P2PUser sender, Object o);
 	
+	void userConnect(P2PUser user);
+	
 	void userUpdate(P2PUser user);
 
 	/**

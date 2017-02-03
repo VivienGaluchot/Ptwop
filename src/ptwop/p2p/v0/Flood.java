@@ -104,6 +104,7 @@ public class Flood implements P2P, NetworkUserHandler {
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
+		p2pHandler.userConnect(user);
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -125,6 +126,7 @@ public class Flood implements P2P, NetworkUserHandler {
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
+		p2pHandler.userConnect(user);
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {

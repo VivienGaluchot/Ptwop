@@ -26,6 +26,11 @@ public class TestUnit {
 		public void userUpdate(P2PUser user) {
 			System.out.println("APP | update of " + user);
 		}
+
+		@Override
+		public void userConnect(P2PUser user) {
+			System.out.println("APP | user connect : " + user);
+		}
 	}
 
 	public static void main(String[] args) {
