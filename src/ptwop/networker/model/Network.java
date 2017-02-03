@@ -2,8 +2,11 @@ package ptwop.networker.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import passgen.WordGenerator;
 import ptwop.common.math.GaussianRandom;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
@@ -15,13 +18,18 @@ public class Network implements Steppable {
 	private long time;
 
 	private ArrayList<Node> nodes;
+	private Map<Node, P2P> p2ps;
 
 	private GaussianRandom packetSize;
 	private GaussianRandom latency;
 	private GaussianRandom loss;
 
+	private WordGenerator nameGenerator;
+
 	public Network() {
+		nameGenerator = new WordGenerator();
 		nodes = new ArrayList<>();
+		p2ps = new HashMap<>();
 		time = 0;
 	}
 
@@ -37,7 +45,8 @@ public class Network implements Steppable {
 		n.setId(nodes.size());
 		nodes.add(n);
 
-		P2P p2p = new Flood(n, n.getName());
+		P2P p2p = new Flood(n, nameGenerator.getPassword(6));
+		p2ps.put(n, p2p);
 		p2p.setMessageHandler(new P2PHandler() {
 			@Override
 			public void handleMessage(P2PUser sender, Object o) {
@@ -73,6 +82,10 @@ public class Network implements Steppable {
 	public List<Node> getNodes() {
 		return Collections.unmodifiableList(nodes);
 	}
+	
+	public P2P getP2P(Node n){
+		return p2ps.get(n);
+	}
 
 	@Override
 	public void doTimeStep() {
@@ -98,6 +111,7 @@ public class Network implements Steppable {
 	 */
 	public void randomize(int n, GaussianRandom latency, GaussianRandom loss, GaussianRandom packetSize) {
 		nodes.clear();
+		p2ps.clear();
 		time = 0;
 
 		this.latency = latency;

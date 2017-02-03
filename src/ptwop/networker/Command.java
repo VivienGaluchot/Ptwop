@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,6 +24,8 @@ import ptwop.networker.model.Link;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.NetworkerNAddress;
 import ptwop.networker.model.Node;
+import ptwop.p2p.P2P;
+import ptwop.p2p.P2PUser;
 
 public class Command extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -36,8 +39,10 @@ public class Command extends JPanel {
 	private JTextField address;
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
+	private DefaultTableModel p2pUserModel;
 
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
+	String[] p2pUsersColumnNames = { "Name", "Address" };
 
 	public Command(final Network net) {
 		this.net = net;
@@ -127,8 +132,8 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(new JLabel("n° de pair : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(address, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-				new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(address, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(connectTo, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		line++;
@@ -147,7 +152,26 @@ public class Command extends JPanel {
 		linksInfo.setModel(linksInfoModel);
 		JScrollPane listScroller = new JScrollPane(linksInfo);
 
-		subPanel.add(listScroller, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER,
+		subPanel.add(listScroller, new GridBagConstraints(0, 0, 2, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+
+		line++;
+		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+				new Insets(0, 0, 0, 0), 0, 0));
+
+		// P2P Users
+		subPanel = new JPanel();
+		subPanel.setOpaque(false);
+		subPanel.setLayout(new GridBagLayout());
+		subPanel.setBorder(BorderFactory.createTitledBorder("P2P Users"));
+
+		JTable p2pUsers = new JTable();
+		p2pUsers.setFillsViewportHeight(true);
+		p2pUserModel = new DefaultTableModel();
+		p2pUsers.setModel(p2pUserModel);
+		listScroller = new JScrollPane(p2pUsers);
+
+		subPanel.add(listScroller, new GridBagConstraints(0, 1, 2, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
 		line++;
@@ -177,10 +201,29 @@ public class Command extends JPanel {
 				infos[i][4] = new Float(l.getWeight());
 			}
 			linksInfoModel.setDataVector(infos, linksColumnNames);
+
+			// p2p users info
+			P2P p2p = net.getP2P(node);
+			Set<P2PUser> users = p2p.getUsers();
+			Object[][] usersInfo = new Object[users.size() + 1][];
+			if (p2p != null && p2p.getMyself() != null) {
+				usersInfo[0] = new Object[2];
+				usersInfo[0][0] = p2p.getMyself().getName();
+				usersInfo[0][1] = p2p.getMyself().getAddress();
+			}
+			int i = 1;
+			for (P2PUser u : users) {
+				usersInfo[i] = new Object[2];
+				usersInfo[i][0] = u.getName();
+				usersInfo[i][1] = u.getAddress();
+				i++;
+			}
+			p2pUserModel.setDataVector(usersInfo, p2pUsersColumnNames);
 		} else {
 			nodeName.setText("");
 			connectTo.setEnabled(false);
 			linksInfoModel.setDataVector(new Object[0][], linksColumnNames);
+			p2pUserModel.setDataVector(new Object[0][], p2pUsersColumnNames);
 		}
 	}
 

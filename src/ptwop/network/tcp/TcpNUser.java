@@ -1,7 +1,5 @@
 package ptwop.network.tcp;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -25,8 +23,8 @@ public class TcpNUser implements NUser, Runnable {
 	public TcpNUser(int listeningPort, Socket socket, NUserHandler handler) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
-		out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-		in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+		out = new ObjectOutputStream(socket.getOutputStream());
+		in = new ObjectInputStream(socket.getInputStream());
 
 		// sharing listening port
 		out.writeObject(new Integer(listeningPort));
