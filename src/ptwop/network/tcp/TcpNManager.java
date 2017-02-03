@@ -51,7 +51,7 @@ public class TcpNManager extends NManager implements Runnable {
 			return;
 		}
 		for (NUser u : users) {
-			if (u.getAddress() == address) {
+			if (u.getAddress().equals(address)) {
 				System.out.println("Already connected to " + address);
 				return;
 			}
