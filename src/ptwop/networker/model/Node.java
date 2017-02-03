@@ -26,12 +26,22 @@ public class Node extends NManager implements Steppable {
 	}
 
 	public void connectedTo(Link link) {
+		if (links.contains(link)) {
+			System.out.println("already connected to " + link);
+			return;
+		}
+
 		links.add(link);
 		routingMap.put(link.getDestNode(), link);
 		handler.connectedTo(link);
 	}
 
 	public void addLink(Link link) {
+		if (links.contains(link)) {
+			System.out.println("already connected to " + link);
+			return;
+		}
+		
 		links.add(link);
 		routingMap.put(link.getDestNode(), link);
 		handler.newUser(link);
@@ -67,6 +77,11 @@ public class Node extends NManager implements Steppable {
 	@Override
 	public String toString() {
 		return getName();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		return o instanceof Node && ((Node)o).id == id;
 	}
 
 	// NManager

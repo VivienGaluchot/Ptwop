@@ -55,8 +55,14 @@ public class Link implements Steppable, NUser {
 		this(net, source, destNode, 10, 0, 4);
 	}
 
+	@Override
 	public String toString() {
-		return "Link to " + destNode;
+		return "Link-" + destNode;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		return o instanceof Link && ((Link)o).source.equals(source) && ((Link)o).destNode.equals(destNode);
 	}
 
 	public void computeWeight() {
