@@ -11,11 +11,13 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Set;
 
 import ptwop.common.gui.Animable;
 import ptwop.common.math.Vector2D;
 import ptwop.networker.model.Link;
 import ptwop.networker.model.Node;
+import ptwop.networker.model.TimedData;
 
 public class NodeWrapper implements Animable {
 	private NetworkWrapper netWrapper;
@@ -176,15 +178,7 @@ public class NodeWrapper implements Animable {
 				Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
 				g2d.setColor(drawC);
 				g2d.draw(line);
-
-				if (isHovered() || isSelected()) {
-					// Msg
-					String dispMsg = l.getNumberOfElements() + "";
-					Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-					Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
-					mspPos = mspPos.add(slideNorm.multiply(0.4));
-					g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
-				}
+				
 				// Arrow
 				v = p2.clone();
 				slide = slideNorm.multiply(arrowSize / 2);
@@ -193,6 +187,29 @@ public class NodeWrapper implements Animable {
 				Vector2D arrowSide = v.add(slide);
 				line = new Line2D.Double(arrowSide.x, arrowSide.y, p2.x, p2.y);
 				g2d.draw(line);
+				
+				// Msg
+				if (isHovered() || isSelected()) {
+					String dispMsg = l.getNumberOfElements() + "";
+					Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
+					Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
+					mspPos = mspPos.add(slideNorm.multiply(0.4));
+					g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
+				}
+				
+				// Datas
+				float dataRadius = 0.3f;
+				g2d.setColor(new Color(0,0,0.2f,0.2f));
+				Set<TimedData> datas = l.getTransitingDatas();
+				for (TimedData tdata : datas) {
+					float advance = (float) (node.getNetwork().getTime() - tdata.inTime)
+							/ (tdata.outTime - tdata.inTime);
+					Vector2D dataPos = p2.subtract(p1).multiply(advance).add(p1);
+					dataPos = dataPos.add(slideNorm.multiply(0.4));
+					Ellipse2D dataShape = new Ellipse2D.Double(dataPos.x - dataRadius, dataPos.y - dataRadius,
+							dataRadius * 2, dataRadius * 2);
+					g2d.fill(dataShape);
+				}
 			}
 		}
 
@@ -216,6 +233,5 @@ public class NodeWrapper implements Animable {
 	@Override
 	public void animate(long timeStep) {
 		// TODO Auto-generated method stub
-
 	}
 }

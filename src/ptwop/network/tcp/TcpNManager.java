@@ -6,7 +6,6 @@ import java.net.Socket;
 
 import ptwop.network.NAddress;
 import ptwop.network.NManager;
-import ptwop.network.NUser;
 
 public class TcpNManager extends NManager implements Runnable {
 	ServerSocket listener;
@@ -50,17 +49,17 @@ public class TcpNManager extends NManager implements Runnable {
 			System.out.println("Can't connect to myself " + address);
 			return;
 		}
-		for (NUser u : users) {
-			if (u.getAddress().equals(address)) {
-				System.out.println("Already connected to " + address);
-				return;
-			}
+		
+		if (isConnectedTo(address)) {
+			System.out.println("Already connected to " + address);
+			return;
 		}
+		
 		if (address instanceof TcpNAddress) {
 			TcpNAddress a = (TcpNAddress) address;
 			System.out.println("connection to " + a);
 			Socket newSocket = new Socket(a.ip, a.port);
-			connectedTo(new TcpNUser(listener.getLocalPort(), newSocket, handler));
+			connectedTo(new TcpNUser(listener.getLocalPort(), newSocket, this));
 		}
 	}
 
@@ -69,7 +68,7 @@ public class TcpNManager extends NManager implements Runnable {
 		while (!stop) {
 			try {
 				Socket newSocket = listener.accept();
-				TcpNManager.this.newUser(new TcpNUser(listener.getLocalPort(), newSocket, handler));
+				TcpNManager.this.newUser(new TcpNUser(listener.getLocalPort(), newSocket, this));
 			} catch (IOException e) {
 				stop = true;
 			}

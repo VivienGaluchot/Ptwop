@@ -25,7 +25,7 @@ public class Node extends NManager implements Steppable {
 		routingMap = new HashMap<>();
 	}
 
-	public void connectedTo(Link link) {
+	public void linkConnectedTo(Link link) {
 		if (links.contains(link)) {
 			System.out.println("already connected to " + link);
 			return;
@@ -33,7 +33,7 @@ public class Node extends NManager implements Steppable {
 
 		links.add(link);
 		routingMap.put(link.getDestNode(), link);
-		handler.connectedTo(link);
+		super.connectedTo(link);
 	}
 
 	public void addLink(Link link) {
@@ -41,14 +41,29 @@ public class Node extends NManager implements Steppable {
 			System.out.println("already connected to " + link);
 			return;
 		}
-		
+
 		links.add(link);
 		routingMap.put(link.getDestNode(), link);
-		handler.newUser(link);
+		super.newUser(link);
+	}
+
+	public void removeLink(Link link) {
+		links.remove(link);
+		routingMap.remove(link);
+		userQuit(link);
+	}
+	
+	public void removeLinkTo(Node node) {
+		Link link = routingMap.get(node);
+		removeLink(link);
 	}
 
 	public List<Link> getLinks() {
 		return Collections.unmodifiableList(links);
+	}
+
+	public Network getNetwork() {
+		return net;
 	}
 
 	public String getName() {
@@ -64,7 +79,7 @@ public class Node extends NManager implements Steppable {
 	}
 
 	public void handleData(Node source, Data data) {
-		handler.newMessage(routingMap.get(source), data.data);
+		newMessage(routingMap.get(source), data.data);
 	}
 
 	@Override
@@ -78,10 +93,10 @@ public class Node extends NManager implements Steppable {
 	public String toString() {
 		return getName();
 	}
-	
+
 	@Override
-	public boolean equals(Object o){
-		return o instanceof Node && ((Node)o).id == id;
+	public boolean equals(Object o) {
+		return o instanceof Node && ((Node) o).id == id;
 	}
 
 	// NManager

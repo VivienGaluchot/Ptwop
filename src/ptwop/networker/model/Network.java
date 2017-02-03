@@ -45,7 +45,7 @@ public class Network implements Steppable {
 		n.setId(nodes.size());
 		nodes.add(n);
 
-		P2P p2p = new Flood(n, nameGenerator.getPassword(6));
+		P2P p2p = new Flood(n, nameGenerator.getWord(6));
 		p2ps.put(n, p2p);
 		p2p.setMessageHandler(new P2PHandler() {
 			@Override
@@ -125,7 +125,7 @@ public class Network implements Steppable {
 	}
 
 	public void connectMeTo(Node me, Node dest) {
-		me.connectedTo(new Link(this, me, dest, latency.nextLong(), loss.nextFloat(), packetSize.nextInt()));
+		me.linkConnectedTo(new Link(this, me, dest, latency.nextLong(), loss.nextFloat(), packetSize.nextInt()));
 		dest.addLink(new Link(this, dest, me, latency.nextLong(), loss.nextFloat(), packetSize.nextInt()));
 	}
 }

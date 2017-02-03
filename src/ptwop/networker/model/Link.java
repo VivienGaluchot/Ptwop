@@ -1,7 +1,9 @@
 package ptwop.networker.model;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import ptwop.network.NAddress;
 import ptwop.network.NUser;
@@ -20,15 +22,17 @@ public class Link implements Steppable, NUser {
 	private Random rand;
 
 	private Node source;
-	private Node destNode;
+	private Node dest;
 	private DataBuffer<TimedData> buffer;
+
+	private Set<TimedData> transitingDatas;
 
 	private float weight;
 
 	/**
 	 * @param net
 	 *            Network used to get current time
-	 * @param destNode
+	 * @param dest
 	 *            Node which will receive data
 	 * @param latency
 	 *            number of time unit between the reception and the forward of a
@@ -38,35 +42,41 @@ public class Link implements Steppable, NUser {
 	 * @param packetSize
 	 *            number max of data who can be on the link at the same time
 	 */
-	public Link(Network net, Node source, Node destNode, long latency, float loss, int packetSize) {
+	public Link(Network net, Node source, Node dest, long latency, float loss, int packetSize) {
 		this.net = net;
 		this.source = source;
-		this.destNode = destNode;
+		this.dest = dest;
 		this.latency = latency;
 		this.loss = loss;
 		rand = new Random();
 
 		buffer = new DataBuffer<>(packetSize);
 		computeWeight();
+
+		transitingDatas = new HashSet<>();
 	}
 
 	// default param
-	public Link(Network net, Node source, Node destNode) {
-		this(net, source, destNode, 10, 0, 4);
+	public Link(Network net, Node source, Node dest) {
+		this(net, source, dest, 10, 0, 4);
 	}
 
 	@Override
 	public String toString() {
-		return "Link-" + destNode;
+		return "Link-" + dest;
 	}
-	
+
 	@Override
-	public boolean equals(Object o){
-		return o instanceof Link && ((Link)o).source.equals(source) && ((Link)o).destNode.equals(destNode);
+	public boolean equals(Object o) {
+		return o instanceof Link && ((Link) o).source.equals(source) && ((Link) o).dest.equals(dest);
 	}
 
 	public void computeWeight() {
 		weight = latency / ((1 - loss));
+	}
+
+	public Set<TimedData> getTransitingDatas() {
+		return transitingDatas;
 	}
 
 	public boolean isFull() {
@@ -74,7 +84,7 @@ public class Link implements Steppable, NUser {
 	}
 
 	public Node getDestNode() {
-		return destNode;
+		return dest;
 	}
 
 	public int getNumberOfElements() {
@@ -107,7 +117,8 @@ public class Link implements Steppable, NUser {
 	 * @return true if the data have been successfully added, false otherwise
 	 */
 	public boolean push(Data data) {
-		TimedData tdata = new TimedData(net.getTime() + latency, data);
+		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data);
+		transitingDatas.add(tdata);
 		return buffer.push(tdata);
 	}
 
@@ -120,11 +131,12 @@ public class Link implements Steppable, NUser {
 		// push data to node it's time
 		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
 			TimedData toPush = buffer.pop();
+			transitingDatas.remove(toPush);
 
 			// x float in [0:1[
 			float x = rand.nextFloat();
 			if (x >= loss)
-				destNode.handleData(source, toPush.data);
+				dest.handleData(source, toPush.data);
 		}
 	}
 
@@ -137,11 +149,12 @@ public class Link implements Steppable, NUser {
 
 	@Override
 	public void disconnect() {
-		// TODO Auto-generated method stub
+		source.removeLink(this);
+		dest.removeLinkTo(source);
 	}
 
 	@Override
 	public NAddress getAddress() {
-		return destNode.getMyAddress();
+		return dest.getMyAddress();
 	}
 }

@@ -36,6 +36,7 @@ public class Command extends JPanel {
 	// Node info
 	private Node node;
 	private JButton connectTo;
+	private JButton disconnect;
 	private JTextField address;
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
@@ -121,6 +122,16 @@ public class Command extends JPanel {
 			}
 		});
 		connectTo.setEnabled(false);
+
+		disconnect = new JButton("Deconnexion");
+		disconnect.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				node.stop();
+			}
+		});
+		disconnect.setEnabled(false);
+
 		address = new JTextField("-");
 
 		subPanel = new JPanel();
@@ -136,7 +147,9 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(address, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(connectTo, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
+		subPanel.add(connectTo, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(disconnect, new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 0, GridBagConstraints.CENTER,
@@ -172,11 +185,11 @@ public class Command extends JPanel {
 		p2pUserModel = new DefaultTableModel();
 		p2pUsers.setModel(p2pUserModel);
 		listScroller = new JScrollPane(p2pUsers);
-		
+
 		subPanel.add(new JLabel("info : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(p2pInfo, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(p2pInfo, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+				new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(listScroller, new GridBagConstraints(0, 1, 2, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
@@ -193,6 +206,7 @@ public class Command extends JPanel {
 		if (node != null) {
 			nodeName.setText(node.getName());
 			connectTo.setEnabled(true);
+			disconnect.setEnabled(true);
 
 			// linksInfo
 			List<Link> links = node.getLinks();
@@ -229,6 +243,7 @@ public class Command extends JPanel {
 		} else {
 			nodeName.setText("");
 			connectTo.setEnabled(false);
+			disconnect.setEnabled(false);
 			linksInfoModel.setDataVector(new Object[0][], linksColumnNames);
 			p2pInfo.setText("");
 			p2pUserModel.setDataVector(new Object[0][], p2pUsersColumnNames);
