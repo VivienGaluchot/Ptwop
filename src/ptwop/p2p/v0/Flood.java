@@ -16,7 +16,6 @@ import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
 import ptwop.p2p.v0.messages.ConnectTo;
 import ptwop.p2p.v0.messages.FloodMessage;
-import ptwop.p2p.v0.messages.Hello;
 import ptwop.p2p.v0.messages.MessageToApp;
 import ptwop.p2p.v0.messages.MyNameIs;
 
@@ -35,6 +34,25 @@ public class Flood implements P2P, NUserHandler {
 		myself = new P2PUser(myName, manager.getMyAddress());
 		this.manager = manager;
 		manager.setHandler(this);
+	}
+	
+	public void sendUserListTo(NUser user){
+		try {
+			synchronized (otherUsers) {
+				for (NUser u : otherUsers.inverse().keySet()) {
+					if (u != user) {
+						user.send(new ConnectTo(u.getAddress()));
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public String toString(){
+		return "Flood P2P";
 	}
 
 	// P2P Interface
@@ -99,12 +117,16 @@ public class Flood implements P2P, NUserHandler {
 	@Override
 	public void newUser(NUser pair) {
 		System.out.println("newUser() " + pair);
+
+		sendUserListTo(pair);
+		
 		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		System.out.println("otherUsers " + otherUsers.size());
+		
 		p2pHandler.userConnect(user);
+		
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -115,19 +137,16 @@ public class Flood implements P2P, NUserHandler {
 	@Override
 	public void connectedTo(NUser pair) {
 		System.out.println("connectedTo() " + pair);
-		if (otherUsers.size() == 0) {
-			try {
-				pair.send(new Hello());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		
+		sendUserListTo(pair);
+		
 		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		System.out.println("otherUsers " + otherUsers.size());
+		
 		p2pHandler.userConnect(user);
+		
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -149,20 +168,7 @@ public class Flood implements P2P, NUserHandler {
 			return;
 		}
 
-		if (o instanceof Hello) {
-			// send other users
-			try {
-				synchronized (otherUsers) {
-					for (NUser u : otherUsers.inverse().keySet()) {
-						if (u != user) {
-							user.send(new ConnectTo(u.getAddress()));
-						}
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else if (o instanceof MyNameIs) {
+		if (o instanceof MyNameIs) {
 			MyNameIs m = (MyNameIs) o;
 			senderUser.setName(m.name);
 			p2pHandler.userUpdate(senderUser);

@@ -39,6 +39,7 @@ public class Command extends JPanel {
 	private JTextField address;
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
+	private JLabel p2pInfo;
 	private DefaultTableModel p2pUserModel;
 
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
@@ -51,6 +52,7 @@ public class Command extends JPanel {
 
 		timeLabel = new JLabel();
 		nodeName = new JLabel();
+		p2pInfo = new JLabel();
 
 		setLayout(new GridBagLayout());
 		int line = 0;
@@ -163,14 +165,18 @@ public class Command extends JPanel {
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("P2P Users"));
+		subPanel.setBorder(BorderFactory.createTitledBorder("P2P"));
 
 		JTable p2pUsers = new JTable();
 		p2pUsers.setFillsViewportHeight(true);
 		p2pUserModel = new DefaultTableModel();
 		p2pUsers.setModel(p2pUserModel);
 		listScroller = new JScrollPane(p2pUsers);
-
+		
+		subPanel.add(new JLabel("info : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(p2pInfo, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(listScroller, new GridBagConstraints(0, 1, 2, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
@@ -204,6 +210,7 @@ public class Command extends JPanel {
 
 			// p2p users info
 			P2P p2p = net.getP2P(node);
+			p2pInfo.setText(p2p.toString());
 			Set<P2PUser> users = p2p.getUsers();
 			Object[][] usersInfo = new Object[users.size() + 1][];
 			if (p2p != null && p2p.getMyself() != null) {
@@ -223,6 +230,7 @@ public class Command extends JPanel {
 			nodeName.setText("");
 			connectTo.setEnabled(false);
 			linksInfoModel.setDataVector(new Object[0][], linksColumnNames);
+			p2pInfo.setText("");
 			p2pUserModel.setDataVector(new Object[0][], p2pUsersColumnNames);
 		}
 	}
