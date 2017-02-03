@@ -18,9 +18,9 @@ public abstract class NManager {
 
 	public abstract void start();
 
-	public abstract NAddress getMyAdress();
+	public abstract NAddress getMyAddress();
 
-	public abstract void connectTo(NAddress adress) throws IOException;
+	public abstract void connectTo(NAddress address) throws IOException;
 
 	protected void newUser(NUser user) {
 		users.add(user);

@@ -210,13 +210,6 @@ public class NodeWrapper implements Animable {
 		Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispName, g2d);
 		g2d.drawString(dispName, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 0.25f);
 
-		// Msg
-		if (isHovered() || isSelected()) {
-			String dispMsg = node.getNumberOfElements() + "";
-			bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-			g2d.drawString(dispMsg, (float) (pos.x - bound.getWidth() / 2), (float) pos.y + 1.5f);
-		}
-
 		g2d.dispose();
 	}
 

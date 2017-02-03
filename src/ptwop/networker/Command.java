@@ -1,29 +1,27 @@
 package ptwop.networker;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import ptwop.networker.model.Data;
+import ptwop.common.gui.Dialog;
 import ptwop.networker.model.Link;
 import ptwop.networker.model.Network;
+import ptwop.networker.model.NetworkerNAddress;
 import ptwop.networker.model.Node;
 
 public class Command extends JPanel {
@@ -34,29 +32,20 @@ public class Command extends JPanel {
 
 	// Node info
 	private Node node;
+	private JButton connectTo;
+	private JTextField address;
 	private JLabel nodeName;
-	private JLabel nodeNumberOfElements;
-	private JLabel nodeProcessType;
 	private DefaultTableModel linksInfoModel;
-	private DefaultTableModel routageInfoModel;
 
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
-	String[] routingColumnNames = { "Dest", "Next" };
-
-	private JComboBox<Node> nodeList;
-
-	private JButton msgButton;
 
 	public Command(final Network net) {
 		this.net = net;
 
 		this.setPreferredSize(new Dimension(250, 300));
-		this.setBackground(Color.white);
 
 		timeLabel = new JLabel();
 		nodeName = new JLabel();
-		nodeNumberOfElements = new JLabel();
-		nodeProcessType = new JLabel();
 
 		setLayout(new GridBagLayout());
 		int line = 0;
@@ -106,22 +95,27 @@ public class Command extends JPanel {
 		subPanel.add(button, new GridBagConstraints(2, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
-		button = new JButton("Init Bellman Ford");
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				net.initBellmanFord();
-				update();
-			}
-		});
-		subPanel.add(button, new GridBagConstraints(0, 2, 3, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
 		// Node info
+		connectTo = new JButton("Connexion");
+		connectTo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					int id = Integer.parseInt(address.getText());
+					node.connectTo(new NetworkerNAddress(id));
+					address.setText("-");
+				} catch (NumberFormatException | IOException ex) {
+					Dialog.displayError(null, ex.getMessage());
+				}
+			}
+		});
+		connectTo.setEnabled(false);
+		address = new JTextField("-");
+
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
@@ -131,17 +125,12 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(nodeName, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-
-		subPanel.add(new JLabel("charge : "), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+		subPanel.add(new JLabel("n° de pair : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(nodeNumberOfElements, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
+		subPanel.add(address, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+				new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(connectTo, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-
-		subPanel.add(new JLabel("process time : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(nodeProcessType, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
@@ -165,54 +154,6 @@ public class Command extends JPanel {
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 				new Insets(10, 0, 0, 0), 0, 0));
 
-		// Routage
-		subPanel = new JPanel();
-		subPanel.setOpaque(false);
-		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Routes"));
-
-		JTable routageInfo = new JTable();
-		routageInfo.setFillsViewportHeight(true);
-		routageInfoModel = new DefaultTableModel();
-		routageInfo.setModel(routageInfoModel);
-		listScroller = new JScrollPane(routageInfo);
-
-		subPanel.add(listScroller, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-
-		line++;
-		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-				new Insets(10, 0, 0, 0), 0, 0));
-
-		// Message
-		subPanel = new JPanel();
-		subPanel.setOpaque(false);
-		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Message"));
-
-		subPanel.add(new JLabel("Destinataire : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-
-		nodeList = new JComboBox<>();
-		for (Node n : net.getNodes())
-			nodeList.addItem(n);
-		subPanel.add(nodeList, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		msgButton = new JButton("go");
-		msgButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				node.push(new Data(node, (Node) nodeList.getSelectedItem(), net.getTime()));
-				update();
-			}
-		});
-		subPanel.add(msgButton, new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-
-		line++;
-		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-				new Insets(10, 0, 0, 0), 0, 0));
-
 		displayNode(null);
 		update();
 	}
@@ -221,8 +162,7 @@ public class Command extends JPanel {
 		timeLabel.setText("" + net.getTime());
 		if (node != null) {
 			nodeName.setText(node.getName());
-			nodeNumberOfElements.setText(node.getNumberOfElements() + "");
-			nodeProcessType.setText(node.getProcessTime() + "");
+			connectTo.setEnabled(true);
 
 			// linksInfo
 			List<Link> links = node.getLinks();
@@ -237,37 +177,10 @@ public class Command extends JPanel {
 				infos[i][4] = new Float(l.getWeight());
 			}
 			linksInfoModel.setDataVector(infos, linksColumnNames);
-			// routing
-			Map<Node, Link> routingMap = node.getRoutingMap();
-			infos = new Object[routingMap.size()][];
-			int i = 0;
-			Object[] sortedNodes = routingMap.keySet().toArray();
-			Arrays.sort(sortedNodes, new Comparator<Object>() {
-				@Override
-				public int compare(Object arg0, Object arg1) {
-					Node n1 = (Node) arg0;
-					Node n2 = (Node) arg1;
-					return n1.getId() - n2.getId();
-				}
-			});
-			for (Object o : sortedNodes) {
-				Node n = (Node) o;
-				infos[i] = new Object[2];
-				infos[i][0] = n.getName();
-				if (routingMap.get(n) != null)
-					infos[i][1] = new String(routingMap.get(n).getDestNode().getName());
-				else
-					infos[i][1] = new String("null");
-				i++;
-			}
-			routageInfoModel.setDataVector(infos, routingColumnNames);
-			msgButton.setEnabled(true);
 		} else {
 			nodeName.setText("");
-			nodeNumberOfElements.setText("");
+			connectTo.setEnabled(false);
 			linksInfoModel.setDataVector(new Object[0][], linksColumnNames);
-			routageInfoModel.setDataVector(new Object[0][], routingColumnNames);
-			msgButton.setEnabled(false);
 		}
 	}
 

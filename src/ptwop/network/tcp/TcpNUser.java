@@ -58,9 +58,9 @@ public class TcpNUser implements NUser, Runnable {
 	}
 
 	@Override
-	public NAddress getAdress() {
-		TcpNAddress adress = new TcpNAddress(socket.getInetAddress(), pairListeningPort);
-		return adress;
+	public NAddress getAddress() {
+		TcpNAddress address = new TcpNAddress(socket.getInetAddress(), pairListeningPort);
+		return address;
 	}
 
 	@Override
@@ -81,6 +81,6 @@ public class TcpNUser implements NUser, Runnable {
 
 	@Override
 	public String toString() {
-		return getAdress().toString();
+		return getAddress().toString();
 	}
 }

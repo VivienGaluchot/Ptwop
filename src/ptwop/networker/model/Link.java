@@ -1,6 +1,10 @@
 package ptwop.networker.model;
 
+import java.io.IOException;
 import java.util.Random;
+
+import ptwop.network.NAddress;
+import ptwop.network.NUser;
 
 /**
  * A Link forward data between nodes in a single way according some properties
@@ -8,23 +12,18 @@ import java.util.Random;
  * 
  * @author Vivien
  */
-public class Link implements Steppable {
+public class Link implements Steppable, NUser {
 	private Network net;
 
 	private long latency;
 	private float loss;
 	private Random rand;
 
+	private Node source;
 	private Node destNode;
 	private DataBuffer<TimedData> buffer;
 
 	private float weight;
-
-	public static Link connect(Network net, Node source, Node dest) {
-		Link l = new Link(net, dest);
-		source.addLink(l);
-		return l;
-	}
 
 	/**
 	 * @param net
@@ -39,8 +38,9 @@ public class Link implements Steppable {
 	 * @param packetSize
 	 *            number max of data who can be on the link at the same time
 	 */
-	public Link(Network net, Node destNode, long latency, float loss, int packetSize) {
+	public Link(Network net, Node source, Node destNode, long latency, float loss, int packetSize) {
 		this.net = net;
+		this.source = source;
 		this.destNode = destNode;
 		this.latency = latency;
 		this.loss = loss;
@@ -50,8 +50,13 @@ public class Link implements Steppable {
 		computeWeight();
 	}
 
-	public Link(Network net, Node destNode) {
-		this(net, destNode, 10, 0, 4);
+	// default param
+	public Link(Network net, Node source, Node destNode) {
+		this(net, source, destNode, 10, 0, 4);
+	}
+
+	public String toString() {
+		return "Link to " + destNode;
 	}
 
 	public void computeWeight() {
@@ -112,9 +117,25 @@ public class Link implements Steppable {
 
 			// x float in [0:1[
 			float x = rand.nextFloat();
-
 			if (x >= loss)
-				destNode.push(toPush.data);
+				destNode.handleData(source, toPush.data);
 		}
+	}
+
+	// NUser
+
+	@Override
+	public void send(Object o) throws IOException {
+		push(new Data(o, net.getTime()));
+	}
+
+	@Override
+	public void disconnect() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public NAddress getAddress() {
+		return destNode.getMyAddress();
 	}
 }

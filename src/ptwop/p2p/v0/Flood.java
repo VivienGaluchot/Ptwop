@@ -33,7 +33,7 @@ public class Flood implements P2P, NUserHandler {
 	public Flood(NManager manager, String myName) {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
-		myself = new P2PUser(myName, manager.getMyAdress());
+		myself = new P2PUser(myName, manager.getMyAddress());
 		this.manager = manager;
 		manager.setHandler(this);
 	}
@@ -46,8 +46,8 @@ public class Flood implements P2P, NUserHandler {
 	}
 
 	@Override
-	public void connectTo(NAddress adress) throws IOException {
-		manager.connectTo(adress);
+	public void connectTo(NAddress address) throws IOException {
+		manager.connectTo(address);
 	}
 
 	@Override
@@ -100,10 +100,11 @@ public class Flood implements P2P, NUserHandler {
 	@Override
 	public void newUser(NUser pair) {
 		System.out.println("newUser() " + pair);
-		P2PUser user = new P2PUser(pair.getAdress());
+		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
+		System.out.println("otherUsers " + otherUsers.size());
 		p2pHandler.userConnect(user);
 		try {
 			pair.send(new MyNameIs(myself.getName()));
@@ -122,10 +123,11 @@ public class Flood implements P2P, NUserHandler {
 				e.printStackTrace();
 			}
 		}
-		P2PUser user = new P2PUser(pair.getAdress());
+		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
+		System.out.println("otherUsers " + otherUsers.size());
 		p2pHandler.userConnect(user);
 		try {
 			pair.send(new MyNameIs(myself.getName()));
@@ -142,6 +144,12 @@ public class Flood implements P2P, NUserHandler {
 			System.out.println("Flood>handleMessage : Unknown message class");
 			return;
 		}
+		
+		if(senderUser == null){
+			System.out.println("Flood>handleMessage : Unknown sender");
+			return;
+		}
+			
 
 		if (o instanceof Hello) {
 			// send other users
@@ -149,7 +157,7 @@ public class Flood implements P2P, NUserHandler {
 			synchronized (otherUsers) {
 				for (NUser u : otherUsers.inverse().keySet()) {
 					if (u != user) {
-						otherUsersPack.messages.add(new ConnectTo(u.getAdress()));
+						otherUsersPack.messages.add(new ConnectTo(u.getAddress()));
 					}
 				}
 			}
@@ -164,11 +172,11 @@ public class Flood implements P2P, NUserHandler {
 			p2pHandler.userUpdate(senderUser);
 		} else if (o instanceof ConnectTo) {
 			ConnectTo m = (ConnectTo) o;
-			System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.adress);
+			System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.address);
 			try {
-				manager.connectTo(m.adress);
+				manager.connectTo(m.address);
 			} catch (IOException e) {
-				System.out.println("Impossible to connect to " + m.adress + " : " + e.getMessage());
+				System.out.println("Impossible to connect to " + m.address + " : " + e.getMessage());
 			}
 		} else if (o instanceof MessageToApp) {
 			MessageToApp m = (MessageToApp) o;

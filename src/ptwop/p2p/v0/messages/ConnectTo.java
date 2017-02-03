@@ -4,9 +4,9 @@ import ptwop.network.NAddress;
 
 public class ConnectTo extends FloodMessage {
 	private static final long serialVersionUID = 1L;
-	public NAddress adress;
+	public NAddress address;
 
-	public ConnectTo(NAddress adress) {
-		this.adress = adress;
+	public ConnectTo(NAddress address) {
+		this.address = address;
 	}
 }

@@ -1,5 +1,6 @@
 package ptwop.common.gui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,12 +14,20 @@ public class Frame extends JFrame {
 
 	private JPanel contentPane;
 
-	public Frame(JPanel main) {
-		this(main, null);
+	public Frame(Component main) {
+		this(main, null, "Ptwop - dev");
 	}
 
-	public Frame(JPanel main, JPanel sideBar) {
-		setTitle("Ptwop - dev");
+	public Frame(Component main, String title) {
+		this(main, null, title);
+	}
+
+	public Frame(Component main, JPanel sideBar) {
+		this(main, sideBar, "Ptwop - dev");
+	}
+
+	public Frame(Component main, JPanel sideBar, String title) {
+		setTitle(title);
 		setSize(new Dimension(800, 600));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

@@ -1,16 +1,14 @@
 package ptwop.networker.model;
 
 public class Data {
-	public Node source;
-	public Node dest;
+	public Object data;
 
 	public int hop;
 
 	private long creationTime;
 
-	public Data(Node source, Node destination, long creationTime) {
-		this.source = source;
-		this.dest = destination;
+	public Data(Object data, long creationTime) {
+		this.data = data;
 		this.creationTime = creationTime;
 
 		hop = 0;
@@ -30,6 +28,6 @@ public class Data {
 
 	@Override
 	public String toString() {
-		return source.getName() + "->" + dest.getName() + ", " + hop + " hop";
+		return hop + " hop";
 	}
 }

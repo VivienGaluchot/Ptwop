@@ -11,7 +11,7 @@ public interface P2P {
 	 */
 	public void start();
 	
-	public void connectTo(NAddress adress) throws IOException;
+	public void connectTo(NAddress address) throws IOException;
 
 	/**
 	 * disconnect from the p2p network

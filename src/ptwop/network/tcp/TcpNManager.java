@@ -27,7 +27,7 @@ public class TcpNManager extends NManager implements Runnable {
 	}
 
 	@Override
-	public NAddress getMyAdress() {
+	public NAddress getMyAddress() {
 		return new TcpNAddress(listener.getInetAddress(), listener.getLocalPort());
 	}
 
@@ -45,19 +45,19 @@ public class TcpNManager extends NManager implements Runnable {
 	}
 
 	@Override
-	public void connectTo(NAddress adress) throws IOException {
-		if (adress == getMyAdress()) {
-			System.out.println("Can't connect to myself " + adress);
+	public void connectTo(NAddress address) throws IOException {
+		if (address == getMyAddress()) {
+			System.out.println("Can't connect to myself " + address);
 			return;
 		}
 		for (NUser u : users) {
-			if (u.getAdress() == adress) {
-				System.out.println("Already connected to " + adress);
+			if (u.getAddress() == address) {
+				System.out.println("Already connected to " + address);
 				return;
 			}
 		}
-		if (adress instanceof TcpNAddress) {
-			TcpNAddress a = (TcpNAddress) adress;
+		if (address instanceof TcpNAddress) {
+			TcpNAddress a = (TcpNAddress) address;
 			System.out.println("connection to " + a);
 			Socket newSocket = new Socket(a.ip, a.port);
 			connectedTo(new TcpNUser(listener.getLocalPort(), newSocket, handler));
