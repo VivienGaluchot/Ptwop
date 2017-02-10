@@ -1,7 +1,6 @@
 package ptwop.networker.model;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
@@ -24,8 +23,6 @@ public class Link implements Steppable, NUser {
 	private Node source;
 	private Node dest;
 	private DataBuffer<TimedData> buffer;
-
-	private Set<TimedData> transitingDatas;
 
 	private float weight;
 
@@ -52,8 +49,6 @@ public class Link implements Steppable, NUser {
 
 		buffer = new DataBuffer<>(packetSize);
 		computeWeight();
-
-		transitingDatas = new HashSet<>();
 	}
 
 	// default param
@@ -76,7 +71,7 @@ public class Link implements Steppable, NUser {
 	}
 
 	public Set<TimedData> getTransitingDatas() {
-		return transitingDatas;
+		return buffer.getElements();
 	}
 
 	public boolean isFull() {
@@ -118,7 +113,6 @@ public class Link implements Steppable, NUser {
 	 */
 	public boolean push(Data data) {
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data);
-		transitingDatas.add(tdata);
 		return buffer.push(tdata);
 	}
 
@@ -131,7 +125,6 @@ public class Link implements Steppable, NUser {
 		// push data to node it's time
 		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
 			TimedData toPush = buffer.pop();
-			transitingDatas.remove(toPush);
 
 			// x float in [0:1[
 			float x = rand.nextFloat();

@@ -1,6 +1,8 @@
 package ptwop.networker.model;
 
 import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DataBuffer<E> {
 	private int bufferSize;
@@ -76,5 +78,11 @@ public class DataBuffer<E> {
 	 */
 	public int numerOfElements() {
 		return buffer.size();
+	}
+	
+	public Set<E> getElements(){
+		HashSet<E> set = new HashSet<>();
+		set.addAll(buffer);
+		return set;
 	}
 }

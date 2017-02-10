@@ -31,11 +31,13 @@ public class NodeWrapper implements Animable {
 	private Color drawColor;
 	private Color selectedDrawColor;
 	private Color hoveredDrawColor;
-	private boolean selected;
+	private boolean clicked;
 	private boolean hovered;
 
 	private float arrowSize;
 	private float arrowSpace;
+
+	private boolean selected;
 
 	public NodeWrapper(Node node, NetworkWrapper netWrapper) {
 		this.node = node;
@@ -47,7 +49,7 @@ public class NodeWrapper implements Animable {
 		drawColor = Color.darkGray;
 		selectedDrawColor = new Color(80, 140, 200);
 		hoveredDrawColor = new Color(80, 140, 200);
-		setSelected(false);
+		setClicked(false);
 		setHovered(false);
 
 		arrowSize = 0.5f;
@@ -106,13 +108,21 @@ public class NodeWrapper implements Animable {
 	public void setHoveredDrawColor(Color hoveredDrawColor) {
 		this.hoveredDrawColor = hoveredDrawColor;
 	}
-
+	
 	public boolean isSelected() {
 		return selected;
 	}
-
+	
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public boolean isClicked() {
+		return clicked;
+	}
+
+	public void setClicked(boolean clicked) {
+		this.clicked = clicked;
 		hovered = false;
 	}
 
@@ -122,7 +132,7 @@ public class NodeWrapper implements Animable {
 
 	public void setHovered(boolean hovered) {
 		this.hovered = hovered;
-		selected = false;
+		clicked = false;
 	}
 
 	public Shape getTranslatedShape() {
@@ -152,7 +162,7 @@ public class NodeWrapper implements Animable {
 		Color drawC = drawColor;
 		if (hovered)
 			drawC = hoveredDrawColor;
-		if (selected)
+		if (clicked)
 			drawC = selectedDrawColor;
 
 		Stroke initStroke = g2d.getStroke();
@@ -189,7 +199,7 @@ public class NodeWrapper implements Animable {
 				g2d.draw(line);
 				
 				// Msg
-				if (isHovered() || isSelected()) {
+				if (isHovered() || isClicked()) {
 					String dispMsg = l.getNumberOfElements() + "";
 					Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
 					Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
@@ -214,6 +224,11 @@ public class NodeWrapper implements Animable {
 		}
 
 		g2d.setStroke(initStroke);
+		
+		if(isSelected()){
+			g2d.setStroke(new BasicStroke(0.1f, BasicStroke.CAP_ROUND,
+					BasicStroke.JOIN_ROUND));			
+		}
 
 		// Node
 		Shape shape = getTranslatedShape();

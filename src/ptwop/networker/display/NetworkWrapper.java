@@ -25,9 +25,10 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	private HashMap<Node, NodeWrapper> nodes;
 
 	// Mouse
-	private NodeWrapper selected = null;
+	private NodeWrapper clicked = null;
 	private NodeWrapper hovered = null;
 	private Vector2D lastMousePos;
+	private NodeWrapper selected;
 
 	public NetworkWrapper(Network network, SpaceTransform spaceTransform, Command command) {
 		this.network = network;
@@ -95,6 +96,16 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	// Mouse listener
 
+	private void setClicked(NodeWrapper selected) {
+		if (this.clicked != null) {
+			this.clicked.setClicked(false);
+		}
+		this.clicked = selected;
+		if (this.clicked != null) {
+			this.clicked.setClicked(true);
+		}
+	}
+	
 	private void setSelected(NodeWrapper selected) {
 		if (this.selected != null) {
 			this.selected.setSelected(false);
@@ -110,9 +121,9 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		Vector2D deltaMousPos = mousePos.subtract(lastMousePos);
 		lastMousePos = mousePos;
-		if (selected != null) {
-			Vector2D newPos = selected.getPos().add(deltaMousPos);
-			selected.setPos(newPos);
+		if (clicked != null) {
+			Vector2D newPos = clicked.getPos().add(deltaMousPos);
+			clicked.setPos(newPos);
 		} else {
 			spaceTransform.updateMouseDrag(e.getPoint());
 		}
@@ -123,7 +134,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
 		if (n != hovered && hovered != null)
-			hovered.setSelected(false);
+			hovered.setClicked(false);
 
 		hovered = n;
 		if (hovered != null)
@@ -148,18 +159,20 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		lastMousePos = mousePos;
 
 		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
-		setSelected(n);
-		if (n != null)
+		setClicked(n);
+		if (n != null) {
 			command.displayNode(n.getNode());
-		else {
+			setSelected(n);
+		} else {
 			spaceTransform.startMouseDrag(e.getPoint());
 			command.displayNode(null);
+			setSelected(null);
 		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		setSelected(null);
+		setClicked(null);
 		mouseMoved(e);
 	}
 
