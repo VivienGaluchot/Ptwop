@@ -9,4 +9,8 @@ public class ConnectTo extends FloodMessage {
 	public ConnectTo(NAddress address) {
 		this.address = address;
 	}
+	
+	public String toString() {
+		return "ConnectTo " + address.toString();
+	}
 }

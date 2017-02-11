@@ -14,29 +14,25 @@ import ptwop.common.math.Vector2D;
 import ptwop.networker.model.Node;
 
 public class NodeWrapper implements Animable, HCS {
+	private NetworkWrapper wrapper;
+	
 	private Node node;
-	Vector2D pos;
+	private Vector2D pos;
 	private double radius;
 	private Ellipse2D.Double mobileShape;
 
-	private Color fillColor;
-	private Color drawColor;
-	private Color clickedDrawColor;
-	private Color hoveredDrawColor;
+	private static Color fillColor = Color.white;
 	private boolean clicked;
 	private boolean hovered;
 
 	private boolean selected;
 
-	public NodeWrapper(Node node) {
+	public NodeWrapper(Node node, NetworkWrapper wrapper) {
+		this.wrapper = wrapper;
 		this.node = node;
 		pos = new Vector2D(0, 0);
 		radius = 0.8;
 		mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
-		fillColor = Color.white;
-		drawColor = Color.darkGray;
-		clickedDrawColor = new Color(80, 140, 200);
-		hoveredDrawColor = new Color(80, 140, 200);
 		setClicked(false);
 		setHovered(false);
 	}
@@ -68,34 +64,6 @@ public class NodeWrapper implements Animable, HCS {
 
 	public Color getFillColor() {
 		return fillColor;
-	}
-
-	public void setFillColor(Color fillColor) {
-		this.fillColor = fillColor;
-	}
-
-	public Color getDrawColor() {
-		return drawColor;
-	}
-
-	public void setDrawColor(Color drawColor) {
-		this.drawColor = drawColor;
-	}
-
-	public Color getClickedDrawColor() {
-		return clickedDrawColor;
-	}
-
-	public void setSelectedDrawColor(Color clickedDrawColor) {
-		this.clickedDrawColor = clickedDrawColor;
-	}
-
-	public Color getHoveredDrawColor() {
-		return hoveredDrawColor;
-	}
-
-	public void setHoveredDrawColor(Color hoveredDrawColor) {
-		this.hoveredDrawColor = hoveredDrawColor;
 	}
 
 	public boolean isSelected() {
@@ -134,11 +102,11 @@ public class NodeWrapper implements Animable, HCS {
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
 
-		Color drawC = drawColor;
+		Color drawC = wrapper.getColor();
 		if (hovered)
-			drawC = hoveredDrawColor;
+			drawC = wrapper.getHoveredColor();
 		if (clicked)
-			drawC = clickedDrawColor;
+			drawC = wrapper.getClickedColor();
 
 		if (isSelected())
 			g2d.setStroke(new BasicStroke(0.15f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

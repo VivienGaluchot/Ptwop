@@ -25,6 +25,8 @@ public class Link implements Steppable, NUser {
 	private DataBuffer<TimedData> buffer;
 
 	private float weight;
+	
+	private int pushedThisRound;
 
 	/**
 	 * @param net
@@ -49,6 +51,8 @@ public class Link implements Steppable, NUser {
 
 		buffer = new DataBuffer<>(packetSize);
 		computeWeight();
+		
+		pushedThisRound = 0;
 	}
 
 	// default param
@@ -116,7 +120,7 @@ public class Link implements Steppable, NUser {
 	 * @return true if the data have been successfully added, false otherwise
 	 */
 	public boolean push(Data data) {
-		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data);
+		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data, pushedThisRound++);
 		net.signalNewData(tdata, this);
 		return buffer.push(tdata);
 	}
@@ -127,6 +131,7 @@ public class Link implements Steppable, NUser {
 	 */
 	@Override
 	public void doTimeStep() {
+		pushedThisRound = 0;
 		// push data to node it's time
 		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
 			TimedData tdata = buffer.pop();

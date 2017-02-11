@@ -7,4 +7,8 @@ public class MyNameIs extends FloodMessage {
 	public MyNameIs(String name) {
 		this.name = name;
 	}
+
+	public String toString() {
+		return "MyNameIs " + name;
+	}
 }

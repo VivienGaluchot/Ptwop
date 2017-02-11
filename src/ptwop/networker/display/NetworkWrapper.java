@@ -1,5 +1,6 @@
 package ptwop.networker.display;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -34,6 +35,11 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	private HCS selected = null;
 
 	private Vector2D lastMousePos;
+	
+	private Color color;
+	private Color hoveredColor;
+	private Color clickedColor;
+	private Color selectedColor;
 
 	public NetworkWrapper(Network network, SpaceTransform spaceTransform, Command command) {
 		this.network = network;
@@ -46,21 +52,26 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		for (Node n : network.getNodes())
 			addNode(n);
 		lastMousePos = null;
+
+		color = Color.darkGray;
+		clickedColor = new Color(40, 70, 150);
+		hoveredColor = new Color(80, 140, 200);
+		selectedColor = Color.darkGray;
 	}
 
-	public void addNode(Node n) {
-		nodes.put(n, new NodeWrapper(n));
+	public synchronized void addNode(Node n) {
+		nodes.put(n, new NodeWrapper(n, this));
 	}
 
-	public void removeNode(Node n) {
+	public synchronized void removeNode(Node n) {
 		nodes.remove(n);
 	}
 
-	public void addLink(Link l) {
+	public synchronized void addLink(Link l) {
 		links.put(l, new LinkWrapper(l, this));
 	}
 
-	public void removeLink(Link l) {
+	public synchronized void removeLink(Link l) {
 		links.remove(l);
 		for (TimedData d : l.getTransitingDatas()) {
 			if (datas.containsKey(d))
@@ -68,12 +79,12 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		}
 	}
 
-	public void addData(TimedData d, Link l) {
+	public synchronized void addData(TimedData d, Link l) {
 		datas.put(d, new DataWrapper(d, links.get(l), this));
 
 	}
 
-	public void removeData(TimedData d) {
+	public synchronized void removeData(TimedData d) {
 		datas.remove(d);
 	}
 
@@ -103,20 +114,52 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		return network;
 	}
 
-	@Override
-	public void paint(Graphics g) {
-		for (Link l : links.keySet())
-			links.get(l).paint(g);
+	public Color getColor() {
+		return color;
+	}
 
-		for (TimedData d : datas.keySet())
-			datas.get(d).paint(g);
+	public void setColor(Color color) {
+		this.color = color;
+	}
 
-		for (Node n : nodes.keySet())
-			nodes.get(n).paint(g);
+	public Color getHoveredColor() {
+		return hoveredColor;
+	}
+
+	public void setHoveredColor(Color hoveredColor) {
+		this.hoveredColor = hoveredColor;
+	}
+
+	public Color getClickedColor() {
+		return clickedColor;
+	}
+
+	public void setClickedColor(Color clickedColor) {
+		this.clickedColor = clickedColor;
+	}
+
+	public Color getSelectedColor() {
+		return selectedColor;
+	}
+
+	public void setSelectedColor(Color selectedColor) {
+		this.selectedColor = selectedColor;
 	}
 
 	@Override
-	public void animate(long timeStep) {
+	public synchronized void paint(Graphics g) {
+		for (Link l : links.keySet())
+			links.get(l).paint(g);
+
+		for (Node n : nodes.keySet())
+			nodes.get(n).paint(g);
+		
+		for (TimedData d : datas.keySet())
+			datas.get(d).paint(g);
+	}
+
+	@Override
+	public synchronized void animate(long timeStep) {
 		for (Link l : links.keySet())
 			links.get(l).animate(timeStep);
 
@@ -128,13 +171,13 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	}
 
 	@Override
-	public void doTimeStep() {
+	public synchronized void doTimeStep() {
 		network.doTimeStep();
 	}
 
 	// Mouse listener
 
-	private HCS getHCSAtPos(Vector2D pos) {
+	private synchronized HCS getHCSAtPos(Vector2D pos) {
 		for (Node n : nodes.keySet()) {
 			if (nodes.get(n).getShape().contains(pos.x, pos.y)) {
 				return nodes.get(n);
@@ -225,16 +268,15 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 		if (hcs != null && hcs instanceof NodeWrapper) {
 			command.displayNode(((NodeWrapper) hcs).getNode());
-			setSelected(hcs);
 		} else {
 			spaceTransform.startMouseDrag(e.getPoint());
 			command.displayNode(null);
-			setSelected(null);
 		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		setSelected(clicked);
 		setClicked(null);
 		mouseMoved(e);
 	}

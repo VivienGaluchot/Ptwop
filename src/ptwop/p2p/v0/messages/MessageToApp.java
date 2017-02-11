@@ -8,4 +8,8 @@ public class MessageToApp extends FloodMessage{
 	public MessageToApp(Object msg) {
 		this.msg = msg;
 	}
+	
+	public String toString() {
+		return "MessageToApp : " + msg.toString();
+	}
 }

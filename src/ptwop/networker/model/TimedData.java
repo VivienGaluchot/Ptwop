@@ -8,9 +8,17 @@ public class TimedData {
 	public long outTime;
 	public Data data;
 
-	public TimedData(long inTime, long outTime, Data data) {
+	// used for displaying messages
+	public int slide;
+
+	public TimedData(long inTime, long outTime, Data data, int slide) {
 		this.inTime = inTime;
 		this.outTime = outTime;
 		this.data = data;
+		this.slide = slide;
+	}
+	
+	public String toString(){
+		return data.toString();
 	}
 }
