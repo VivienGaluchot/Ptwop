@@ -81,6 +81,10 @@ public class Link implements Steppable, NUser {
 	public Node getDestNode() {
 		return dest;
 	}
+	
+	public Node getSourceNode() {
+		return source;
+	}
 
 	public int getNumberOfElements() {
 		return buffer.numerOfElements();
@@ -113,6 +117,7 @@ public class Link implements Steppable, NUser {
 	 */
 	public boolean push(Data data) {
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data);
+		net.signalNewData(tdata, this);
 		return buffer.push(tdata);
 	}
 
@@ -124,12 +129,13 @@ public class Link implements Steppable, NUser {
 	public void doTimeStep() {
 		// push data to node it's time
 		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
-			TimedData toPush = buffer.pop();
+			TimedData tdata = buffer.pop();
+			net.signalRemovedData(tdata);
 
 			// x float in [0:1[
 			float x = rand.nextFloat();
 			if (x >= loss)
-				dest.handleData(source, toPush.data);
+				dest.handleData(source, tdata.data);
 		}
 	}
 

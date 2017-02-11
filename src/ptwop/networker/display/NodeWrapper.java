@@ -5,55 +5,40 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.List;
-import java.util.Set;
 
 import ptwop.common.gui.Animable;
 import ptwop.common.math.Vector2D;
-import ptwop.networker.model.Link;
 import ptwop.networker.model.Node;
-import ptwop.networker.model.TimedData;
 
-public class NodeWrapper implements Animable {
-	private NetworkWrapper netWrapper;
-
+public class NodeWrapper implements Animable, HCS {
 	private Node node;
-	private Vector2D pos;
+	Vector2D pos;
 	private double radius;
 	private Ellipse2D.Double mobileShape;
 
 	private Color fillColor;
 	private Color drawColor;
-	private Color selectedDrawColor;
+	private Color clickedDrawColor;
 	private Color hoveredDrawColor;
 	private boolean clicked;
 	private boolean hovered;
 
-	private float arrowSize;
-	private float arrowSpace;
-
 	private boolean selected;
 
-	public NodeWrapper(Node node, NetworkWrapper netWrapper) {
+	public NodeWrapper(Node node) {
 		this.node = node;
-		this.netWrapper = netWrapper;
 		pos = new Vector2D(0, 0);
 		radius = 0.8;
 		mobileShape = new Ellipse2D.Double(-radius, -radius, 2 * radius, 2 * radius);
 		fillColor = Color.white;
 		drawColor = Color.darkGray;
-		selectedDrawColor = new Color(80, 140, 200);
+		clickedDrawColor = new Color(80, 140, 200);
 		hoveredDrawColor = new Color(80, 140, 200);
 		setClicked(false);
 		setHovered(false);
-
-		arrowSize = 0.5f;
-		arrowSpace = 0.1f;
 	}
 
 	public Node getNode() {
@@ -77,6 +62,10 @@ public class NodeWrapper implements Animable {
 		radius = r;
 	}
 
+	public double getRadius() {
+		return radius;
+	}
+
 	public Color getFillColor() {
 		return fillColor;
 	}
@@ -93,12 +82,12 @@ public class NodeWrapper implements Animable {
 		this.drawColor = drawColor;
 	}
 
-	public Color getSelectedDrawColor() {
-		return selectedDrawColor;
+	public Color getClickedDrawColor() {
+		return clickedDrawColor;
 	}
 
-	public void setSelectedDrawColor(Color selectedDrawColor) {
-		this.selectedDrawColor = selectedDrawColor;
+	public void setSelectedDrawColor(Color clickedDrawColor) {
+		this.clickedDrawColor = clickedDrawColor;
 	}
 
 	public Color getHoveredDrawColor() {
@@ -108,11 +97,11 @@ public class NodeWrapper implements Animable {
 	public void setHoveredDrawColor(Color hoveredDrawColor) {
 		this.hoveredDrawColor = hoveredDrawColor;
 	}
-	
+
 	public boolean isSelected() {
 		return selected;
 	}
-	
+
 	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
@@ -141,20 +130,6 @@ public class NodeWrapper implements Animable {
 		return transformShape.createTransformedShape(mobileShape);
 	}
 
-	private static float linkWeightTransform(float weight) {
-		float maxsize = 0.15f;
-		float minsize = 0.05f;
-		float range = 100;
-		float x;
-		if (0 <= weight && weight < range)
-			x = (float) (Math.cos(10 * weight / (Math.PI * range)) + 1f) / 2f;
-		else if (weight >= range)
-			x = 0;
-		else
-			x = 1;
-		return x * (maxsize - minsize) + minsize;
-	}
-
 	@Override
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g.create();
@@ -163,72 +138,10 @@ public class NodeWrapper implements Animable {
 		if (hovered)
 			drawC = hoveredDrawColor;
 		if (clicked)
-			drawC = selectedDrawColor;
+			drawC = clickedDrawColor;
 
-		Stroke initStroke = g2d.getStroke();
-
-		// Links
-		List<Link> links = node.getLinks();
-		for (Link l : links) {
-			NodeWrapper dest = netWrapper.getWrapper(l.getDestNode());
-			Vector2D v = dest.pos.subtract(pos);
-			v.capModule(radius + 0.2);
-			Vector2D p2 = dest.pos.subtract(v);
-			v.capModule(radius);
-			Vector2D p1 = pos.add(v);
-			Vector2D v2 = p2.subtract(p1);
-			if (v.dot(v2) > 0) {
-				g2d.setStroke(new BasicStroke(linkWeightTransform(l.getWeight()), BasicStroke.CAP_ROUND,
-						BasicStroke.JOIN_ROUND));
-				// Line
-				Vector2D slideNorm = v2.getOrthogonal();
-				Vector2D slide = slideNorm.multiply(arrowSpace);
-				p1 = p1.add(slide);
-				p2 = p2.add(slide);
-				Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-				g2d.setColor(drawC);
-				g2d.draw(line);
-				
-				// Arrow
-				v = p2.clone();
-				slide = slideNorm.multiply(arrowSize / 2);
-				v2 = p2.subtract(p1).normalize().multiply(arrowSize);
-				v = v.subtract(v2);
-				Vector2D arrowSide = v.add(slide);
-				line = new Line2D.Double(arrowSide.x, arrowSide.y, p2.x, p2.y);
-				g2d.draw(line);
-				
-				// Msg
-				if (isHovered() || isClicked()) {
-					String dispMsg = l.getNumberOfElements() + "";
-					Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-					Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
-					mspPos = mspPos.add(slideNorm.multiply(0.4));
-					g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
-				}
-				
-				// Datas
-				float dataRadius = 0.3f;
-				g2d.setColor(new Color(0,0,0.2f,0.2f));
-				Set<TimedData> datas = l.getTransitingDatas();
-				for (TimedData tdata : datas) {
-					float advance = (float) (node.getNetwork().getTime() - tdata.inTime)
-							/ (tdata.outTime - tdata.inTime);
-					Vector2D dataPos = p2.subtract(p1).multiply(advance).add(p1);
-					dataPos = dataPos.add(slideNorm.multiply(0.4));
-					Ellipse2D dataShape = new Ellipse2D.Double(dataPos.x - dataRadius, dataPos.y - dataRadius,
-							dataRadius * 2, dataRadius * 2);
-					g2d.fill(dataShape);
-				}
-			}
-		}
-
-		g2d.setStroke(initStroke);
-		
-		if(isSelected()){
-			g2d.setStroke(new BasicStroke(0.1f, BasicStroke.CAP_ROUND,
-					BasicStroke.JOIN_ROUND));			
-		}
+		if (isSelected())
+			g2d.setStroke(new BasicStroke(0.15f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 		// Node
 		Shape shape = getTranslatedShape();
@@ -248,5 +161,10 @@ public class NodeWrapper implements Animable {
 	@Override
 	public void animate(long timeStep) {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Shape getShape() {
+		return getTranslatedShape();
 	}
 }

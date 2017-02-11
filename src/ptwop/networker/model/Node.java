@@ -32,6 +32,7 @@ public class Node extends NManager implements Steppable {
 		}
 
 		links.add(link);
+		net.signalNewLink(link);
 		routingMap.put(link.getDestNode(), link);
 		super.connectedTo(link);
 	}
@@ -43,12 +44,14 @@ public class Node extends NManager implements Steppable {
 		}
 
 		links.add(link);
+		net.signalNewLink(link);
 		routingMap.put(link.getDestNode(), link);
 		super.newUser(link);
 	}
 
 	public void removeLink(Link link) {
 		links.remove(link);
+		net.signalRemovedLink(link);
 		routingMap.remove(link);
 		userQuit(link);
 	}

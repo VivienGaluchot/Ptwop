@@ -12,9 +12,11 @@ import ptwop.common.gui.Animable;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.Vector2D;
 import ptwop.networker.Command;
+import ptwop.networker.model.Link;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.Node;
 import ptwop.networker.model.Steppable;
+import ptwop.networker.model.TimedData;
 
 public class NetworkWrapper implements Animable, MouseListener, MouseMotionListener, Steppable, MouseWheelListener {
 
@@ -23,25 +25,56 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	private Network network;
 	private HashMap<Node, NodeWrapper> nodes;
+	private HashMap<Link, LinkWrapper> links;
+	private HashMap<TimedData, DataWrapper> datas;
 
 	// Mouse
-	private NodeWrapper clicked = null;
-	private NodeWrapper hovered = null;
+	private HCS hovered = null;
+	private HCS clicked = null;
+	private HCS selected = null;
+
 	private Vector2D lastMousePos;
-	private NodeWrapper selected;
 
 	public NetworkWrapper(Network network, SpaceTransform spaceTransform, Command command) {
 		this.network = network;
+		this.network.setWrapper(this);
 		this.spaceTransform = spaceTransform;
 		this.command = command;
 		nodes = new HashMap<>();
+		links = new HashMap<>();
+		datas = new HashMap<>();
 		for (Node n : network.getNodes())
 			addNode(n);
 		lastMousePos = null;
 	}
 
-	private void addNode(Node n) {
-		nodes.put(n, new NodeWrapper(n, this));
+	public void addNode(Node n) {
+		nodes.put(n, new NodeWrapper(n));
+	}
+
+	public void removeNode(Node n) {
+		nodes.remove(n);
+	}
+
+	public void addLink(Link l) {
+		links.put(l, new LinkWrapper(l, this));
+	}
+
+	public void removeLink(Link l) {
+		links.remove(l);
+		for (TimedData d : l.getTransitingDatas()) {
+			if (datas.containsKey(d))
+				removeData(d);
+		}
+	}
+
+	public void addData(TimedData d, Link l) {
+		datas.put(d, new DataWrapper(d, links.get(l), this));
+
+	}
+
+	public void removeData(TimedData d) {
+		datas.remove(d);
 	}
 
 	public void putInCircle() {
@@ -66,14 +99,30 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		return nodes.get(n);
 	}
 
+	public Network getNetwork() {
+		return network;
+	}
+
 	@Override
 	public void paint(Graphics g) {
+		for (Link l : links.keySet())
+			links.get(l).paint(g);
+
+		for (TimedData d : datas.keySet())
+			datas.get(d).paint(g);
+
 		for (Node n : nodes.keySet())
 			nodes.get(n).paint(g);
 	}
 
 	@Override
 	public void animate(long timeStep) {
+		for (Link l : links.keySet())
+			links.get(l).animate(timeStep);
+
+		for (TimedData d : datas.keySet())
+			datas.get(d).animate(timeStep);
+
 		for (Node n : nodes.keySet())
 			nodes.get(n).animate(timeStep);
 	}
@@ -83,30 +132,48 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		network.doTimeStep();
 	}
 
-	public NodeWrapper getNodeAtPos(Vector2D pos) {
-		NodeWrapper res = null;
-		// get the last of the set
-		for (Node n : nodes.keySet()) {
-			if (nodes.get(n).getTranslatedShape().contains(pos.x, pos.y)) {
-				res = nodes.get(n);
-			}
-		}
-		return res;
-	}
-
 	// Mouse listener
 
-	private void setClicked(NodeWrapper selected) {
+	private HCS getHCSAtPos(Vector2D pos) {
+		for (Node n : nodes.keySet()) {
+			if (nodes.get(n).getShape().contains(pos.x, pos.y)) {
+				return nodes.get(n);
+			}
+		}
+		for (TimedData d : datas.keySet()) {
+			if (datas.get(d).getShape().contains(pos.x, pos.y)) {
+				return datas.get(d);
+			}
+		}
+		for (Link l : links.keySet()) {
+			if (links.get(l).getShape().contains(pos.x, pos.y)) {
+				return links.get(l);
+			}
+		}
+		return null;
+	}
+
+	private void setHovered(HCS hovered) {
+		if (this.hovered != null) {
+			this.hovered.setHovered(false);
+		}
+		this.hovered = hovered;
+		if (this.hovered != null) {
+			this.hovered.setHovered(true);
+		}
+	}
+
+	private void setClicked(HCS clicked) {
 		if (this.clicked != null) {
 			this.clicked.setClicked(false);
 		}
-		this.clicked = selected;
+		this.clicked = clicked;
 		if (this.clicked != null) {
 			this.clicked.setClicked(true);
 		}
 	}
-	
-	private void setSelected(NodeWrapper selected) {
+
+	private void setSelected(HCS selected) {
 		if (this.selected != null) {
 			this.selected.setSelected(false);
 		}
@@ -121,9 +188,9 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		Vector2D deltaMousPos = mousePos.subtract(lastMousePos);
 		lastMousePos = mousePos;
-		if (clicked != null) {
-			Vector2D newPos = clicked.getPos().add(deltaMousPos);
-			clicked.setPos(newPos);
+		if (clicked != null && clicked instanceof NodeWrapper) {
+			Vector2D newPos = ((NodeWrapper) clicked).getPos().add(deltaMousPos);
+			((NodeWrapper) clicked).setPos(newPos);
 		} else {
 			spaceTransform.updateMouseDrag(e.getPoint());
 		}
@@ -132,13 +199,8 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
-		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
-		if (n != hovered && hovered != null)
-			hovered.setClicked(false);
-
-		hovered = n;
-		if (hovered != null)
-			hovered.setHovered(true);
+		HCS hcs = getHCSAtPos(new Vector2D(mousePos.x, mousePos.y));
+		setHovered(hcs);
 	}
 
 	@Override
@@ -158,11 +220,12 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		lastMousePos = mousePos;
 
-		NodeWrapper n = getNodeAtPos(new Vector2D(mousePos.x, mousePos.y));
-		setClicked(n);
-		if (n != null) {
-			command.displayNode(n.getNode());
-			setSelected(n);
+		HCS hcs = getHCSAtPos(new Vector2D(mousePos.x, mousePos.y));
+		setClicked(hcs);
+
+		if (hcs != null && hcs instanceof NodeWrapper) {
+			command.displayNode(((NodeWrapper) hcs).getNode());
+			setSelected(hcs);
 		} else {
 			spaceTransform.startMouseDrag(e.getPoint());
 			command.displayNode(null);

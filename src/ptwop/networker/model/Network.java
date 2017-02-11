@@ -8,6 +8,7 @@ import java.util.Map;
 
 import passgen.WordGenerator;
 import ptwop.common.math.GaussianRandom;
+import ptwop.networker.display.NetworkWrapper;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
@@ -26,12 +27,41 @@ public class Network implements Steppable {
 
 	private WordGenerator nameGenerator;
 
+	private NetworkWrapper wrapper;
+
 	public Network() {
 		nameGenerator = new WordGenerator();
 		nodes = new ArrayList<>();
 		p2ps = new HashMap<>();
 		time = 0;
+		wrapper = null;
 	}
+
+	// Wrapper signal
+	public void setWrapper(NetworkWrapper wrapper) {
+		this.wrapper = wrapper;
+	}
+
+	public void signalNewLink(Link l) {
+		if (wrapper != null)
+			wrapper.addLink(l);
+	}
+
+	public void signalRemovedLink(Link l) {
+		if (wrapper != null)
+			wrapper.removeLink(l);
+	}
+	
+	public void signalNewData(TimedData d, Link l) {
+		if (wrapper != null)
+			wrapper.addData(d, l);
+	}
+	
+	public void signalRemovedData(TimedData d) {
+		if (wrapper != null)
+			wrapper.removeData(d);
+	}
+	// end wrapper signal
 
 	public long getTime() {
 		return time;
@@ -82,8 +112,8 @@ public class Network implements Steppable {
 	public List<Node> getNodes() {
 		return Collections.unmodifiableList(nodes);
 	}
-	
-	public P2P getP2P(Node n){
+
+	public P2P getP2P(Node n) {
 		return p2ps.get(n);
 	}
 

@@ -41,6 +41,7 @@ public class Command extends JPanel {
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
 	private JLabel p2pInfo;
+	private JLabel p2pName;
 	private DefaultTableModel p2pUserModel;
 
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
@@ -54,6 +55,7 @@ public class Command extends JPanel {
 		timeLabel = new JLabel();
 		nodeName = new JLabel();
 		p2pInfo = new JLabel();
+		p2pName = new JLabel();
 
 		setLayout(new GridBagLayout());
 		int line = 0;
@@ -185,12 +187,16 @@ public class Command extends JPanel {
 		p2pUserModel = new DefaultTableModel();
 		p2pUsers.setModel(p2pUserModel);
 		listScroller = new JScrollPane(p2pUsers);
-
+		
 		subPanel.add(new JLabel("info : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(p2pInfo, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
 				new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(listScroller, new GridBagConstraints(0, 1, 2, 1, 1, 1, GridBagConstraints.CENTER,
+		subPanel.add(new JLabel("nom p2p : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(p2pName, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+				new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(listScroller, new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
 		line++;
@@ -225,14 +231,10 @@ public class Command extends JPanel {
 			// p2p users info
 			P2P p2p = net.getP2P(node);
 			p2pInfo.setText(p2p.toString());
+			p2pName.setText(p2p.getMyself().getName());
 			Set<P2PUser> users = p2p.getUsers();
-			Object[][] usersInfo = new Object[users.size() + 1][];
-			if (p2p != null && p2p.getMyself() != null) {
-				usersInfo[0] = new Object[2];
-				usersInfo[0][0] = p2p.getMyself().getName();
-				usersInfo[0][1] = p2p.getMyself().getAddress();
-			}
-			int i = 1;
+			Object[][] usersInfo = new Object[users.size()][];
+			int i = 0;
 			for (P2PUser u : users) {
 				usersInfo[i] = new Object[2];
 				usersInfo[i][0] = u.getName();
