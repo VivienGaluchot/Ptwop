@@ -7,6 +7,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import ptwop.common.gui.Animable;
@@ -29,23 +30,27 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	private HashMap<Link, LinkWrapper> links;
 	private HashMap<TimedData, DataWrapper> datas;
 
+	private boolean animated;
+
 	// Mouse
 	private HCS hovered = null;
 	private HCS clicked = null;
 	private HCS selected = null;
 
 	private Vector2D lastMousePos;
-	
+
 	private Color color;
 	private Color hoveredColor;
 	private Color clickedColor;
 	private Color selectedColor;
 
-	public NetworkWrapper(Network network, SpaceTransform spaceTransform, Command command) {
+	public NetworkWrapper(Network network, SpaceTransform spaceTransform) {
+		animated = false;
+
 		this.network = network;
 		this.network.setWrapper(this);
 		this.spaceTransform = spaceTransform;
-		this.command = command;
+		this.command = null;
 		nodes = new HashMap<>();
 		links = new HashMap<>();
 		datas = new HashMap<>();
@@ -57,6 +62,10 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		clickedColor = new Color(40, 70, 150);
 		hoveredColor = new Color(80, 140, 200);
 		selectedColor = Color.darkGray;
+	}
+
+	public void setCommand(Command command) {
+		this.command = command;
 	}
 
 	public synchronized void addNode(Node n) {
@@ -153,21 +162,40 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 		for (Node n : nodes.keySet())
 			nodes.get(n).paint(g);
-		
-		for (TimedData d : datas.keySet())
-			datas.get(d).paint(g);
+
+		ArrayList<DataWrapper> toPaintLast = new ArrayList<>();
+		for (TimedData d : datas.keySet()) {
+			DataWrapper dw = datas.get(d);
+			if (dw.isHovered() || dw.isSelected())
+				toPaintLast.add(dw);
+			else
+				datas.get(d).paint(g);
+		}
+		for (DataWrapper dw : toPaintLast)
+			dw.paint(g);
+	}
+	
+	public boolean isAnimated(){
+		return animated;
+	}
+
+	public void setAnimated(boolean animated) {
+		this.animated = animated;
 	}
 
 	@Override
 	public synchronized void animate(long timeStep) {
-		for (Link l : links.keySet())
-			links.get(l).animate(timeStep);
+		if (animated)
+			network.doTimeStep();
 
-		for (TimedData d : datas.keySet())
-			datas.get(d).animate(timeStep);
-
-		for (Node n : nodes.keySet())
-			nodes.get(n).animate(timeStep);
+		// for (Link l : links.keySet())
+		// links.get(l).animate(timeStep);
+		//
+		// for (TimedData d : datas.keySet())
+		// datas.get(d).animate(timeStep);
+		//
+		// for (Node n : nodes.keySet())
+		// nodes.get(n).animate(timeStep);
 	}
 
 	@Override
@@ -178,20 +206,24 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	// Mouse listener
 
 	private synchronized HCS getHCSAtPos(Vector2D pos) {
-		for (Node n : nodes.keySet()) {
-			if (nodes.get(n).getShape().contains(pos.x, pos.y)) {
-				return nodes.get(n);
+		try {
+			for (Node n : nodes.keySet()) {
+				if (nodes.get(n).getShape().contains(pos.x, pos.y)) {
+					return nodes.get(n);
+				}
 			}
-		}
-		for (TimedData d : datas.keySet()) {
-			if (datas.get(d).getShape().contains(pos.x, pos.y)) {
-				return datas.get(d);
+			for (TimedData d : datas.keySet()) {
+				if (datas.get(d).getShape().contains(pos.x, pos.y)) {
+					return datas.get(d);
+				}
 			}
-		}
-		for (Link l : links.keySet()) {
-			if (links.get(l).getShape().contains(pos.x, pos.y)) {
-				return links.get(l);
+			for (Link l : links.keySet()) {
+				if (links.get(l).getShape().contains(pos.x, pos.y)) {
+					return links.get(l);
+				}
 			}
+		} catch (Exception e) {
+			return null;
 		}
 		return null;
 	}
@@ -260,6 +292,9 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if (command == null)
+			return;
+
 		Vector2D mousePos = spaceTransform.transformMousePosition(e.getPoint());
 		lastMousePos = mousePos;
 

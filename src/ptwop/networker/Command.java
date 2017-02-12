@@ -7,19 +7,21 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import ptwop.common.gui.Dialog;
+import ptwop.networker.display.NetworkWrapper;
 import ptwop.networker.model.Link;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.NetworkerNAddress;
@@ -29,15 +31,21 @@ import ptwop.p2p.P2PUser;
 
 public class Command extends JPanel {
 	private static final long serialVersionUID = 1L;
+	
+	private NetworkWrapper wrapper;
 
 	private Network net;
 	private JLabel timeLabel;
 
+	// Network
+	private JButton play;
+	private JButton pause;
+
 	// Node info
 	private Node node;
+	private JComboBox<Node> pairComboBox;
 	private JButton connectTo;
 	private JButton disconnect;
-	private JTextField address;
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
 	private JLabel p2pInfo;
@@ -47,10 +55,20 @@ public class Command extends JPanel {
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
 	String[] p2pUsersColumnNames = { "Name", "Address" };
 
-	public Command(final Network net) {
-		this.net = net;
+	public Command(NetworkWrapper wrapper) {
+		this.wrapper = wrapper;
+		this.net = wrapper.getNetwork();
 
 		this.setPreferredSize(new Dimension(250, 300));
+
+		play = new JButton();
+		play.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				wrapper.setAnimated(!wrapper.isAnimated());
+				update();
+			}
+		});
 
 		timeLabel = new JLabel();
 		nodeName = new JLabel();
@@ -69,6 +87,8 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(timeLabel, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(play, new GridBagConstraints(2, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
 		JButton button = new JButton("+1");
 		button.addActionListener(new ActionListener() {
@@ -110,15 +130,15 @@ public class Command extends JPanel {
 				GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 
 		// Node info
+		pairComboBox = new JComboBox<>();
 		connectTo = new JButton("Connexion");
 		connectTo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					int id = Integer.parseInt(address.getText());
-					node.connectTo(new NetworkerNAddress(id));
-					address.setText("-");
-				} catch (NumberFormatException | IOException ex) {
+					node.connectTo(new NetworkerNAddress(((Node) pairComboBox.getSelectedItem()).getId()));
+					update();
+				} catch (IOException ex) {
 					Dialog.displayError(null, ex.getMessage());
 				}
 			}
@@ -134,8 +154,6 @@ public class Command extends JPanel {
 		});
 		disconnect.setEnabled(false);
 
-		address = new JTextField("-");
-
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
@@ -145,9 +163,7 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(nodeName, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(new JLabel("n° de pair : "), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(address, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
+		subPanel.add(pairComboBox, new GridBagConstraints(0, 1, 2, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(connectTo, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
@@ -187,7 +203,7 @@ public class Command extends JPanel {
 		p2pUserModel = new DefaultTableModel();
 		p2pUsers.setModel(p2pUserModel);
 		listScroller = new JScrollPane(p2pUsers);
-		
+
 		subPanel.add(new JLabel("info : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(p2pInfo, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
@@ -208,9 +224,26 @@ public class Command extends JPanel {
 	}
 
 	public void update() {
+		if(wrapper.isAnimated())
+			play.setText("Pause");
+		else
+			play.setText("Play");
+		
 		timeLabel.setText("" + net.getTime());
 		if (node != null) {
 			nodeName.setText(node.getName());
+
+			// pair list
+			pairComboBox.removeAllItems();
+			pairComboBox.setEnabled(true);
+			ArrayList<Node> connectedNode = new ArrayList<Node>();
+			for (Link l : node.getLinks())
+				connectedNode.add(l.getDestNode());
+			for (Node n : net.getNodes()) {
+				if (n != node && !connectedNode.contains(n))
+					pairComboBox.addItem(n);
+			}
+
 			connectTo.setEnabled(true);
 			disconnect.setEnabled(true);
 
@@ -244,10 +277,13 @@ public class Command extends JPanel {
 			p2pUserModel.setDataVector(usersInfo, p2pUsersColumnNames);
 		} else {
 			nodeName.setText("");
+			pairComboBox.removeAllItems();
+			pairComboBox.setEnabled(false);
 			connectTo.setEnabled(false);
 			disconnect.setEnabled(false);
 			linksInfoModel.setDataVector(new Object[0][], linksColumnNames);
 			p2pInfo.setText("");
+			p2pName.setText("");
 			p2pUserModel.setDataVector(new Object[0][], p2pUsersColumnNames);
 		}
 	}

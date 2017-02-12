@@ -23,9 +23,10 @@ public class Link implements Steppable, NUser {
 	private Node source;
 	private Node dest;
 	private DataBuffer<TimedData> buffer;
+	private DataBuffer<Data> waitQueue;
 
 	private float weight;
-	
+
 	private int pushedThisRound;
 
 	/**
@@ -50,8 +51,9 @@ public class Link implements Steppable, NUser {
 		rand = new Random();
 
 		buffer = new DataBuffer<>(packetSize);
+		waitQueue = new DataBuffer<>(1000);
 		computeWeight();
-		
+
 		pushedThisRound = 0;
 	}
 
@@ -85,7 +87,7 @@ public class Link implements Steppable, NUser {
 	public Node getDestNode() {
 		return dest;
 	}
-	
+
 	public Node getSourceNode() {
 		return source;
 	}
@@ -121,8 +123,10 @@ public class Link implements Steppable, NUser {
 	 */
 	public boolean push(Data data) {
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data, pushedThisRound++);
-		net.signalNewData(tdata, this);
-		return buffer.push(tdata);
+		boolean pushed = buffer.push(tdata);
+		if (pushed)
+			net.signalNewData(tdata, this);
+		return pushed;
 	}
 
 	/**
@@ -130,8 +134,11 @@ public class Link implements Steppable, NUser {
 	 * The data have a probability to be lost, according the loss parameter
 	 */
 	@Override
-	public void doTimeStep() {
+	public synchronized void doTimeStep() {
 		pushedThisRound = 0;
+		while (!buffer.isFull() && !waitQueue.isEmpty()) {
+			push(waitQueue.pop());
+		}
 		// push data to node it's time
 		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
 			TimedData tdata = buffer.pop();
@@ -141,6 +148,12 @@ public class Link implements Steppable, NUser {
 			float x = rand.nextFloat();
 			if (x >= loss)
 				dest.handleData(source, tdata.data);
+			else
+				try {
+					send(tdata.data);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 	}
 
@@ -148,7 +161,17 @@ public class Link implements Steppable, NUser {
 
 	@Override
 	public void send(Object o) throws IOException {
-		push(new Data(o, net.getTime()));
+		Data d = new Data(o, net.getTime());
+
+		boolean pushed = false;
+		if (waitQueue.isEmpty())
+			pushed = push(d);
+
+		if (!pushed) {
+			boolean onQueue = waitQueue.push(d);
+			if (!onQueue)
+				throw new IOException("waitQueue full");
+		}
 	}
 
 	@Override

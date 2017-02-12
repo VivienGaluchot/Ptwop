@@ -156,8 +156,8 @@ public class SpaceTransform implements Animable, ComponentListener {
 
 		g2d.transform(currentTransform);
 
-		Font currentFont = g2d.getFont();
-		Font newFont = currentFont.deriveFont(currentFont.getSize() * 0.06f);
+		Font currentFont = new Font("Consolas", Font.PLAIN, 1);
+		Font newFont = currentFont.deriveFont(0.8f);
 		g2d.setFont(newFont);
 		g2d.setStroke(new BasicStroke(0.06f));
 

@@ -68,15 +68,16 @@ public class NetWorker {
 		AnimationPanel mainPanel = new AnimationPanel(spaceTransform);
 		spaceTransform.setFather(mainPanel);
 
-		final Network net = new Network();
+		Network net = new Network();
 		int nodeNumber = 10;
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
-		GaussianRandom linkPacketSize = new GaussianRandom(1, 100, 10, 5);
+		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
 		net.randomize(nodeNumber, linkLatency, linkLoss, linkPacketSize);
-
-		final Command command = new Command(net);
-		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform, command);
+		
+		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform);
+		Command command = new Command(mainWrapper);
+		mainWrapper.setCommand(command);
 		spaceTransform.setAnimable(mainWrapper);
 		spaceTransform.setGraphicSize(nodeNumber * 2 + 10);
 

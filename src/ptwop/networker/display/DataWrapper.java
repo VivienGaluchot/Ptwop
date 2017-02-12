@@ -17,7 +17,7 @@ public class DataWrapper implements Animable, HCS {
 	private TimedData data;
 	private LinkWrapper linkWrapper;
 
-	static private float dataRadius = 0.2f;
+	static private float dataRadius = 0.3f;
 
 	private boolean clicked;
 	private boolean hovered;
@@ -25,11 +25,17 @@ public class DataWrapper implements Animable, HCS {
 
 	private Shape shape;
 
+	private float advance;
+
 	public DataWrapper(TimedData data, LinkWrapper linkWrapper, NetworkWrapper netWrapper) {
 		this.data = data;
 		this.netWrapper = netWrapper;
 		this.linkWrapper = linkWrapper;
 		shape = null;
+	}
+
+	public float getAdvance() {
+		return advance;
 	}
 
 	@Override
@@ -41,9 +47,7 @@ public class DataWrapper implements Animable, HCS {
 		else
 			g2d.setColor(netWrapper.getHoveredColor());
 
-		float advance = (float) (netWrapper.getNetwork().getTime() - data.inTime) / (data.outTime - data.inTime);
-		if (advance > 1)
-			netWrapper.removeData(data);
+		advance = (float) (netWrapper.getNetwork().getTime() - data.inTime) / (data.outTime - data.inTime);
 
 		// Shape
 		Vector2D dataPos = linkWrapper.getP2().subtract(linkWrapper.getP1()).multiply(advance).add(linkWrapper.getP1());
@@ -53,10 +57,10 @@ public class DataWrapper implements Animable, HCS {
 
 		// Message
 		if (isHovered() || isClicked() || isSelected()) {
-			dataPos = dataPos.add(linkWrapper.getSlideNorm().multiply(0.5));
+			dataPos = dataPos.add(linkWrapper.getSlideNorm());
 			String dispMsg = data.toString();
 			Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
-			bound.setRect((float) (dataPos.x - bound.getWidth() / 2), (float) dataPos.y + 0.25f - bound.getHeight(),
+			bound.setRect((float) (dataPos.x - bound.getWidth() / 2), (float) dataPos.y + 0.5f - bound.getHeight(),
 					bound.getWidth(), bound.getHeight());
 			g2d.setColor(new Color(1f, 1f, 1f, 0.6f));
 			g2d.fill(bound);

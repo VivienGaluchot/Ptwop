@@ -51,9 +51,9 @@ public class Node extends NManager implements Steppable {
 
 	public void removeLink(Link link) {
 		links.remove(link);
-		net.signalRemovedLink(link);
 		routingMap.remove(link);
 		userQuit(link);
+		net.signalRemovedLink(link);
 	}
 	
 	public void removeLinkTo(Node node) {

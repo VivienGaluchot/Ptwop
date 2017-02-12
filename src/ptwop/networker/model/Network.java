@@ -118,10 +118,8 @@ public class Network implements Steppable {
 	}
 
 	@Override
-	public void doTimeStep() {
+	public synchronized void doTimeStep() {
 		time++;
-		// TODO generate data ?
-
 		for (Node n : nodes) {
 			n.doTimeStep();
 		}
