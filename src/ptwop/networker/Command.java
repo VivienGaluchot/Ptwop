@@ -39,7 +39,6 @@ public class Command extends JPanel {
 
 	// Network
 	private JButton play;
-	private JButton pause;
 
 	// Node info
 	private Node node;
