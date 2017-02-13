@@ -12,7 +12,8 @@ import ptwop.networker.display.NetworkWrapper;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.v0.Flood;
+import ptwop.p2p.flood.FloodV0;
+import ptwop.p2p.flood.FloodV1;
 
 public class Network implements Steppable {
 
@@ -75,7 +76,7 @@ public class Network implements Steppable {
 		n.setId(nodes.size());
 		nodes.add(n);
 
-		P2P p2p = new Flood(n, nameGenerator.getWord(6));
+		P2P p2p = new FloodV1(n, nameGenerator.getWord(6));
 		p2ps.put(n, p2p);
 		p2p.setMessageHandler(new P2PHandler() {
 			@Override

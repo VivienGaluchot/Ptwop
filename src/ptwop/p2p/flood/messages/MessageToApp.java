@@ -1,4 +1,4 @@
-package ptwop.p2p.v0.messages;
+package ptwop.p2p.flood.messages;
 
 public class MessageToApp extends FloodMessage{
 	private static final long serialVersionUID = 1L;

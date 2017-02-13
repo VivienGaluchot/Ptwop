@@ -32,7 +32,7 @@ import ptwop.network.tcp.TcpNManager;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.v0.Flood;
+import ptwop.p2p.flood.FloodV0;
 
 public class DemoApp {
 
@@ -171,7 +171,7 @@ public class DemoApp {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					NManager manager = new TcpNManager(Integer.parseInt(listenPort.getText()));
-					p2p = new Flood(manager, name.getText());
+					p2p = new FloodV0(manager, name.getText());
 					p2p.setMessageHandler(new Handler());
 					p2p.start();
 					listenPort.setEditable(false);

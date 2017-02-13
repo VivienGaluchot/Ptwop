@@ -1,7 +1,8 @@
-package ptwop.p2p.v0;
+package ptwop.p2p.flood;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.BiMap;
@@ -14,33 +15,91 @@ import ptwop.network.NUserHandler;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.v0.messages.ConnectTo;
-import ptwop.p2p.v0.messages.FloodMessage;
-import ptwop.p2p.v0.messages.MessageToApp;
-import ptwop.p2p.v0.messages.MyNameIs;
+import ptwop.p2p.flood.messages.ConnectTo;
+import ptwop.p2p.flood.messages.FloodMessage;
+import ptwop.p2p.flood.messages.MessageToApp;
+import ptwop.p2p.flood.messages.MyNameIs;
 
-public class Flood implements P2P, NUserHandler {
+public class FloodV1 implements P2P, NUserHandler {
 
 	private NManager manager;
 
 	private BiMap<P2PUser, NUser> otherUsers;
 	private P2PUser myself;
 
+	private Set<Set<NAddress>> neighbours;
+
 	private P2PHandler p2pHandler;
 
-	public Flood(NManager manager, String myName) {
+	public FloodV1(NManager manager, String myName) {
 		System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
+		neighbours = new HashSet<>();
 		myself = new P2PUser(myName, manager.getMyAddress());
 		this.manager = manager;
 		manager.setHandler(this);
 	}
-	
-	public void sendUserListTo(NUser user){
+
+	public void addNeighbours(NAddress a, NAddress b) {
+		synchronized (neighbours) {
+			if (neighbours.isEmpty()) {
+				Set<NAddress> newSet = new HashSet<>();
+				newSet.add(a);
+				newSet.add(b);
+				neighbours.add(newSet);
+			} else {
+				Set<NAddress> setFind = null;
+				Set<Set<NAddress>> toRemove = new HashSet<>();
+				for (Set<NAddress> set : neighbours) {
+					if (setFind == null) {
+						if (set.contains(a)) {
+							set.add(b);
+							setFind = set;
+						} else if (set.contains(b)) {
+							set.add(a);
+							setFind = set;
+						}
+					} else if (set.contains(a) || set.contains(b)) {
+						setFind.addAll(set);
+						toRemove.add(set);
+					}
+				}
+				for (Set<NAddress> s : toRemove) {
+					neighbours.remove(s);
+				}
+			}
+		}
+	}
+
+	public boolean areNeighbours(NAddress a, NAddress b) {
+		synchronized (neighbours) {
+			for (Set<NAddress> s : neighbours) {
+				if (s.contains(a) && s.contains(b)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void removeFromNeighbours(NAddress a) {
+		synchronized (neighbours) {
+			Set<NAddress> removedFrom = null;
+			for (Set<NAddress> s : neighbours) {
+				s.remove(a);
+				removedFrom = s;
+				break;
+			}
+			if (removedFrom != null && removedFrom.isEmpty())
+				neighbours.remove(removedFrom);
+		}
+	}
+
+	public void sendUserListTo(NUser user) {
 		try {
 			synchronized (otherUsers) {
 				for (NUser u : otherUsers.inverse().keySet()) {
-					if (u != user) {
+					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
 						user.send(new ConnectTo(u.getAddress()));
 					}
 				}
@@ -49,9 +108,9 @@ public class Flood implements P2P, NUserHandler {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return "Flood P2P";
 	}
 
@@ -119,14 +178,14 @@ public class Flood implements P2P, NUserHandler {
 		System.out.println("newUser() " + pair);
 
 		sendUserListTo(pair);
-		
+
 		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		
+
 		p2pHandler.userConnect(user);
-		
+
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -137,16 +196,16 @@ public class Flood implements P2P, NUserHandler {
 	@Override
 	public void connectedTo(NUser pair) {
 		System.out.println("connectedTo() " + pair);
-		
+
 		sendUserListTo(pair);
-		
+
 		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		
+
 		p2pHandler.userConnect(user);
-		
+
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -176,8 +235,10 @@ public class Flood implements P2P, NUserHandler {
 			ConnectTo m = (ConnectTo) o;
 			System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.address);
 			try {
+				addNeighbours(user.getAddress(), m.address);
 				manager.connectTo(m.address);
 			} catch (IOException e) {
+				removeFromNeighbours(m.address);
 				System.out.println("Impossible to connect to " + m.address + " : " + e.getMessage());
 			}
 		} else if (o instanceof MessageToApp) {
@@ -191,6 +252,7 @@ public class Flood implements P2P, NUserHandler {
 	@Override
 	public void userQuit(NUser user) {
 		System.out.println("connectionClosed()");
+		removeFromNeighbours(user.getAddress());
 		P2PUser disconnectedUser = otherUsers.inverse().get(user);
 		otherUsers.remove(disconnectedUser);
 		p2pHandler.userDisconnect(disconnectedUser);

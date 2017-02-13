@@ -1,4 +1,4 @@
-package ptwop.p2p.v0.messages;
+package ptwop.p2p.flood.messages;
 
 import java.io.Serializable;
 
