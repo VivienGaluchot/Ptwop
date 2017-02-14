@@ -26,7 +26,7 @@ public class TcpNManager extends NManager implements Runnable {
 	}
 
 	@Override
-	public NAddress getMyAddress() {
+	public NAddress getAddress() {
 		return new TcpNAddress(listener.getInetAddress(), listener.getLocalPort());
 	}
 
@@ -45,7 +45,7 @@ public class TcpNManager extends NManager implements Runnable {
 
 	@Override
 	public void connectTo(NAddress address) throws IOException {
-		if (address == getMyAddress()) {
+		if (address == getAddress()) {
 			System.out.println("Can't connect to myself " + address);
 			return;
 		}

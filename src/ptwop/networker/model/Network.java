@@ -6,15 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import passgen.WordGenerator;
 import ptwop.common.math.GaussianRandom;
 import ptwop.networker.display.NetworkWrapper;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.flood.FloodV0;
-import ptwop.p2p.flood.FloodV1;
-import ptwop.p2p.flood.FloodV2;
 
 public class Network implements Steppable {
 
@@ -27,12 +23,12 @@ public class Network implements Steppable {
 	private GaussianRandom latency;
 	private GaussianRandom loss;
 
-	private WordGenerator nameGenerator;
-
 	private NetworkWrapper wrapper;
 
-	public Network() {
-		nameGenerator = new WordGenerator();
+	private P2PCreator creator;
+
+	public Network(P2PCreator creator) {
+		this.creator = creator;
 		nodes = new ArrayList<>();
 		p2ps = new HashMap<>();
 		time = 0;
@@ -53,12 +49,12 @@ public class Network implements Steppable {
 		if (wrapper != null)
 			wrapper.removeLink(l);
 	}
-	
+
 	public void signalNewData(TimedData d, Link l) {
 		if (wrapper != null)
 			wrapper.addData(d, l);
 	}
-	
+
 	public void signalRemovedData(TimedData d) {
 		if (wrapper != null)
 			wrapper.removeData(d);
@@ -77,7 +73,7 @@ public class Network implements Steppable {
 		n.setId(nodes.size());
 		nodes.add(n);
 
-		P2P p2p = new FloodV2(n, nameGenerator.getWord(6));
+		P2P p2p = creator.createP2P(n);
 		p2ps.put(n, p2p);
 		p2p.setMessageHandler(new P2PHandler() {
 			@Override
@@ -87,17 +83,18 @@ public class Network implements Steppable {
 
 			@Override
 			public void userConnect(P2PUser user) {
-				System.out.println("Node " + n + " | connected to " + user);
+				// System.out.println("Node " + n + " | connected to " + user);
 			}
 
 			@Override
 			public void userUpdate(P2PUser user) {
-				System.out.println("Node " + n + " | update from " + user);
+				// System.out.println("Node " + n + " | update from " + user);
 			}
 
 			@Override
 			public void userDisconnect(P2PUser user) {
-				System.out.println("Node " + n + " | disconnected from " + user);
+				// System.out.println("Node " + n + " | disconnected from " +
+				// user);
 			}
 		});
 		p2p.start();

@@ -27,7 +27,7 @@ public class Node extends NManager implements Steppable {
 
 	public void linkConnectedTo(Link link) {
 		if (links.contains(link)) {
-			System.out.println("already connected to " + link);
+			// System.out.println("already connected to " + link);
 			return;
 		}
 
@@ -39,7 +39,7 @@ public class Node extends NManager implements Steppable {
 
 	public void addLink(Link link) {
 		if (links.contains(link)) {
-			System.out.println("already connected to " + link);
+			// System.out.println("already connected to " + link);
 			return;
 		}
 
@@ -106,17 +106,17 @@ public class Node extends NManager implements Steppable {
 
 	@Override
 	public void start() {
-		System.out.println("Starting node " + this);
+		// System.out.println("Starting node " + this);
 	}
 
 	@Override
-	public NAddress getMyAddress() {
+	public NAddress getAddress() {
 		return new NetworkerNAddress(this);
 	}
 
 	@Override
 	public void connectTo(NAddress address) throws IOException {
-		System.out.println("Connecting " + this + " to " + address);
+		// System.out.println("Connecting " + this + " to " + address);
 		if (address instanceof NetworkerNAddress) {
 			Node n = net.getNode((NetworkerNAddress) address);
 			if (n == null)

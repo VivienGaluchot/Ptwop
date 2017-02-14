@@ -3,8 +3,6 @@ package ptwop.networker;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -13,13 +11,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
+import passgen.WordGenerator;
 import ptwop.common.gui.AnimationPanel;
 import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
+import ptwop.network.NManager;
 import ptwop.networker.display.NetworkWrapper;
 import ptwop.networker.model.Network;
+import ptwop.networker.model.P2PCreator;
+import ptwop.p2p.P2P;
+import ptwop.p2p.flood.FloodV2;
 
 public class NetWorker {
 	private static JTextPane console;
@@ -67,8 +70,14 @@ public class NetWorker {
 		SpaceTransform spaceTransform = new SpaceTransform();
 		AnimationPanel mainPanel = new AnimationPanel(spaceTransform);
 		spaceTransform.setFather(mainPanel);
-
-		Network net = new Network();
+		
+		WordGenerator nameGenerator = new WordGenerator();
+		Network net = new Network(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV2(n, nameGenerator.getWord(6));
+			}
+		});
 		int nodeNumber = 10;
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
@@ -88,14 +97,6 @@ public class NetWorker {
 		mainPanel.addMouseListener(mainWrapper);
 		mainPanel.addMouseMotionListener(mainWrapper);
 		mainPanel.addMouseWheelListener(mainWrapper);
-
-		mainPanel.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-				net.doTimeStep();
-				command.update();
-			}
-		});
 
 		spaceTransform.setDisplayGrid(true);
 		spaceTransform.setGridSize(5);

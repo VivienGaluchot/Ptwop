@@ -20,7 +20,7 @@ public abstract class NManager implements NUserHandler {
 
 	public abstract void start();
 
-	public abstract NAddress getMyAddress();
+	public abstract NAddress getAddress();
 
 	public abstract void connectTo(NAddress address) throws IOException;
 

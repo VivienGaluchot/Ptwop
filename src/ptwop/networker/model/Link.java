@@ -182,6 +182,6 @@ public class Link implements Steppable, NUser {
 
 	@Override
 	public NAddress getAddress() {
-		return dest.getMyAddress();
+		return dest.getAddress();
 	}
 }

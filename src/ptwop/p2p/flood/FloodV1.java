@@ -32,10 +32,10 @@ public class FloodV1 implements P2P, NUserHandler {
 	private P2PHandler p2pHandler;
 
 	public FloodV1(NManager manager, String myName) {
-		System.out.println("Flood initialisation");
+		// System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
 		neighbours = new HashSet<>();
-		myself = new P2PUser(myName, manager.getMyAddress());
+		myself = new P2PUser(myName, manager.getAddress());
 		this.manager = manager;
 		manager.setHandler(this);
 	}
@@ -175,7 +175,7 @@ public class FloodV1 implements P2P, NUserHandler {
 
 	@Override
 	public void newUser(NUser pair) {
-		System.out.println("newUser() " + pair);
+		// System.out.println("newUser() " + pair);
 
 		sendUserListTo(pair);
 
@@ -195,7 +195,7 @@ public class FloodV1 implements P2P, NUserHandler {
 
 	@Override
 	public void connectedTo(NUser pair) {
-		System.out.println("connectedTo() " + pair);
+		// System.out.println("connectedTo() " + pair);
 
 		sendUserListTo(pair);
 
@@ -233,7 +233,7 @@ public class FloodV1 implements P2P, NUserHandler {
 			p2pHandler.userUpdate(senderUser);
 		} else if (o instanceof ConnectTo) {
 			ConnectTo m = (ConnectTo) o;
-			System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.address);
+			// System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.address);
 			try {
 				addNeighbours(user.getAddress(), m.address);
 				manager.connectTo(m.address);
@@ -251,7 +251,7 @@ public class FloodV1 implements P2P, NUserHandler {
 
 	@Override
 	public void userQuit(NUser user) {
-		System.out.println("connectionClosed()");
+		// System.out.println("connectionClosed()");
 		removeFromNeighbours(user.getAddress());
 		P2PUser disconnectedUser = otherUsers.inverse().get(user);
 		otherUsers.remove(disconnectedUser);
