@@ -92,8 +92,12 @@ public class Link implements Steppable, NUser {
 		return source;
 	}
 
-	public int getNumberOfElements() {
+	public int getNumberOfTransitingElements() {
 		return buffer.numerOfElements();
+	}
+	
+	public int getNumberOfPendingMessages() {
+		return buffer.numerOfElements() + waitQueue.numerOfElements();
 	}
 
 	public int getSize() {

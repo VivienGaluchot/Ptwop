@@ -253,7 +253,7 @@ public class Command extends JPanel {
 				Link l = links.get(i);
 				infos[i] = new Object[5];
 				infos[i][0] = new String(l.getDestNode().getName());
-				infos[i][1] = new String(l.getNumberOfElements() + "/" + l.getSize());
+				infos[i][1] = new String(l.getNumberOfTransitingElements() + "/" + l.getSize());
 				infos[i][2] = new Float(l.getLoss());
 				infos[i][3] = new Float(l.getLatency());
 				infos[i][4] = new Float(l.getWeight());

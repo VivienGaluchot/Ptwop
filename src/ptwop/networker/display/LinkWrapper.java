@@ -109,7 +109,7 @@ public class LinkWrapper implements Animable, HCS {
 
 			// Msg
 			if (showMsh) {
-				String dispMsg = link.getNumberOfElements() + "";
+				String dispMsg = link.getNumberOfTransitingElements() + "";
 				Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
 				Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
 				mspPos = mspPos.add(slideNorm.multiply(0.4));

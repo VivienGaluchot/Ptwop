@@ -150,6 +150,12 @@ public class Network implements Steppable {
 			addNode(node);
 		}
 	}
+	
+	public Node addNewNode(){
+		Node node = new Node(this);
+		addNode(node);
+		return node;
+	}
 
 	public void connectMeTo(Node me, Node dest) {
 		me.linkConnectedTo(new Link(this, me, dest, latency.nextLong(), loss.nextFloat(), packetSize.nextInt()));

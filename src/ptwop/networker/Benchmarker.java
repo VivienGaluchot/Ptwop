@@ -1,7 +1,9 @@
 package ptwop.networker;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Iterator;
+
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NManager;
@@ -14,125 +16,146 @@ import ptwop.p2p.P2P;
 import ptwop.p2p.flood.*;
 
 public class Benchmarker {
-
-	static ArrayList<Long> connectionTime;
-	static ArrayList<Integer> messageNumbers;
-
 	public static void main(String[] args) {
-		connectionTime = new ArrayList<>();
-		messageNumbers = new ArrayList<>();
+		DefaultCategoryDataset messageNumbersDataset = new DefaultCategoryDataset();
+		DefaultCategoryDataset threeMoy = new DefaultCategoryDataset();
 
-		int nC = 1;
+		int nC = 100;
 		for (int i = 0; i < nC; i++) {
-			createNetwork(100);
-			for (Integer j : messageNumbers)
-				System.out.println(j);
-			messageNumbers.clear();
+			Network net = createInterconnectedNetwork(new P2PCreator() {
+				@Override
+				public P2P createP2P(NManager n) {
+					return new FloodV0(n, "");
+				}
+			}, 10, messageNumbersDataset, "" + i);
+			connectNodeAndWait(net, messageNumbersDataset, "" + i);
+			System.out.println("Passe " + i);
 		}
+		 displayMinMaxMoy(messageNumbersDataset, "FloodV0", "Temps", "Nombre de messages");
+		getMinMaxMoy(threeMoy, messageNumbersDataset, "FloodV0");
 
-		long moy = 0;
-		for (Long l : connectionTime) {
-			moy += l;
+		for (int i = 0; i < nC; i++) {
+			Network net = createInterconnectedNetwork(new P2PCreator() {
+				@Override
+				public P2P createP2P(NManager n) {
+					return new FloodV1(n, "");
+				}
+			}, 10, messageNumbersDataset, "" + i);
+			connectNodeAndWait(net, messageNumbersDataset, "" + i);
+			System.out.println("Passe " + i);
 		}
-		moy = moy / nC;
-		System.out.println("Moyenne : " + moy);
+		 displayMinMaxMoy(messageNumbersDataset, "FloodV1", "Temps", "Nombre de messages");
+		getMinMaxMoy(threeMoy, messageNumbersDataset, "FloodV1");
 
-		double variance = 0;
-		for (Long l : connectionTime) {
-			variance += (l - moy) * (l - moy);
+		for (int i = 0; i < nC; i++) {
+			Network net = createInterconnectedNetwork(new P2PCreator() {
+				@Override
+				public P2P createP2P(NManager n) {
+					return new FloodV2(n, "");
+				}
+			}, 10, messageNumbersDataset, "" + i);
+			connectNodeAndWait(net, messageNumbersDataset, "" + i);
+			System.out.println("Passe " + i);
 		}
-		variance = variance / connectionTime.size();
-		// System.out.println("Variance : " + variance);
-
-		double eqType = Math.sqrt(variance);
-		System.out.println("eqType : " + eqType);
+		 displayMinMaxMoy(messageNumbersDataset, "FloodV2", "Temps", "Nombre de messages");
+		getMinMaxMoy(threeMoy, messageNumbersDataset, "FloodV2");
+		new Chart("Comparaison", "Temps", "Nombre de messages", threeMoy);
 	}
 
-	// test de connection a un réseau existant
-	public static Network createNetwork(int nodeNumber) {
-		Network net = new Network(new P2PCreator() {
-			@Override
-			public P2P createP2P(NManager n) {
-				return new FloodV2(n, "");
+	public static void displayMinMaxMoy(DefaultCategoryDataset messageNumbersDataset, String title, String xAxis,
+			String yAxis) {
+		new Chart(title, xAxis, yAxis, getMinMaxMoy(new DefaultCategoryDataset(), messageNumbersDataset, title));
+	}
+
+	public static DefaultCategoryDataset getMinMaxMoy(DefaultCategoryDataset outDataSet,
+			DefaultCategoryDataset inDataSet, String title) {
+		for (Object ckey : inDataSet.getColumnKeys()) {
+			Double min = Double.MAX_VALUE;
+			Double max = Double.MIN_VALUE;
+			Double moy = 0.0;
+			int nb = 0;
+			for (Object rkey : inDataSet.getRowKeys()) {
+				Number value = inDataSet.getValue((Comparable<?>) rkey, (Comparable<?>) ckey);
+				if (value instanceof Double) {
+					Double n = (Double) value;
+					if (n < min)
+						min = n;
+					if (n > max)
+						max = n;
+					moy += n;
+					nb++;
+				}
 			}
-		});
+			moy = moy / nb;
+			outDataSet.addValue(min, title + "min", (Comparable<?>) ckey);
+			outDataSet.addValue(moy, title + "moy", (Comparable<?>) ckey);
+			outDataSet.addValue(max, title + "max", (Comparable<?>) ckey);
+		}
+
+		return outDataSet;
+	}
+
+	public static void reachStability(Network net, DefaultCategoryDataset dataset, String category) {
+		int messageNumber;
+		do {
+			net.doTimeStep();
+			if (dataset != null) {
+				dataset.setValue(getTransitingMessagesNumber(net), category, new Long(net.getTime()));
+			}
+			messageNumber = getPendingMessageNumber(net);
+		} while (messageNumber > 0);
+	}
+
+	public static Network createInterconnectedNetwork(P2PCreator p2pC, int nodeNumber, DefaultCategoryDataset dataset,
+			String category) {
+		Network net = new Network(p2pC);
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
 		net.randomize(nodeNumber + 1, linkLatency, linkLoss, linkPacketSize);
 
-		Node alone = net.getNode(0);
-
-		// connect all nodes to all nodes and wait stabilization
-		for (Node n1 : net.getNodes()) {
-			for (Node n2 : net.getNodes()) {
-				if (n1 != alone && n2 != alone && n1 != n2 && !n1.isConnectedTo(n2.getAddress())) {
-					try {
-						n1.connectTo(n2.getAddress());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+		// Connect all nodes but 'alone' in line
+		Iterator<Node> nodeIt = net.getNodes().iterator();
+		Node prev = null;
+		while (nodeIt.hasNext()) {
+			Node n = nodeIt.next();
+			if (prev != null)
+				try {
+					n.connectTo(prev.getAddress());
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			}
+			prev = n;
 		}
+		reachStability(net, dataset, category);
+		return net;
+	}
 
-		boolean stable = false;
-		long stableTime = 0;
-		int messageNumber;
-		do {
-			do {
-				net.doTimeStep();
-				messageNumber = getMessageNumber(net);
-				messageNumbers.add(messageNumber);
-			} while (messageNumber > 0);
-			stable = true;
-			stableTime = net.getTime();
-			// 50 more steps
-			for (int i = 0; i < 50; i++) {
-				net.doTimeStep();
-				messageNumber = getMessageNumber(net);
-				if (messageNumber > 0) {
-					stable = false;
-					break;
-				}
-			}
-		} while (!stable);
-
-		System.out.println("Network stabilized at " + stableTime + "ms");
-		connectionTime.add(stableTime);
+	public static void connectNodeAndWait(Network net, DefaultCategoryDataset dataset, String category) {
+		Node alone = net.addNewNode();
 		try {
 			alone.connectTo(new NetworkerNAddress(1));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		stable = false;
-		do {
-			do {
-				net.doTimeStep();
-				messageNumber = getMessageNumber(net);
-				messageNumbers.add(messageNumber);
-			} while (messageNumber > 0);
-			stable = true;
-			stableTime = net.getTime();
-			// 50 more steps
-			for (int i = 0; i < 50; i++) {
-				net.doTimeStep();
-				messageNumber = getMessageNumber(net);
-				if (messageNumber > 0) {
-					stable = false;
-					break;
-				}
-			}
-		} while (!stable);
-		return net;
+		reachStability(net, dataset, category);
 	}
 
-	public static int getMessageNumber(Network net) {
+	public static int getPendingMessageNumber(Network net) {
 		int res = 0;
 		for (Node n : net.getNodes()) {
 			for (Link l : n.getLinks()) {
-				res += l.getTransitingDatas().size();
+				res += l.getNumberOfPendingMessages();
+			}
+		}
+		return res;
+	}
+
+	public static int getTransitingMessagesNumber(Network net) {
+		int res = 0;
+		for (Node n : net.getNodes()) {
+			for (Link l : n.getLinks()) {
+				res += l.getNumberOfTransitingElements();
 			}
 		}
 		return res;
