@@ -9,6 +9,7 @@ import java.util.Map;
 
 import ptwop.network.NAddress;
 import ptwop.network.NManager;
+import ptwop.networker.DataTracker;
 
 public class Node extends NManager implements Steppable {
 	private Network net;
@@ -16,6 +17,11 @@ public class Node extends NManager implements Steppable {
 	private int id;
 	private ArrayList<Link> links;
 	private Map<Node, Link> routingMap;
+
+	/* BENCHMARK */
+	public boolean track = false;
+	public DataTracker<Integer> linkNumberTracker = new DataTracker<>();
+	public DataTracker<Integer> totalBandwithUsed = new DataTracker<>();
 
 	public Node(Network net) {
 		this.net = net;
@@ -55,7 +61,7 @@ public class Node extends NManager implements Steppable {
 		userQuit(link);
 		net.signalRemovedLink(link);
 	}
-	
+
 	public void removeLinkTo(Node node) {
 		Link link = routingMap.get(node);
 		removeLink(link);
@@ -89,6 +95,16 @@ public class Node extends NManager implements Steppable {
 	public void doTimeStep() {
 		for (Link l : links) {
 			l.doTimeStep();
+		}
+
+		/* BENCHMARK */
+		if (track) {
+			linkNumberTracker.addData(links.size());
+			int res = 0;
+			for (Link l : getLinks()) {
+				res += l.getNumberOfTransitingElements();
+			}
+			totalBandwithUsed.addData(res);
 		}
 	}
 

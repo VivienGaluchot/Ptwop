@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import ptwop.common.math.GaussianRandom;
+import ptwop.networker.DataTracker;
 import ptwop.networker.display.NetworkWrapper;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
@@ -26,6 +27,11 @@ public class Network implements Steppable {
 	private NetworkWrapper wrapper;
 
 	private P2PCreator creator;
+
+	/* BENCHMARK */
+	public boolean track = false;
+	public DataTracker<Integer> nodeNumberTracker = new DataTracker<>();
+	public DataTracker<Integer> totalBandwithUsed = new DataTracker<>();
 
 	public Network(P2PCreator creator) {
 		this.creator = creator;
@@ -122,6 +128,18 @@ public class Network implements Steppable {
 		for (Node n : nodes) {
 			n.doTimeStep();
 		}
+
+		/* BENCHMARK */
+		if (track) {
+			nodeNumberTracker.addData(nodes.size());
+			int res = 0;
+			for (Node n : getNodes()) {
+				for (Link l : n.getLinks()) {
+					res += l.getNumberOfTransitingElements();
+				}
+			}
+			totalBandwithUsed.addData(res);
+		}
 	}
 
 	/**
@@ -150,8 +168,8 @@ public class Network implements Steppable {
 			addNode(node);
 		}
 	}
-	
-	public Node addNewNode(){
+
+	public Node addNewNode() {
 		Node node = new Node(this);
 		addNode(node);
 		return node;

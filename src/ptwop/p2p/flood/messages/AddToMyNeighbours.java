@@ -11,6 +11,6 @@ public class AddToMyNeighbours extends FloodMessage {
 	}
 	
 	public String toString() {
-		return "ConnectTo " + address.toString();
+		return "AddToMyNeighbours " + address.toString();
 	}
 }

@@ -102,7 +102,8 @@ public class FloodV2 implements P2P, NUserHandler {
 				for (NUser u : otherUsers.inverse().keySet()) {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
 						user.send(new ConnectTo(u.getAddress()));
-						u.send(new AddToMyNeighbours(user.getAddress()));
+						// u.send(new AddToMyNeighbours(user.getAddress()));
+						u.send(new ConnectTo(user.getAddress()));
 					}
 				}
 			}

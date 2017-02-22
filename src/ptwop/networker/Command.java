@@ -149,6 +149,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				node.stop();
+				update();
 			}
 		});
 		disconnect.setEnabled(false);

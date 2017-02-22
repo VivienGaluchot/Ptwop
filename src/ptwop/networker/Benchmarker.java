@@ -1,9 +1,11 @@
 package ptwop.networker;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NManager;
@@ -17,98 +19,275 @@ import ptwop.p2p.flood.*;
 
 public class Benchmarker {
 	public static void main(String[] args) {
-		DefaultCategoryDataset messageNumbersDataset = new DefaultCategoryDataset();
-		DefaultCategoryDataset threeMoy = new DefaultCategoryDataset();
 
-		int nC = 100;
-		for (int i = 0; i < nC; i++) {
-			Network net = createInterconnectedNetwork(new P2PCreator() {
-				@Override
-				public P2P createP2P(NManager n) {
-					return new FloodV0(n, "");
-				}
-			}, 10, messageNumbersDataset, "" + i);
-			connectNodeAndWait(net, messageNumbersDataset, "" + i);
-			System.out.println("Passe " + i);
-		}
-		 displayMinMaxMoy(messageNumbersDataset, "FloodV0", "Temps", "Nombre de messages");
-		getMinMaxMoy(threeMoy, messageNumbersDataset, "FloodV0");
+		evaluateOneConnectionOverTime(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV0(n, "");
+			}
+		}, "FloodV0");
 
-		for (int i = 0; i < nC; i++) {
-			Network net = createInterconnectedNetwork(new P2PCreator() {
-				@Override
-				public P2P createP2P(NManager n) {
-					return new FloodV1(n, "");
-				}
-			}, 10, messageNumbersDataset, "" + i);
-			connectNodeAndWait(net, messageNumbersDataset, "" + i);
-			System.out.println("Passe " + i);
-		}
-		 displayMinMaxMoy(messageNumbersDataset, "FloodV1", "Temps", "Nombre de messages");
-		getMinMaxMoy(threeMoy, messageNumbersDataset, "FloodV1");
+		evaluateOneConnectionOverTime(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV1(n, "");
+			}
+		}, "FloodV1");
 
-		for (int i = 0; i < nC; i++) {
-			Network net = createInterconnectedNetwork(new P2PCreator() {
-				@Override
-				public P2P createP2P(NManager n) {
-					return new FloodV2(n, "");
-				}
-			}, 10, messageNumbersDataset, "" + i);
-			connectNodeAndWait(net, messageNumbersDataset, "" + i);
-			System.out.println("Passe " + i);
-		}
-		 displayMinMaxMoy(messageNumbersDataset, "FloodV2", "Temps", "Nombre de messages");
-		getMinMaxMoy(threeMoy, messageNumbersDataset, "FloodV2");
-		new Chart("Comparaison", "Temps", "Nombre de messages", threeMoy);
+		evaluateOneConnectionOverTime(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV2(n, "");
+			}
+		}, "FloodV2");
+
+		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
+		// @Override
+		// public P2P createP2P(NManager n) {
+		// return new FloodV0(n, "");
+		// }
+		// }, "FloodV0");
+		//
+		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
+		// @Override
+		// public P2P createP2P(NManager n) {
+		// return new FloodV1(n, "");
+		// }
+		// }, "FloodV1");
+		//
+		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
+		// @Override
+		// public P2P createP2P(NManager n) {
+		// return new FloodV2(n, "");
+		// }
+		// }, "FloodV2");
+
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV0(n, "");
+			}
+		}, "FloodV0");
+
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV1(n, "");
+			}
+		}, "FloodV1");
+
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
+			@Override
+			public P2P createP2P(NManager n) {
+				return new FloodV2(n, "");
+			}
+		}, "FloodV2");
 	}
 
-	public static void displayMinMaxMoy(DefaultCategoryDataset messageNumbersDataset, String title, String xAxis,
+	public static void evaluateOneConnectionOverTime(P2PCreator p2pcreator, String name) {
+		XYSeriesCollection bandwith = new XYSeriesCollection();
+		XYSeriesCollection linknumber = new XYSeriesCollection();
+		ArrayList<Thread> runners = new ArrayList<>();
+		int nC = 200;
+		int nNode = 10;
+		int nThreads = 4;
+		for (int t = 0; t < nThreads; t++) {
+			Thread runner = new Thread() {
+				@Override
+				public void run() {
+					for (int i = 0; i < nC / nThreads; i++) {
+						Network net = new Network(p2pcreator);
+						interconnectedNodes(net, nNode);
+						net.track = true;
+						Node alone = connectNodeAndWait(net);
+						synchronized (bandwith) {
+							bandwith.addSeries(net.totalBandwithUsed.getXYSerie(0, this.hashCode()+i));
+							linknumber.addSeries(alone.linkNumberTracker.getXYSerie(0, this.hashCode()+i));
+						}
+						System.out.println(name + " : passe " + i);
+					}
+				}
+			};
+			runners.add(runner);
+			runner.start();
+		}
+		for (Thread runner : runners) {
+			try {
+				runner.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		displayMinMaxMoy(bandwith, name + " connection d'un noeud", "t (ms)", "Nombre de messages");
+		displayMinMaxMoy(linknumber, name + " connection d'un noeud", "t (ms)", "Nombre de liens");
+	}
+
+	public static void evaluateFullConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
+		XYSeriesCollection connexionTime = new XYSeriesCollection();
+		ArrayList<Thread> runners = new ArrayList<>();
+		int nEssais = 10;
+		int nNodeMax = 50;
+		for (int essai = 0; essai < nEssais; essai++) {
+			Thread runner = new Thread() {
+				@Override
+				public void run() {
+					XYSeries series = new XYSeries(this.hashCode());
+					int j = 1;
+					for (int i = 0; i < nNodeMax; i = i + j++) {
+						Network net = new Network(p2pcreator);
+						interconnectedNodes(net, i);
+						connectNodeAndWait(net);
+						series.add(i, net.getTime());
+						System.out.println(name + " : passe " + i);
+					}
+					synchronized (connexionTime) {
+						connexionTime.addSeries(series);
+					}
+				}
+			};
+			runners.add(runner);
+			runner.start();
+		}
+		for (Thread runner : runners) {
+			try {
+				runner.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		displayMinMaxMoy(connexionTime, name + " noeuds connectés en meme temps", "Nombre de noeuds", "t (ms)");
+	}
+
+	public static void evaluateOneNodeConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
+		XYSeriesCollection connexionTime = new XYSeriesCollection();
+		ArrayList<Thread> runners = new ArrayList<>();
+		int nEssais = 10;
+		int nNodeMax = 50;
+		for (int essai = 0; essai < nEssais; essai++) {
+			Thread runner = new Thread() {
+				@Override
+				public void run() {
+					XYSeries series = new XYSeries(this.hashCode());
+					Network net = new Network(p2pcreator);
+					interconnectedNodes(net, 2);
+					for (int i = 0; i < nNodeMax; i++) {
+						long st = net.getTime();
+						connectNodeAndWait(net);
+						long et = net.getTime();
+						series.add(i, et - st);
+						System.out.println(name + " : passe " + i);
+					}
+					synchronized (connexionTime) {
+						connexionTime.addSeries(series);
+					}
+				}
+			};
+			runners.add(runner);
+			runner.start();
+		}
+		for (Thread runner : runners)
+			try {
+				runner.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		displayMinMaxMoy(connexionTime, name + " noeuds connectés en meme temps", "Nombre de noeuds", "t (ms)");
+	}
+
+	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, String title, String xAxis,
 			String yAxis) {
-		new Chart(title, xAxis, yAxis, getMinMaxMoy(new DefaultCategoryDataset(), messageNumbersDataset, title));
+		new Chart(title, xAxis, yAxis, getYMinMaxMoy(new XYSeriesCollection(), messageNumbersDataset));
 	}
 
-	public static DefaultCategoryDataset getMinMaxMoy(DefaultCategoryDataset outDataSet,
-			DefaultCategoryDataset inDataSet, String title) {
-		for (Object ckey : inDataSet.getColumnKeys()) {
+	public static XYSeriesCollection getYMinMaxMoy(XYSeriesCollection outDataSet, XYSeriesCollection inDataSet) {
+		XYSeries minS = new XYSeries("min");
+		XYSeries moyS = new XYSeries("moy");
+		XYSeries maxS = new XYSeries("max");
+		int nSeries = inDataSet.getSeriesCount();
+		boolean doMore = true;
+		for (int i = 0; doMore; i++) {
 			Double min = Double.MAX_VALUE;
 			Double max = Double.MIN_VALUE;
 			Double moy = 0.0;
 			int nb = 0;
-			for (Object rkey : inDataSet.getRowKeys()) {
-				Number value = inDataSet.getValue((Comparable<?>) rkey, (Comparable<?>) ckey);
-				if (value instanceof Double) {
-					Double n = (Double) value;
-					if (n < min)
-						min = n;
-					if (n > max)
-						max = n;
-					moy += n;
-					nb++;
+			doMore = false;
+			Number vx = null;
+			for (int j = 0; j < nSeries; j++) {
+				XYSeries series = inDataSet.getSeries(j);
+				if (i < series.getItemCount()) {
+					vx = series.getX(i);
+					Number value = series.getY(i);
+					if (value instanceof Double) {
+						Double n = (Double) value;
+						if (n < min)
+							min = n;
+						if (n > max)
+							max = n;
+						moy += n;
+						nb++;
+					} else if (value instanceof Integer) {
+						Integer n = (Integer) value;
+						if (n < min)
+							min = n.doubleValue();
+						if (n > max)
+							max = n.doubleValue();
+						moy += n;
+						nb++;
+					}
+					doMore = true;
 				}
 			}
-			moy = moy / nb;
-			outDataSet.addValue(min, title + "min", (Comparable<?>) ckey);
-			outDataSet.addValue(moy, title + "moy", (Comparable<?>) ckey);
-			outDataSet.addValue(max, title + "max", (Comparable<?>) ckey);
+			if (nb > 0) {
+				moy = moy / nb;
+				minS.add(vx, min);
+				moyS.add(vx, moy);
+				maxS.add(vx, max);
+			}
 		}
-
+		outDataSet.addSeries(minS);
+		outDataSet.addSeries(moyS);
+		outDataSet.addSeries(maxS);
 		return outDataSet;
 	}
 
-	public static void reachStability(Network net, DefaultCategoryDataset dataset, String category) {
+	public static XYSeriesCollection getMoy(XYSeriesCollection outDataSet, XYSeriesCollection inDataSet, String title) {
+		XYSeries moyS = new XYSeries("moy");
+		int nSeries = inDataSet.getSeriesCount();
+		int nValues = inDataSet.getSeries(0).getItemCount();
+		for (int i = 0; i < nValues; i++) {
+			Double moy = 0.0;
+			int nb = 0;
+			for (int j = 0; j < nSeries; j++) {
+				XYSeries series = inDataSet.getSeries(j);
+				if (i < series.getItemCount()) {
+					Number value = series.getY(i);
+					if (value instanceof Double) {
+						Double n = (Double) value;
+						moy += n;
+						nb++;
+					} else if (value instanceof Integer) {
+						Integer n = (Integer) value;
+						moy += n;
+						nb++;
+					}
+				}
+			}
+			moy = moy / nb;
+			moyS.add(inDataSet.getSeries(0).getX(i), moy);
+		}
+		outDataSet.addSeries(moyS);
+		return outDataSet;
+	}
+
+	public static void reachStability(Network net) {
 		int messageNumber;
 		do {
 			net.doTimeStep();
-			if (dataset != null) {
-				dataset.setValue(getTransitingMessagesNumber(net), category, new Long(net.getTime()));
-			}
 			messageNumber = getPendingMessageNumber(net);
 		} while (messageNumber > 0);
 	}
 
-	public static Network createInterconnectedNetwork(P2PCreator p2pC, int nodeNumber, DefaultCategoryDataset dataset,
-			String category) {
-		Network net = new Network(p2pC);
+	public static Network interconnectedNodes(Network net, int nodeNumber) {
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
@@ -127,18 +306,25 @@ public class Benchmarker {
 				}
 			prev = n;
 		}
-		reachStability(net, dataset, category);
+		reachStability(net);
 		return net;
 	}
 
-	public static void connectNodeAndWait(Network net, DefaultCategoryDataset dataset, String category) {
+	public static Node connectNodeAndWait(Network net) {
 		Node alone = net.addNewNode();
+		alone.track = true;
 		try {
-			alone.connectTo(new NetworkerNAddress(1));
+			alone.connectTo(new NetworkerNAddress(0));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		reachStability(net, dataset, category);
+		reachStability(net);
+		// while (alone.getLinks().size() < (net.getNodes().size() - 1))
+		// net.doTimeStep();
+		// // few more steps
+		// for (int j = 0; j < 10; j++)
+		// net.doTimeStep();
+		return alone;
 	}
 
 	public static int getPendingMessageNumber(Network net) {
