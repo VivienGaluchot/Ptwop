@@ -16,7 +16,7 @@ public class Node extends NManager implements Steppable {
 
 	private int id;
 	private ArrayList<Link> links;
-	private Map<Node, Link> routingMap;
+	private Map<Node, Link> linkMap;
 
 	/* BENCHMARK */
 	public boolean track = false;
@@ -28,7 +28,21 @@ public class Node extends NManager implements Steppable {
 		this.setId(0);
 
 		links = new ArrayList<>();
-		routingMap = new HashMap<>();
+		linkMap = new HashMap<>();
+	}
+
+	/**
+	 * Function used to establish a link connection. Called when the connecting
+	 * link have send his TCP syn message
+	 * 
+	 * @param n
+	 */
+	public void signalInitTCP(Node n) {
+		linkMap.get(n).replyTCP();
+	}
+	
+	public void signalACK(Node n) {
+		linkMap.get(n).signalAck();
 	}
 
 	public void linkConnectedTo(Link link) {
@@ -39,7 +53,7 @@ public class Node extends NManager implements Steppable {
 
 		links.add(link);
 		net.signalNewLink(link);
-		routingMap.put(link.getDestNode(), link);
+		linkMap.put(link.getDestNode(), link);
 		super.connectedTo(link);
 	}
 
@@ -51,19 +65,19 @@ public class Node extends NManager implements Steppable {
 
 		links.add(link);
 		net.signalNewLink(link);
-		routingMap.put(link.getDestNode(), link);
+		linkMap.put(link.getDestNode(), link);
 		super.newUser(link);
 	}
 
 	public void removeLink(Link link) {
 		links.remove(link);
-		routingMap.remove(link);
+		linkMap.remove(link);
 		userQuit(link);
 		net.signalRemovedLink(link);
 	}
 
 	public void removeLinkTo(Node node) {
-		Link link = routingMap.get(node);
+		Link link = linkMap.get(node);
 		removeLink(link);
 	}
 
@@ -88,7 +102,7 @@ public class Node extends NManager implements Steppable {
 	}
 
 	public void handleData(Node source, Data data) {
-		newMessage(routingMap.get(source), data.data);
+		newMessage(linkMap.get(source), data.data);
 	}
 
 	@Override

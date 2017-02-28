@@ -82,7 +82,8 @@ public class NetWorker {
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
-		net.randomize(nodeNumber, linkLatency, linkLoss, linkPacketSize);
+		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
+		net.addNewNodes(nodeNumber);
 		
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform);
 		Command command = new Command(mainWrapper);

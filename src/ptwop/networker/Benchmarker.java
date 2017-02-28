@@ -20,26 +20,26 @@ import ptwop.p2p.flood.*;
 public class Benchmarker {
 	public static void main(String[] args) {
 
-		evaluateOneConnectionOverTime(new P2PCreator() {
-			@Override
-			public P2P createP2P(NManager n) {
-				return new FloodV0(n, "");
-			}
-		}, "FloodV0");
-
-		evaluateOneConnectionOverTime(new P2PCreator() {
-			@Override
-			public P2P createP2P(NManager n) {
-				return new FloodV1(n, "");
-			}
-		}, "FloodV1");
-
-		evaluateOneConnectionOverTime(new P2PCreator() {
-			@Override
-			public P2P createP2P(NManager n) {
-				return new FloodV2(n, "");
-			}
-		}, "FloodV2");
+		// evaluateOneConnectionOverTime(new P2PCreator() {
+		// @Override
+		// public P2P createP2P(NManager n) {
+		// return new FloodV0(n, "");
+		// }
+		// }, "FloodV0");
+		//
+		// evaluateOneConnectionOverTime(new P2PCreator() {
+		// @Override
+		// public P2P createP2P(NManager n) {
+		// return new FloodV1(n, "");
+		// }
+		// }, "FloodV1");
+		//
+		// evaluateOneConnectionOverTime(new P2PCreator() {
+		// @Override
+		// public P2P createP2P(NManager n) {
+		// return new FloodV2(n, "");
+		// }
+		// }, "FloodV2");
 
 		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
 		// @Override
@@ -88,9 +88,9 @@ public class Benchmarker {
 		XYSeriesCollection bandwith = new XYSeriesCollection();
 		XYSeriesCollection linknumber = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int nC = 200;
-		int nNode = 10;
-		int nThreads = 4;
+		int nC = 100;
+		int nNode = 20;
+		int nThreads = 8;
 		for (int t = 0; t < nThreads; t++) {
 			Thread runner = new Thread() {
 				@Override
@@ -101,8 +101,8 @@ public class Benchmarker {
 						net.track = true;
 						Node alone = connectNodeAndWait(net);
 						synchronized (bandwith) {
-							bandwith.addSeries(net.totalBandwithUsed.getXYSerie(0, this.hashCode()+i));
-							linknumber.addSeries(alone.linkNumberTracker.getXYSerie(0, this.hashCode()+i));
+							bandwith.addSeries(net.totalBandwithUsed.getXYSerie(0, this.hashCode() + i));
+							linknumber.addSeries(alone.linkNumberTracker.getXYSerie(0, this.hashCode() + i));
 						}
 						System.out.println(name + " : passe " + i);
 					}
@@ -125,7 +125,7 @@ public class Benchmarker {
 	public static void evaluateFullConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection connexionTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int nEssais = 10;
+		int nEssais = 20;
 		int nNodeMax = 50;
 		for (int essai = 0; essai < nEssais; essai++) {
 			Thread runner = new Thread() {
@@ -161,8 +161,8 @@ public class Benchmarker {
 	public static void evaluateOneNodeConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection connexionTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int nEssais = 10;
-		int nNodeMax = 50;
+		int nEssais = 1;
+		int nNodeMax = 150;
 		for (int essai = 0; essai < nEssais; essai++) {
 			Thread runner = new Thread() {
 				@Override
@@ -291,7 +291,8 @@ public class Benchmarker {
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
-		net.randomize(nodeNumber + 1, linkLatency, linkLoss, linkPacketSize);
+		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
+		net.addNewNodes(nodeNumber);
 
 		// Connect all nodes but 'alone' in line
 		Iterator<Node> nodeIt = net.getNodes().iterator();

@@ -29,6 +29,11 @@ public class Link implements Steppable, NUser {
 
 	private int pushedThisRound;
 
+	private boolean established;
+	private boolean initiatingTCP;
+	private boolean replyingTCP;
+	private long timeLeftToEstablish;
+
 	/**
 	 * @param net
 	 *            Network used to get current time
@@ -55,11 +60,22 @@ public class Link implements Steppable, NUser {
 		computeWeight();
 
 		pushedThisRound = 0;
+
+		established = false;
+		initiatingTCP = false;
+		timeLeftToEstablish = latency;
 	}
 
-	// default param
+	/**
+	 * Randomized constructor, use the net randomizers
+	 * 
+	 * @param net
+	 * @param source
+	 * @param dest
+	 */
 	public Link(Network net, Node source, Node dest) {
-		this(net, source, dest, 10, 0, 4);
+		this(net, source, dest, net.getLatencyRandomizer().nextLong(), net.getLossRandomizer().nextFloat(),
+				net.getPacketSizeRandomizer().nextInt());
 	}
 
 	@Override
@@ -70,6 +86,24 @@ public class Link implements Steppable, NUser {
 	@Override
 	public boolean equals(Object o) {
 		return o instanceof Link && ((Link) o).source.equals(source) && ((Link) o).dest.equals(dest);
+	}
+
+	public boolean isEstablished() {
+		return established;
+	}
+
+	public void initiateTCP() {
+		System.out.println("initiateTCP");
+		initiatingTCP = true;
+	}
+	
+	public void replyTCP(){
+		System.out.println("replyTCP");
+		replyingTCP = true;
+	}
+	
+	public void signalAck(){
+		established = true;
 	}
 
 	public void computeWeight() {
@@ -95,7 +129,7 @@ public class Link implements Steppable, NUser {
 	public int getNumberOfTransitingElements() {
 		return buffer.numerOfElements();
 	}
-	
+
 	public int getNumberOfPendingMessages() {
 		return buffer.numerOfElements() + waitQueue.numerOfElements();
 	}
@@ -125,7 +159,9 @@ public class Link implements Steppable, NUser {
 	 *            data to send
 	 * @return true if the data have been successfully added, false otherwise
 	 */
-	public boolean push(Data data) {
+	private boolean push(Data data) {
+		if(!established)
+			return false;
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data, pushedThisRound++);
 		boolean pushed = buffer.push(tdata);
 		if (pushed)
@@ -139,25 +175,42 @@ public class Link implements Steppable, NUser {
 	 */
 	@Override
 	public synchronized void doTimeStep() {
-		pushedThisRound = 0;
-		while (!buffer.isFull() && !waitQueue.isEmpty()) {
-			push(waitQueue.pop());
-		}
-		// push data to node it's time
-		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
-			TimedData tdata = buffer.pop();
-			net.signalRemovedData(tdata);
+		if (established) {
+			pushedThisRound = 0;
+			while (!buffer.isFull() && !waitQueue.isEmpty()) {
+				push(waitQueue.pop());
+			}
 
-			// x float in [0:1[
-			float x = rand.nextFloat();
-			if (x >= loss)
-				dest.handleData(source, tdata.data);
-			else
-				try {
-					send(tdata.data);
-				} catch (IOException e) {
-					e.printStackTrace();
+			// push data to node when it's time
+			while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
+				TimedData tdata = buffer.pop();
+				net.signalRemovedData(tdata);
+
+				// x float in [0:1[
+				float x = rand.nextFloat();
+				if (x >= loss)
+					dest.handleData(source, tdata.data);
+				else
+					try {
+						send(tdata.data);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+			}
+		} else if (initiatingTCP || replyingTCP) {
+			if (timeLeftToEstablish == 0) {
+				if(initiatingTCP){
+					dest.signalInitTCP(source);
+					initiatingTCP = false;
 				}
+				else{
+					// replying TCP
+					dest.signalACK(source);
+					replyingTCP = false;
+					established = true;
+				}
+			} else
+				timeLeftToEstablish--;
 		}
 	}
 

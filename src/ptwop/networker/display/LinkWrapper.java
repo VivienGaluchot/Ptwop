@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
@@ -87,16 +88,22 @@ public class LinkWrapper implements Animable, HCS {
 		Vector2D v2 = p2.subtract(p1);
 
 		if (v.dot(v2) > 0) {
-			g2d.setStroke(new BasicStroke(linkWeightTransform(link.getWeight()), BasicStroke.CAP_ROUND,
-					BasicStroke.JOIN_ROUND));
+			float linkWeight = linkWeightTransform(link.getWeight());
+			if (!link.isEstablished()) {
+				Stroke dashed = new BasicStroke(0.1f, BasicStroke.CAP_BUTT,
+						BasicStroke.JOIN_BEVEL, 0, new float[] { 0.3f }, 0);
+				g2d.setStroke(dashed);
+			} else {
+				g2d.setStroke(new BasicStroke(linkWeight, BasicStroke.CAP_ROUND,
+						BasicStroke.JOIN_ROUND));
+			}
 			// Line
 			slideNorm = v2.getOrthogonal();
 			Vector2D slide = slideNorm.multiply(arrowSpace);
 			p1 = p1.add(slide);
 			p2 = p2.add(slide);
-			Line2D line = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
-			shape = g2d.getStroke().createStrokedShape(line);
-			g2d.fill(shape);
+			Line2D mainline = new Line2D.Double(p1.x, p1.y, p2.x, p2.y);
+			g2d.draw(mainline);
 
 			// Arrow
 			v = p2.clone();
@@ -104,7 +111,7 @@ public class LinkWrapper implements Animable, HCS {
 			v2 = p2.subtract(p1).normalize().multiply(arrowSize);
 			v = v.subtract(v2);
 			Vector2D arrowSide = v.add(slide);
-			line = new Line2D.Double(arrowSide.x, arrowSide.y, p2.x, p2.y);
+			Line2D line = new Line2D.Double(arrowSide.x, arrowSide.y, p2.x, p2.y);
 			g2d.draw(line);
 
 			// Msg
@@ -116,7 +123,12 @@ public class LinkWrapper implements Animable, HCS {
 				g2d.drawString(dispMsg, (float) (mspPos.x - bound.getWidth() / 2), (float) mspPos.y + 0.25f);
 			}
 
+			g2d.setStroke(new BasicStroke(linkWeight, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			shape = g2d.getStroke().createStrokedShape(mainline);
+
 			g2d.dispose();
+		} else {
+			shape = null;
 		}
 	}
 

@@ -38,6 +38,9 @@ public class Network implements Steppable {
 		nodes = new ArrayList<>();
 		p2ps = new HashMap<>();
 		time = 0;
+		packetSize = null;
+		latency = null;
+		loss = null;
 		wrapper = null;
 	}
 
@@ -154,18 +157,28 @@ public class Network implements Steppable {
 	 * @param packetSize
 	 *            random generator for link packet size max
 	 */
-	public void randomize(int n, GaussianRandom latency, GaussianRandom loss, GaussianRandom packetSize) {
-		nodes.clear();
-		p2ps.clear();
-		time = 0;
-
+	
+	public void setRandomizers(GaussianRandom latency, GaussianRandom loss, GaussianRandom packetSize){
 		this.latency = latency;
 		this.loss = loss;
 		this.packetSize = packetSize;
-
+	}
+	
+	public GaussianRandom getLatencyRandomizer(){
+		return latency;
+	}
+	
+	public GaussianRandom getLossRandomizer(){
+		return loss;
+	}
+	
+	public GaussianRandom getPacketSizeRandomizer(){
+		return packetSize;
+	}
+	
+	public void addNewNodes(int n){
 		for (int i = 0; i < n; i++) {
-			Node node = new Node(this);
-			addNode(node);
+			addNewNode();
 		}
 	}
 
@@ -176,7 +189,9 @@ public class Network implements Steppable {
 	}
 
 	public void connectMeTo(Node me, Node dest) {
-		me.linkConnectedTo(new Link(this, me, dest, latency.nextLong(), loss.nextFloat(), packetSize.nextInt()));
-		dest.addLink(new Link(this, dest, me, latency.nextLong(), loss.nextFloat(), packetSize.nextInt()));
+		Link l = new Link(this, me, dest);
+		l.initiateTCP();
+		me.linkConnectedTo(l);
+		dest.addLink(new Link(this, dest, me));
 	}
 }
