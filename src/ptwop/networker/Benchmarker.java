@@ -8,7 +8,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import ptwop.common.math.GaussianRandom;
-import ptwop.network.NManager;
+import ptwop.network.NServent;
 import ptwop.networker.model.Link;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.NetworkerNAddress;
@@ -64,21 +64,21 @@ public class Benchmarker {
 
 		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
 			@Override
-			public P2P createP2P(NManager n) {
+			public P2P createP2P(NServent n) {
 				return new FloodV0(n, "");
 			}
 		}, "FloodV0");
 
 		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
 			@Override
-			public P2P createP2P(NManager n) {
+			public P2P createP2P(NServent n) {
 				return new FloodV1(n, "");
 			}
 		}, "FloodV1");
 
 		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
 			@Override
-			public P2P createP2P(NManager n) {
+			public P2P createP2P(NServent n) {
 				return new FloodV2(n, "");
 			}
 		}, "FloodV2");

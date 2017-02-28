@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import ptwop.network.NAddress;
-import ptwop.network.NManager;
+import ptwop.network.NPair;
+import ptwop.network.NServent;
 import ptwop.networker.DataTracker;
 
-public class Node extends NManager implements Steppable {
+public class Node extends NServent implements Steppable {
 	private Network net;
 
 	private int id;
@@ -31,32 +32,6 @@ public class Node extends NManager implements Steppable {
 		linkMap = new HashMap<>();
 	}
 
-	/**
-	 * Function used to establish a link connection. Called when the connecting
-	 * link have send his TCP syn message
-	 * 
-	 * @param n
-	 */
-	public void signalInitTCP(Node n) {
-		linkMap.get(n).replyTCP();
-	}
-	
-	public void signalACK(Node n) {
-		linkMap.get(n).signalAck();
-	}
-
-	public void linkConnectedTo(Link link) {
-		if (links.contains(link)) {
-			// System.out.println("already connected to " + link);
-			return;
-		}
-
-		links.add(link);
-		net.signalNewLink(link);
-		linkMap.put(link.getDestNode(), link);
-		super.connectedTo(link);
-	}
-
 	public void addLink(Link link) {
 		if (links.contains(link)) {
 			// System.out.println("already connected to " + link);
@@ -66,13 +41,12 @@ public class Node extends NManager implements Steppable {
 		links.add(link);
 		net.signalNewLink(link);
 		linkMap.put(link.getDestNode(), link);
-		super.newUser(link);
 	}
 
 	public void removeLink(Link link) {
 		links.remove(link);
 		linkMap.remove(link);
-		userQuit(link);
+		pairQuit(link);
 		net.signalRemovedLink(link);
 	}
 
@@ -102,7 +76,9 @@ public class Node extends NManager implements Steppable {
 	}
 
 	public void handleData(Node source, Data data) {
-		newMessage(linkMap.get(source), data.data);
+		if (!linkMap.containsKey(source))
+			addLink(new Link(net, this, source));
+		incommingMessage(linkMap.get(source), data.data);
 	}
 
 	@Override
@@ -132,7 +108,7 @@ public class Node extends NManager implements Steppable {
 		return o instanceof Node && ((Node) o).id == id;
 	}
 
-	// NManager
+	// NServent
 
 	@Override
 	public void start() {
@@ -145,13 +121,40 @@ public class Node extends NManager implements Steppable {
 	}
 
 	@Override
+	public void incommingMessage(NPair user, Object o) {
+		if (o instanceof DataTCP) {
+			try {
+				DataTCP m = (DataTCP) o;
+				Link l = (Link) user;
+				if (m.isSyn()) {
+					l.send(new DataTCP(DataTCP.Type.ACK));
+				} else if (m.isAck()) {
+					l.send(new DataTCP(DataTCP.Type.SYNACK));
+					l.setEstablished(true);
+					super.connectedTo(user);
+				} else if (m.isSynAck()) {
+					l.setEstablished(true);
+					super.incommingConnectionFrom(user);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else
+			super.incommingMessage(user, o);
+	}
+
+	@Override
 	public void connectTo(NAddress address) throws IOException {
 		// System.out.println("Connecting " + this + " to " + address);
 		if (address instanceof NetworkerNAddress) {
 			Node n = net.getNode((NetworkerNAddress) address);
 			if (n == null)
 				throw new IOException("Address unreachable");
-			net.connectMeTo(this, n);
+
+			Link l = new Link(net, this, n);
+			addLink(l);
+			l.send(new DataTCP(DataTCP.Type.SYN));
+			// n.addLink(new Link(net, n, this));
 		} else {
 			System.out.println("Wrong address");
 		}

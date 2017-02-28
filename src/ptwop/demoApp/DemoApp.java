@@ -26,9 +26,9 @@ import javax.swing.SwingUtilities;
 
 import ptwop.common.gui.Dialog;
 import ptwop.common.gui.Frame;
-import ptwop.network.NManager;
+import ptwop.network.NServent;
 import ptwop.network.tcp.TcpNAddress;
-import ptwop.network.tcp.TcpNManager;
+import ptwop.network.tcp.TcpNServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
@@ -170,7 +170,7 @@ public class DemoApp {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					NManager manager = new TcpNManager(Integer.parseInt(listenPort.getText()));
+					NServent manager = new TcpNServent(Integer.parseInt(listenPort.getText()));
 					p2p = new FloodV0(manager, name.getText());
 					p2p.setMessageHandler(new Handler());
 					p2p.start();

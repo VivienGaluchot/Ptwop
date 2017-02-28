@@ -6,21 +6,21 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import ptwop.network.NAddress;
-import ptwop.network.NUser;
-import ptwop.network.NUserHandler;
+import ptwop.network.NPair;
+import ptwop.network.NPairHandler;
 
-public class TcpNUser implements NUser, Runnable {
+public class TcpNPair implements NPair, Runnable {
 	private Socket socket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
-	NUserHandler handler;
+	NPairHandler handler;
 
 	private Thread runner;
 	private boolean run;
 
 	private int pairListeningPort;
 
-	public TcpNUser(int listeningPort, Socket socket, NUserHandler handler) throws IOException {
+	public TcpNPair(int listeningPort, Socket socket, NPairHandler handler) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
 		out = new ObjectOutputStream(socket.getOutputStream());
@@ -37,7 +37,7 @@ public class TcpNUser implements NUser, Runnable {
 			runner.start();
 		} catch (ClassNotFoundException e) {
 			socket.close();
-			handler.userQuit(this);
+			handler.pairQuit(this);
 			throw new IOException("Cant get pair's listening port");
 		}
 	}
@@ -69,14 +69,14 @@ public class TcpNUser implements NUser, Runnable {
 		while (run) {
 			try {
 				Object o = in.readObject();
-				handler.newMessage(this, o);
+				handler.incommingMessage(this, o);
 			} catch (IOException e) {
 				run = false;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
-		handler.userQuit(this);
+		handler.pairQuit(this);
 	}
 
 	@Override

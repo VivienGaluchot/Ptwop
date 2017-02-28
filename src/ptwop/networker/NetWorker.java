@@ -17,7 +17,7 @@ import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
-import ptwop.network.NManager;
+import ptwop.network.NServent;
 import ptwop.networker.display.NetworkWrapper;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.P2PCreator;
@@ -74,7 +74,7 @@ public class NetWorker {
 		WordGenerator nameGenerator = new WordGenerator();
 		Network net = new Network(new P2PCreator() {
 			@Override
-			public P2P createP2P(NManager n) {
+			public P2P createP2P(NServent n) {
 				return new FloodV2(n, nameGenerator.getWord(6));
 			}
 		});

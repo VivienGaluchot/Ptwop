@@ -157,26 +157,26 @@ public class Network implements Steppable {
 	 * @param packetSize
 	 *            random generator for link packet size max
 	 */
-	
-	public void setRandomizers(GaussianRandom latency, GaussianRandom loss, GaussianRandom packetSize){
+
+	public void setRandomizers(GaussianRandom latency, GaussianRandom loss, GaussianRandom packetSize) {
 		this.latency = latency;
 		this.loss = loss;
 		this.packetSize = packetSize;
 	}
-	
-	public GaussianRandom getLatencyRandomizer(){
+
+	public GaussianRandom getLatencyRandomizer() {
 		return latency;
 	}
-	
-	public GaussianRandom getLossRandomizer(){
+
+	public GaussianRandom getLossRandomizer() {
 		return loss;
 	}
-	
-	public GaussianRandom getPacketSizeRandomizer(){
+
+	public GaussianRandom getPacketSizeRandomizer() {
 		return packetSize;
 	}
-	
-	public void addNewNodes(int n){
+
+	public void addNewNodes(int n) {
 		for (int i = 0; i < n; i++) {
 			addNewNode();
 		}
@@ -186,12 +186,5 @@ public class Network implements Steppable {
 		Node node = new Node(this);
 		addNode(node);
 		return node;
-	}
-
-	public void connectMeTo(Node me, Node dest) {
-		Link l = new Link(this, me, dest);
-		l.initiateTCP();
-		me.linkConnectedTo(l);
-		dest.addLink(new Link(this, dest, me));
 	}
 }

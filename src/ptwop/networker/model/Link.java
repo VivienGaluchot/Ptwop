@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.Set;
 
 import ptwop.network.NAddress;
-import ptwop.network.NUser;
+import ptwop.network.NPair;
 
 /**
  * A Link forward data between nodes in a single way according some properties
@@ -13,7 +13,7 @@ import ptwop.network.NUser;
  * 
  * @author Vivien
  */
-public class Link implements Steppable, NUser {
+public class Link implements Steppable, NPair {
 	private Network net;
 
 	private long latency;
@@ -30,9 +30,6 @@ public class Link implements Steppable, NUser {
 	private int pushedThisRound;
 
 	private boolean established;
-	private boolean initiatingTCP;
-	private boolean replyingTCP;
-	private long timeLeftToEstablish;
 
 	/**
 	 * @param net
@@ -62,8 +59,6 @@ public class Link implements Steppable, NUser {
 		pushedThisRound = 0;
 
 		established = false;
-		initiatingTCP = false;
-		timeLeftToEstablish = latency;
 	}
 
 	/**
@@ -92,18 +87,8 @@ public class Link implements Steppable, NUser {
 		return established;
 	}
 
-	public void initiateTCP() {
-		System.out.println("initiateTCP");
-		initiatingTCP = true;
-	}
-	
-	public void replyTCP(){
-		System.out.println("replyTCP");
-		replyingTCP = true;
-	}
-	
-	public void signalAck(){
-		established = true;
+	public void setEstablished(boolean v) {
+		established = v;
 	}
 
 	public void computeWeight() {
@@ -159,9 +144,10 @@ public class Link implements Steppable, NUser {
 	 *            data to send
 	 * @return true if the data have been successfully added, false otherwise
 	 */
-	private boolean push(Data data) {
-		if(!established)
+	public boolean push(Data data) {
+		if (!established && !(data.data instanceof DataTCP))
 			return false;
+
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data, pushedThisRound++);
 		boolean pushed = buffer.push(tdata);
 		if (pushed)
@@ -175,42 +161,26 @@ public class Link implements Steppable, NUser {
 	 */
 	@Override
 	public synchronized void doTimeStep() {
-		if (established) {
-			pushedThisRound = 0;
-			while (!buffer.isFull() && !waitQueue.isEmpty()) {
-				push(waitQueue.pop());
-			}
+		pushedThisRound = 0;
+		while (!buffer.isFull() && !waitQueue.isEmpty()) {
+			push(waitQueue.pop());
+		}
 
-			// push data to node when it's time
-			while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
-				TimedData tdata = buffer.pop();
-				net.signalRemovedData(tdata);
+		// push data to node when it's time
+		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
+			TimedData tdata = buffer.pop();
+			net.signalRemovedData(tdata);
 
-				// x float in [0:1[
-				float x = rand.nextFloat();
-				if (x >= loss)
-					dest.handleData(source, tdata.data);
-				else
-					try {
-						send(tdata.data);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-			}
-		} else if (initiatingTCP || replyingTCP) {
-			if (timeLeftToEstablish == 0) {
-				if(initiatingTCP){
-					dest.signalInitTCP(source);
-					initiatingTCP = false;
+			// x float in [0:1[
+			float x = rand.nextFloat();
+			if (x >= loss)
+				dest.handleData(source, tdata.data);
+			else
+				try {
+					send(tdata.data);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-				else{
-					// replying TCP
-					dest.signalACK(source);
-					replyingTCP = false;
-					established = true;
-				}
-			} else
-				timeLeftToEstablish--;
 		}
 	}
 

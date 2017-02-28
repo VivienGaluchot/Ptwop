@@ -5,14 +5,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import ptwop.network.NAddress;
-import ptwop.network.NManager;
+import ptwop.network.NServent;
 
-public class TcpNManager extends NManager implements Runnable {
+public class TcpNServent extends NServent implements Runnable {
 	ServerSocket listener;
 	Thread runner;
 	boolean stop;
 
-	public TcpNManager(int listenPort) throws IOException {
+	public TcpNServent(int listenPort) throws IOException {
 		listener = new ServerSocket(listenPort);
 		System.out.println("TcpNetworkManager : ecoute sur " + listenPort);
 
@@ -59,7 +59,7 @@ public class TcpNManager extends NManager implements Runnable {
 			TcpNAddress a = (TcpNAddress) address;
 			System.out.println("connection to " + a);
 			Socket newSocket = new Socket(a.ip, a.port);
-			connectedTo(new TcpNUser(listener.getLocalPort(), newSocket, this));
+			connectedTo(new TcpNPair(listener.getLocalPort(), newSocket, this));
 		}
 	}
 
@@ -68,7 +68,7 @@ public class TcpNManager extends NManager implements Runnable {
 		while (!stop) {
 			try {
 				Socket newSocket = listener.accept();
-				TcpNManager.this.newUser(new TcpNUser(listener.getLocalPort(), newSocket, this));
+				TcpNServent.this.incommingConnectionFrom(new TcpNPair(listener.getLocalPort(), newSocket, this));
 			} catch (IOException e) {
 				stop = true;
 			}

@@ -9,9 +9,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import ptwop.network.NAddress;
-import ptwop.network.NManager;
-import ptwop.network.NUser;
-import ptwop.network.NUserHandler;
+import ptwop.network.NServent;
+import ptwop.network.NPair;
+import ptwop.network.NPairHandler;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
@@ -21,18 +21,18 @@ import ptwop.p2p.flood.messages.FloodMessage;
 import ptwop.p2p.flood.messages.MessageToApp;
 import ptwop.p2p.flood.messages.MyNameIs;
 
-public class FloodV2 implements P2P, NUserHandler {
+public class FloodV2 implements P2P, NPairHandler {
 
-	private NManager manager;
+	private NServent manager;
 
-	private BiMap<P2PUser, NUser> otherUsers;
+	private BiMap<P2PUser, NPair> otherUsers;
 	private P2PUser myself;
 
 	private Set<Set<NAddress>> neighbours;
 
 	private P2PHandler p2pHandler;
 
-	public FloodV2(NManager manager, String myName) {
+	public FloodV2(NServent manager, String myName) {
 		// System.out.println("Flood initialisation");
 		otherUsers = HashBiMap.create();
 		neighbours = new HashSet<>();
@@ -96,10 +96,10 @@ public class FloodV2 implements P2P, NUserHandler {
 		}
 	}
 
-	public void sendUserListTo(NUser user) {
+	public void sendUserListTo(NPair user) {
 		try {
 			synchronized (otherUsers) {
-				for (NUser u : otherUsers.inverse().keySet()) {
+				for (NPair u : otherUsers.inverse().keySet()) {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
 						user.send(new ConnectTo(u.getAddress()));
 						// u.send(new AddToMyNeighbours(user.getAddress()));
@@ -134,7 +134,7 @@ public class FloodV2 implements P2P, NUserHandler {
 		System.out.println("stop()");
 		manager.stop();
 		synchronized (otherUsers) {
-			for (NUser u : otherUsers.inverse().keySet()) {
+			for (NPair u : otherUsers.inverse().keySet()) {
 				u.disconnect();
 			}
 			otherUsers.clear();
@@ -177,7 +177,7 @@ public class FloodV2 implements P2P, NUserHandler {
 	// NetworkUserHandler
 
 	@Override
-	public void newUser(NUser pair) {
+	public void incommingConnectionFrom(NPair pair) {
 		// System.out.println("newUser() " + pair);
 
 		sendUserListTo(pair);
@@ -197,7 +197,7 @@ public class FloodV2 implements P2P, NUserHandler {
 	}
 
 	@Override
-	public void connectedTo(NUser pair) {
+	public void connectedTo(NPair pair) {
 		// System.out.println("connectedTo() " + pair);
 
 		sendUserListTo(pair);
@@ -217,7 +217,7 @@ public class FloodV2 implements P2P, NUserHandler {
 	}
 
 	@Override
-	public void newMessage(NUser user, Object o) {
+	public void incommingMessage(NPair user, Object o) {
 		P2PUser senderUser = otherUsers.inverse().get(user);
 
 		if (!(o instanceof FloodMessage)) {
@@ -256,7 +256,7 @@ public class FloodV2 implements P2P, NUserHandler {
 	}
 
 	@Override
-	public void userQuit(NUser user) {
+	public void pairQuit(NPair user) {
 		// System.out.println("connectionClosed()");
 		removeFromNeighbours(user.getAddress());
 		P2PUser disconnectedUser = otherUsers.inverse().get(user);

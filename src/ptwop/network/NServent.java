@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class NManager implements NUserHandler {
-	private NUserHandler handler;
-	private Set<NUser> users;
+public abstract class NServent implements NPairHandler {
+	private NPairHandler handler;
+	private Set<NPair> users;
 	private boolean stopping;
 
-	public NManager() {
+	public NServent() {
 		users = new HashSet<>();
 		stopping = false;
 	}
 
-	public void setHandler(NUserHandler handler) {
+	public void setHandler(NPairHandler handler) {
 		this.handler = handler;
 	}
 
@@ -25,7 +25,7 @@ public abstract class NManager implements NUserHandler {
 	public abstract void connectTo(NAddress address) throws IOException;
 
 	public boolean isConnectedTo(NAddress address) {
-		for (NUser u : users) {
+		for (NPair u : users) {
 			if (u.getAddress().equals(address)) {
 				return true;
 			}
@@ -34,15 +34,15 @@ public abstract class NManager implements NUserHandler {
 	}
 
 	@Override
-	public void newUser(NUser user) {
+	public void incommingConnectionFrom(NPair user) {
 		synchronized (users) {
 			users.add(user);
 		}
-		handler.newUser(user);
+		handler.incommingConnectionFrom(user);
 	}
 
 	@Override
-	public void connectedTo(NUser user) {
+	public void connectedTo(NPair user) {
 		synchronized (users) {
 			users.add(user);
 		}
@@ -50,24 +50,24 @@ public abstract class NManager implements NUserHandler {
 	}
 
 	@Override
-	public void userQuit(NUser user) {
+	public void pairQuit(NPair user) {
 		if (!stopping) {
 			synchronized (users) {
 				users.remove(user);
 			}
 		}
-		handler.userQuit(user);
+		handler.pairQuit(user);
 	}
 
 	@Override
-	public void newMessage(NUser user, Object o) {
-		handler.newMessage(user, o);
+	public void incommingMessage(NPair user, Object o) {
+		handler.incommingMessage(user, o);
 	}
 
 	public void stop() {
 		stopping = true;
 		synchronized (users) {
-			for (NUser user : users) {
+			for (NPair user : users) {
 				user.disconnect();
 			}
 			users.clear();
