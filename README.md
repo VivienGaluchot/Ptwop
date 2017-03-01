@@ -1,2 +1,3 @@
 # Ptwop
-Peer to peer game system
+Peer to peer networking system in development
+Demo app, network simulator & benchmark
