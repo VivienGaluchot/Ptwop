@@ -8,7 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -248,10 +248,11 @@ public class Command extends JPanel {
 			disconnect.setEnabled(true);
 
 			// linksInfo
-			List<Link> links = node.getLinks();
+			Set<Link> links = node.getLinks();
+			Iterator<Link> it = links.iterator();
 			Object[][] infos = new Object[links.size()][];
-			for (int i = 0; i < links.size(); i++) {
-				Link l = links.get(i);
+			for (int i = 0; it.hasNext() ; i++) {
+				Link l = it.next();
 				infos[i] = new Object[5];
 				infos[i][0] = new String(l.getDestNode().getName());
 				infos[i][1] = new String(l.getNumberOfTransitingElements() + "/" + l.getSize());

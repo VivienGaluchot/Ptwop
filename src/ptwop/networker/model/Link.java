@@ -75,12 +75,17 @@ public class Link implements Steppable, NPair {
 
 	@Override
 	public String toString() {
-		return "Link-" + dest;
+		return source + " -> " + dest;
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof Link && ((Link) o).source.equals(source) && ((Link) o).dest.equals(dest);
+		return (o instanceof Link) && ((Link) o).source.equals(source) && ((Link) o).dest.equals(dest);
+	}
+
+	@Override
+	public int hashCode() {
+		return source.getId() * 3 + dest.getId() * 51;
 	}
 
 	public boolean isEstablished() {
@@ -135,6 +140,30 @@ public class Link implements Steppable, NPair {
 		return loss;
 	}
 
+	public void sendAck() {
+		try {
+			send(new DataTCP(DataTCP.Type.ACK));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendSynAck() {
+		try {
+			send(new DataTCP(DataTCP.Type.SYNACK));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendSyn() {
+		try {
+			send(new DataTCP(DataTCP.Type.SYN));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Add a data to the buffer, this data will be pushed to destNode when the
 	 * latency time will be reached. The data have a probability to be lost,
@@ -144,7 +173,7 @@ public class Link implements Steppable, NPair {
 	 *            data to send
 	 * @return true if the data have been successfully added, false otherwise
 	 */
-	public boolean push(Data data) {
+	public synchronized boolean push(Data data) {
 		if (!established && !(data.data instanceof DataTCP))
 			return false;
 
@@ -167,7 +196,7 @@ public class Link implements Steppable, NPair {
 		}
 
 		// push data to node when it's time
-		while (!buffer.isEmpty() && buffer.get().outTime < net.getTime()) {
+		while (!buffer.isEmpty() && (buffer.get().outTime <= net.getTime())) {
 			TimedData tdata = buffer.pop();
 			net.signalRemovedData(tdata);
 

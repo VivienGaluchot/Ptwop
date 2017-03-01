@@ -1,11 +1,11 @@
 package ptwop.networker.model;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
@@ -16,8 +16,7 @@ public class Node extends NServent implements Steppable {
 	private Network net;
 
 	private int id;
-	private ArrayList<Link> links;
-	private Map<Node, Link> linkMap;
+	private BiMap<Node, Link> linkMap;
 
 	/* BENCHMARK */
 	public boolean track = false;
@@ -28,35 +27,30 @@ public class Node extends NServent implements Steppable {
 		this.net = net;
 		this.setId(0);
 
-		links = new ArrayList<>();
-		linkMap = new HashMap<>();
+		linkMap = HashBiMap.create();
 	}
 
-	public void addLink(Link link) {
-		if (links.contains(link)) {
-			// System.out.println("already connected to " + link);
-			return;
-		}
-
-		links.add(link);
+	public synchronized void addLink(Link link) {
+		if (linkMap.containsValue(link))
+			throw new IllegalArgumentException("Link already present : " + link);
 		net.signalNewLink(link);
 		linkMap.put(link.getDestNode(), link);
 	}
 
-	public void removeLink(Link link) {
-		links.remove(link);
-		linkMap.remove(link);
-		pairQuit(link);
+	public synchronized void removeLink(Link link) {
 		net.signalRemovedLink(link);
+		if (linkMap.inverse().remove(link) == null)
+			throw new IllegalArgumentException("Can't remove unconnected link : " + link);
+		pairQuit(link);
 	}
 
-	public void removeLinkTo(Node node) {
+	public synchronized void removeLinkTo(Node node) {
 		Link link = linkMap.get(node);
 		removeLink(link);
 	}
 
-	public List<Link> getLinks() {
-		return Collections.unmodifiableList(links);
+	public Set<Link> getLinks() {
+		return Collections.unmodifiableSet(linkMap.inverse().keySet());
 	}
 
 	public Network getNetwork() {
@@ -75,7 +69,7 @@ public class Node extends NServent implements Steppable {
 		this.id = id;
 	}
 
-	public void handleData(Node source, Data data) {
+	public synchronized void handleData(Node source, Data data) {
 		if (!linkMap.containsKey(source))
 			addLink(new Link(net, this, source));
 		incommingMessage(linkMap.get(source), data.data);
@@ -83,13 +77,13 @@ public class Node extends NServent implements Steppable {
 
 	@Override
 	public void doTimeStep() {
-		for (Link l : links) {
+		for (Link l : linkMap.inverse().keySet()) {
 			l.doTimeStep();
 		}
 
 		/* BENCHMARK */
 		if (track) {
-			linkNumberTracker.addData(links.size());
+			linkNumberTracker.addData(linkMap.size());
 			int res = 0;
 			for (Link l : getLinks()) {
 				res += l.getNumberOfTransitingElements();
@@ -108,6 +102,11 @@ public class Node extends NServent implements Steppable {
 		return o instanceof Node && ((Node) o).id == id;
 	}
 
+	@Override
+	public int hashCode() {
+		return id;
+	}
+
 	// NServent
 
 	@Override
@@ -123,21 +122,19 @@ public class Node extends NServent implements Steppable {
 	@Override
 	public void incommingMessage(NPair user, Object o) {
 		if (o instanceof DataTCP) {
-			try {
-				DataTCP m = (DataTCP) o;
-				Link l = (Link) user;
-				if (m.isSyn()) {
-					l.send(new DataTCP(DataTCP.Type.ACK));
-				} else if (m.isAck()) {
-					l.send(new DataTCP(DataTCP.Type.SYNACK));
-					l.setEstablished(true);
+			DataTCP m = (DataTCP) o;
+			Link l = (Link) user;
+			if (m.isSyn()) {
+				l.sendSynAck();
+			} else if (m.isSynAck()) {
+				l.sendAck();
+				l.setEstablished(true);
+				if (!isConnectedTo(user.getAddress()))
 					super.connectedTo(user);
-				} else if (m.isSynAck()) {
-					l.setEstablished(true);
+			} else if (m.isAck()) {
+				l.setEstablished(true);
+				if (!isConnectedTo(user.getAddress()))
 					super.incommingConnectionFrom(user);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		} else
 			super.incommingMessage(user, o);
@@ -145,16 +142,19 @@ public class Node extends NServent implements Steppable {
 
 	@Override
 	public void connectTo(NAddress address) throws IOException {
-		// System.out.println("Connecting " + this + " to " + address);
+		if (super.isConnectedTo(address))
+			return;
+
 		if (address instanceof NetworkerNAddress) {
 			Node n = net.getNode((NetworkerNAddress) address);
 			if (n == null)
 				throw new IOException("Address unreachable");
 
 			Link l = new Link(net, this, n);
-			addLink(l);
-			l.send(new DataTCP(DataTCP.Type.SYN));
-			// n.addLink(new Link(net, n, this));
+			if (!linkMap.containsValue(l)) {
+				addLink(l);
+				l.sendSyn();
+			}
 		} else {
 			System.out.println("Wrong address");
 		}

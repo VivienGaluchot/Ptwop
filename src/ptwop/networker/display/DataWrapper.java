@@ -62,7 +62,7 @@ public class DataWrapper implements Animable, HCS {
 			Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
 			bound.setRect((float) (dataPos.x - bound.getWidth() / 2), (float) dataPos.y + 0.5f - bound.getHeight(),
 					bound.getWidth(), bound.getHeight());
-			g2d.setColor(new Color(1f, 1f, 1f, 0.6f));
+			g2d.setColor(new Color(1f, 1f, 1f, 0.8f));
 			g2d.fill(bound);
 			g2d.setColor(netWrapper.getColor());
 			g2d.drawString(dispMsg, (float) (dataPos.x - bound.getWidth() / 2), (float) dataPos.y + 0.25f);

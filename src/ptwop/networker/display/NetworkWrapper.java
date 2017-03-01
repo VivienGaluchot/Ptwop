@@ -89,8 +89,11 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	}
 
 	public synchronized void addData(TimedData d, Link l) {
-		datas.put(d, new DataWrapper(d, links.get(l), this));
-
+		LinkWrapper wrapper = links.get(l);
+		if (wrapper != null)
+			datas.put(d, new DataWrapper(d, links.get(l), this));
+		else
+			throw new IllegalArgumentException("Unkwnown link : " + l);
 	}
 
 	public synchronized void removeData(TimedData d) {
@@ -174,8 +177,8 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		for (DataWrapper dw : toPaintLast)
 			dw.paint(g);
 	}
-	
-	public boolean isAnimated(){
+
+	public boolean isAnimated() {
 		return animated;
 	}
 
