@@ -17,8 +17,9 @@ public class TimedData {
 		this.data = data;
 		this.slide = slide;
 	}
-	
-	public String toString(){
+
+	@Override
+	public String toString() {
 		return data.toString();
 	}
 }

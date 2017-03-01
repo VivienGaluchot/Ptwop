@@ -49,12 +49,12 @@ public class TcpNServent extends NServent implements Runnable {
 			System.out.println("Can't connect to myself " + address);
 			return;
 		}
-		
+
 		if (isConnectedTo(address)) {
 			System.out.println("Already connected to " + address);
 			return;
 		}
-		
+
 		if (address instanceof TcpNAddress) {
 			TcpNAddress a = (TcpNAddress) address;
 			System.out.println("connection to " + a);

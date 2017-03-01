@@ -93,12 +93,11 @@ public class LinkWrapper implements Animable, HCS {
 		if (v.dot(v2) > 0) {
 			float linkWeight = linkWeightTransform(link.getWeight());
 			if (!link.isEstablished()) {
-				Stroke dashed = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
-						BasicStroke.JOIN_BEVEL, 0, new float[] { 0.3f }, 0);
+				Stroke dashed = new BasicStroke(0.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+						new float[] { 0.3f }, 0);
 				g2d.setStroke(dashed);
 			} else {
-				g2d.setStroke(new BasicStroke(linkWeight, BasicStroke.CAP_ROUND,
-						BasicStroke.JOIN_ROUND));
+				g2d.setStroke(new BasicStroke(linkWeight, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			}
 			// Line
 			slideNorm = v2.getOrthogonal();

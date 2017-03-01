@@ -15,12 +15,13 @@ public class NetworkerNAddress extends NAddress {
 		this.id = id;
 	}
 
+	@Override
 	public String toString() {
 		return "n" + id;
 	}
-	
+
 	@Override
-	public int hashCode(){
+	public int hashCode() {
 		return id;
 	}
 

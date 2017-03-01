@@ -60,6 +60,7 @@ public class DemoApp {
 			if (b == '\n') {
 				final String text = sb.toString() + "\n";
 				SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						console.setText(console.getText() + text);
 						scrollSole.getVerticalScrollBar().setValue(scrollSole.getVerticalScrollBar().getMaximum());
@@ -118,6 +119,7 @@ public class DemoApp {
 			@Override
 			public void keyTyped(KeyEvent e) {
 				SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						if (e.getKeyChar() == '\n') {
 							String msg = message.getText();

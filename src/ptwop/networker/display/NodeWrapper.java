@@ -15,7 +15,7 @@ import ptwop.networker.model.Node;
 
 public class NodeWrapper implements Animable, HCS {
 	private NetworkWrapper wrapper;
-	
+
 	private Node node;
 	private Vector2D pos;
 	private double radius;
@@ -66,27 +66,33 @@ public class NodeWrapper implements Animable, HCS {
 		return fillColor;
 	}
 
+	@Override
 	public boolean isSelected() {
 		return selected;
 	}
 
+	@Override
 	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
 
+	@Override
 	public boolean isClicked() {
 		return clicked;
 	}
 
+	@Override
 	public void setClicked(boolean clicked) {
 		this.clicked = clicked;
 		hovered = false;
 	}
 
+	@Override
 	public boolean isHovered() {
 		return hovered;
 	}
 
+	@Override
 	public void setHovered(boolean hovered) {
 		this.hovered = hovered;
 		clicked = false;

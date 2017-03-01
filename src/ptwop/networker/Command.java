@@ -31,7 +31,7 @@ import ptwop.p2p.P2PUser;
 
 public class Command extends JPanel {
 	private static final long serialVersionUID = 1L;
-	
+
 	private NetworkWrapper wrapper;
 
 	private Network net;
@@ -224,11 +224,11 @@ public class Command extends JPanel {
 	}
 
 	public void update() {
-		if(wrapper.isAnimated())
+		if (wrapper.isAnimated())
 			play.setText("Pause");
 		else
 			play.setText("Play");
-		
+
 		timeLabel.setText("" + net.getTime());
 		if (node != null) {
 			nodeName.setText(node.getName());
@@ -251,7 +251,7 @@ public class Command extends JPanel {
 			Set<Link> links = node.getLinks();
 			Iterator<Link> it = links.iterator();
 			Object[][] infos = new Object[links.size()][];
-			for (int i = 0; it.hasNext() ; i++) {
+			for (int i = 0; it.hasNext(); i++) {
 				Link l = it.next();
 				infos[i] = new Object[5];
 				infos[i][0] = new String(l.getDestNode().getName());

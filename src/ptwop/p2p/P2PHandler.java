@@ -12,9 +12,9 @@ public interface P2PHandler {
 	 * @throws IOException
 	 */
 	void handleMessage(P2PUser sender, Object o);
-	
+
 	void userConnect(P2PUser user);
-	
+
 	void userUpdate(P2PUser user);
 
 	/**

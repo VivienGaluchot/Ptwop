@@ -35,8 +35,8 @@ public class FloodV0 implements P2P, NPairHandler {
 		this.manager = manager;
 		manager.setHandler(this);
 	}
-	
-	public void sendUserListTo(NPair user){
+
+	public void sendUserListTo(NPair user) {
 		try {
 			synchronized (otherUsers) {
 				for (NPair u : otherUsers.inverse().keySet()) {
@@ -49,9 +49,9 @@ public class FloodV0 implements P2P, NPairHandler {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return "Flood P2P";
 	}
 
@@ -119,14 +119,14 @@ public class FloodV0 implements P2P, NPairHandler {
 		// System.out.println("newUser() " + pair);
 
 		sendUserListTo(pair);
-		
+
 		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		
+
 		p2pHandler.userConnect(user);
-		
+
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -137,16 +137,16 @@ public class FloodV0 implements P2P, NPairHandler {
 	@Override
 	public void connectedTo(NPair pair) {
 		// System.out.println("connectedTo() " + pair);
-		
+
 		sendUserListTo(pair);
-		
+
 		P2PUser user = new P2PUser(pair.getAddress());
 		synchronized (otherUsers) {
 			otherUsers.put(user, pair);
 		}
-		
+
 		p2pHandler.userConnect(user);
-		
+
 		try {
 			pair.send(new MyNameIs(myself.getName()));
 		} catch (IOException e) {
@@ -174,7 +174,8 @@ public class FloodV0 implements P2P, NPairHandler {
 			p2pHandler.userUpdate(senderUser);
 		} else if (o instanceof ConnectTo) {
 			ConnectTo m = (ConnectTo) o;
-			// System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.address);
+			// System.out.println("Message from " + senderUser + " : " +
+			// "ConnectTo " + m.address);
 			try {
 				manager.connectTo(m.address);
 			} catch (IOException e) {

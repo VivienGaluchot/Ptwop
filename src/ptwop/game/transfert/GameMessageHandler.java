@@ -126,12 +126,12 @@ public class GameMessageHandler implements P2PHandler {
 	@Override
 	public void userUpdate(P2PUser user) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void userConnect(P2PUser user) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

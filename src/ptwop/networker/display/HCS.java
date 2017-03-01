@@ -14,6 +14,6 @@ public interface HCS {
 	public void setSelected(boolean selected);
 
 	public boolean isSelected();
-	
+
 	public Shape getShape();
 }

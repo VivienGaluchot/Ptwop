@@ -236,7 +236,8 @@ public class FloodV2 implements P2P, NPairHandler {
 			p2pHandler.userUpdate(senderUser);
 		} else if (o instanceof ConnectTo) {
 			ConnectTo m = (ConnectTo) o;
-			// System.out.println("Message from " + senderUser + " : " + "ConnectTo " + m.address);
+			// System.out.println("Message from " + senderUser + " : " +
+			// "ConnectTo " + m.address);
 			try {
 				addNeighbours(user.getAddress(), m.address);
 				manager.connectTo(m.address);

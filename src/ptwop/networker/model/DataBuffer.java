@@ -79,8 +79,8 @@ public class DataBuffer<E> {
 	public synchronized int numerOfElements() {
 		return buffer.size();
 	}
-	
-	public synchronized Set<E> getElements(){
+
+	public synchronized Set<E> getElements() {
 		HashSet<E> set = new HashSet<>();
 		set.addAll(buffer);
 		return set;

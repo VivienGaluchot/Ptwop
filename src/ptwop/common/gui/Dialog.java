@@ -10,13 +10,13 @@ public class Dialog {
 	}
 
 	public static String IPDialog(Component frame, String msg) {
-		return (String) JOptionPane.showInputDialog(frame, msg, "OK",
-				JOptionPane.PLAIN_MESSAGE, null, null, "127.0.0.1");
+		return (String) JOptionPane.showInputDialog(frame, msg, "OK", JOptionPane.PLAIN_MESSAGE, null, null,
+				"127.0.0.1");
 	}
 
 	public static int PortDialog(Component frame, String msg) {
-		return Integer.parseInt((String) JOptionPane.showInputDialog(frame, msg, "OK",
-				JOptionPane.PLAIN_MESSAGE, null, null, "919"));
+		return Integer.parseInt(
+				(String) JOptionPane.showInputDialog(frame, msg, "OK", JOptionPane.PLAIN_MESSAGE, null, null, "919"));
 	}
 
 	public static String NameDialog(Component frame) {

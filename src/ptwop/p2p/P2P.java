@@ -10,7 +10,7 @@ public interface P2P {
 	 * connect to a p2p network
 	 */
 	public void start();
-	
+
 	public void connectTo(NAddress address) throws IOException;
 
 	/**
@@ -30,7 +30,7 @@ public interface P2P {
 	 * 
 	 * @param dest
 	 * @param msg
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void sendTo(P2PUser dest, Object msg) throws IOException;
 

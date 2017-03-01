@@ -9,7 +9,8 @@ public class AddToMyNeighbours extends FloodMessage {
 	public AddToMyNeighbours(NAddress address) {
 		this.address = address;
 	}
-	
+
+	@Override
 	public String toString() {
 		return "AddToMyNeighbours " + address.toString();
 	}

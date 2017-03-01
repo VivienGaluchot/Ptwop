@@ -38,6 +38,7 @@ public class NetWorker {
 			if (b == '\n') {
 				final String text = sb.toString() + "\n";
 				SwingUtilities.invokeLater(new Runnable() {
+					@Override
 					public void run() {
 						console.setText(console.getText() + text);
 						scrollSole.getVerticalScrollBar().setValue(scrollSole.getVerticalScrollBar().getMaximum());
@@ -70,7 +71,7 @@ public class NetWorker {
 		SpaceTransform spaceTransform = new SpaceTransform();
 		AnimationPanel mainPanel = new AnimationPanel(spaceTransform);
 		spaceTransform.setFather(mainPanel);
-		
+
 		WordGenerator nameGenerator = new WordGenerator();
 		Network net = new Network(new P2PCreator() {
 			@Override
@@ -84,7 +85,7 @@ public class NetWorker {
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
 		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
 		net.addNewNodes(nodeNumber);
-		
+
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform);
 		Command command = new Command(mainWrapper);
 		mainWrapper.setCommand(command);

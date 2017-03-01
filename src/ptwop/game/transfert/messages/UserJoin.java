@@ -1,6 +1,6 @@
 package ptwop.game.transfert.messages;
 
-public class UserJoin extends Message{
+public class UserJoin extends Message {
 	private static final long serialVersionUID = 0L;
 
 	public String name;

@@ -25,7 +25,7 @@ public class InfoLayer implements Animable {
 	public synchronized void setParty(Party party) {
 		this.party = party;
 	}
-	
+
 	public synchronized void setAnimable(Animable animable) {
 		this.animable = animable;
 	}
