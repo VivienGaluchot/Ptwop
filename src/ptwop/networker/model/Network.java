@@ -187,4 +187,24 @@ public class Network implements Steppable {
 		addNode(node);
 		return node;
 	}
+
+	public void setToFullyInterconnected() {
+		for (int i = 0; i < nodes.size(); i++) {
+			Node ni = getNode(i);
+			for (int j = i + 1; j < nodes.size(); j++) {
+				Node nj = getNode(j);
+				// interconnect nodes ni and nj
+				Link li = new Link(this, ni, nj);
+				li.setEstablished(true);
+				ni.addLink(li);
+				Link lj = new Link(this, nj, ni);
+				lj.setEstablished(true);
+				nj.addLink(lj);
+				ni.incommingConnectionFrom(li);
+				nj.connectedTo(lj);
+			}
+			for (Link l : ni.getLinks())
+				l.clearBuffers();
+		}
+	}
 }

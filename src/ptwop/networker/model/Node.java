@@ -31,17 +31,20 @@ public class Node extends NServent implements Steppable {
 	}
 
 	public synchronized void addLink(Link link) {
+		if (linkMap.containsKey(link.getDestNode()))
+			throw new IllegalArgumentException(
+					"Link " + link + " - destination already present : " + link.getDestNode());
 		if (linkMap.containsValue(link))
 			throw new IllegalArgumentException("Link already present : " + link);
-		net.signalNewLink(link);
 		linkMap.put(link.getDestNode(), link);
+		net.signalNewLink(link);
 	}
 
 	public synchronized void removeLink(Link link) {
-		net.signalRemovedLink(link);
 		if (linkMap.inverse().remove(link) == null)
 			throw new IllegalArgumentException("Can't remove unconnected link : " + link);
 		pairQuit(link);
+		net.signalRemovedLink(link);
 	}
 
 	public synchronized void removeLinkTo(Node node) {
@@ -49,7 +52,11 @@ public class Node extends NServent implements Steppable {
 		removeLink(link);
 	}
 
-	public Set<Link> getLinks() {
+	public synchronized Link getLinkTo(Node n) {
+		return linkMap.get(n);
+	}
+
+	public synchronized Set<Link> getLinks() {
 		return Collections.unmodifiableSet(linkMap.inverse().keySet());
 	}
 
@@ -99,7 +106,7 @@ public class Node extends NServent implements Steppable {
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof Node && ((Node) o).id == id;
+		return (o instanceof Node) && (((Node) o).id == id);
 	}
 
 	@Override

@@ -2,8 +2,6 @@ package ptwop.networker;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -18,70 +16,62 @@ import ptwop.p2p.P2P;
 import ptwop.p2p.flood.*;
 
 public class Benchmarker {
+
 	public static void main(String[] args) {
 
-		// evaluateOneConnectionOverTime(new P2PCreator() {
-		// @Override
-		// public P2P createP2P(NManager n) {
-		// return new FloodV0(n, "");
-		// }
-		// }, "FloodV0");
-		//
-		// evaluateOneConnectionOverTime(new P2PCreator() {
-		// @Override
-		// public P2P createP2P(NManager n) {
-		// return new FloodV1(n, "");
-		// }
-		// }, "FloodV1");
-		//
-		// evaluateOneConnectionOverTime(new P2PCreator() {
-		// @Override
-		// public P2P createP2P(NManager n) {
-		// return new FloodV2(n, "");
-		// }
-		// }, "FloodV2");
-
-		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
-		// @Override
-		// public P2P createP2P(NManager n) {
-		// return new FloodV0(n, "");
-		// }
-		// }, "FloodV0");
-		//
-		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
-		// @Override
-		// public P2P createP2P(NManager n) {
-		// return new FloodV1(n, "");
-		// }
-		// }, "FloodV1");
-		//
-		// evaluateFullConnexionTimeOverNumberOfNodes(new P2PCreator() {
-		// @Override
-		// public P2P createP2P(NManager n) {
-		// return new FloodV2(n, "");
-		// }
-		// }, "FloodV2");
-
-		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
+		P2PCreator floodV0Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
 				return new FloodV0(n, "");
 			}
-		}, "FloodV0");
-
-		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
+		};
+		P2PCreator floodV1Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
 				return new FloodV1(n, "");
 			}
-		}, "FloodV1");
-
-		evaluateOneNodeConnexionTimeOverNumberOfNodes(new P2PCreator() {
+		};
+		P2PCreator floodV2Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
 				return new FloodV2(n, "");
 			}
-		}, "FloodV2");
+		};
+
+		initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud", "t (ms)",
+				"Nombre de liens");
+		evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
+		evaluateOneConnectionOverTime(floodV1Creator, "FloodV1");
+		evaluateOneConnectionOverTime(floodV2Creator, "FloodV2");
+		displayMoyCollections();
+
+		initMoyCollections("Temps de connexion d'un noeud au réseau", "Nombre de noeuds", "t (ms)", null, null, null);
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
+	}
+
+	static XYSeriesCollection moyCollection1;
+	static String title1, xAxis1, yAxis1, title2, xAxis2, yAxis2;
+	static XYSeriesCollection moyCollection2;
+
+	public static void initMoyCollections(String title1_v, String xAxis1_v, String yAxis1_v, String title2_v,
+			String xAxis2_v, String yAxis2_v) {
+		title1 = title1_v;
+		xAxis1 = xAxis1_v;
+		yAxis1 = yAxis1_v;
+		title2 = title2_v;
+		xAxis2 = xAxis2_v;
+		yAxis2 = yAxis2_v;
+		moyCollection1 = new XYSeriesCollection();
+		moyCollection2 = new XYSeriesCollection();
+	}
+
+	public static void displayMoyCollections() {
+		if (title1 != null)
+			new Chart(title1, xAxis1, yAxis1, moyCollection1);
+		if (title2 != null)
+			new Chart(title2, xAxis2, yAxis2, moyCollection2);
 	}
 
 	public static void evaluateOneConnectionOverTime(P2PCreator p2pcreator, String name) {
@@ -118,51 +108,15 @@ public class Benchmarker {
 				e.printStackTrace();
 			}
 		}
-		displayMinMaxMoy(bandwith, name + " connection d'un noeud", "t (ms)", "Nombre de messages");
-		displayMinMaxMoy(linknumber, name + " connection d'un noeud", "t (ms)", "Nombre de liens");
-	}
-
-	public static void evaluateFullConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
-		XYSeriesCollection connexionTime = new XYSeriesCollection();
-		ArrayList<Thread> runners = new ArrayList<>();
-		int nEssais = 20;
-		int nNodeMax = 50;
-		for (int essai = 0; essai < nEssais; essai++) {
-			Thread runner = new Thread() {
-				@Override
-				public void run() {
-					XYSeries series = new XYSeries(this.hashCode());
-					int j = 1;
-					for (int i = 0; i < nNodeMax; i = i + j++) {
-						Network net = new Network(p2pcreator);
-						interconnectedNodes(net, i);
-						connectNodeAndWait(net);
-						series.add(i, net.getTime());
-						System.out.println(name + " : passe " + i);
-					}
-					synchronized (connexionTime) {
-						connexionTime.addSeries(series);
-					}
-				}
-			};
-			runners.add(runner);
-			runner.start();
-		}
-		for (Thread runner : runners) {
-			try {
-				runner.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		displayMinMaxMoy(connexionTime, name + " noeuds connectés en meme temps", "Nombre de noeuds", "t (ms)");
+		displayMinMaxMoy(bandwith, moyCollection1, name + " connection d'un noeud", "t (ms)", "Nombre de messages");
+		displayMinMaxMoy(linknumber, moyCollection2, name + " connection d'un noeud", "t (ms)", "Nombre de liens");
 	}
 
 	public static void evaluateOneNodeConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection connexionTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int nEssais = 1;
-		int nNodeMax = 150;
+		int nEssais = 8;
+		int nNodeMax = 70;
 		for (int essai = 0; essai < nEssais; essai++) {
 			Thread runner = new Thread() {
 				@Override
@@ -191,15 +145,17 @@ public class Benchmarker {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		displayMinMaxMoy(connexionTime, name + " noeuds connectés en meme temps", "Nombre de noeuds", "t (ms)");
+		displayMinMaxMoy(connexionTime, moyCollection1, name + " temps de connexion d'un noeud au réseau",
+				"Nombre de noeuds", "t (ms)");
 	}
 
-	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, String title, String xAxis,
-			String yAxis) {
-		new Chart(title, xAxis, yAxis, getYMinMaxMoy(new XYSeriesCollection(), messageNumbersDataset));
+	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, XYSeriesCollection moySerie,
+			String title, String xAxis, String yAxis) {
+		new Chart(title, xAxis, yAxis, getYMinMaxMoy(new XYSeriesCollection(), moySerie, messageNumbersDataset));
 	}
 
-	public static XYSeriesCollection getYMinMaxMoy(XYSeriesCollection outDataSet, XYSeriesCollection inDataSet) {
+	public static XYSeriesCollection getYMinMaxMoy(XYSeriesCollection outDataSet, XYSeriesCollection moyDataSet,
+			XYSeriesCollection inDataSet) {
 		XYSeries minS = new XYSeries("min");
 		XYSeries moyS = new XYSeries("moy");
 		XYSeries maxS = new XYSeries("max");
@@ -247,6 +203,10 @@ public class Benchmarker {
 		outDataSet.addSeries(minS);
 		outDataSet.addSeries(moyS);
 		outDataSet.addSeries(maxS);
+		if (moyDataSet != null) {
+			moyS.setKey(moyDataSet.getSeriesCount());
+			moyDataSet.addSeries(moyS);
+		}
 		return outDataSet;
 	}
 
@@ -293,21 +253,7 @@ public class Benchmarker {
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
 		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
 		net.addNewNodes(nodeNumber);
-
-		// Connect all nodes but 'alone' in line
-		Iterator<Node> nodeIt = net.getNodes().iterator();
-		Node prev = null;
-		while (nodeIt.hasNext()) {
-			Node n = nodeIt.next();
-			if (prev != null)
-				try {
-					n.connectTo(prev.getAddress());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			prev = n;
-		}
-		reachStability(net);
+		net.setToFullyInterconnected();
 		return net;
 	}
 

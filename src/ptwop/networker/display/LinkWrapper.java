@@ -93,7 +93,7 @@ public class LinkWrapper implements Animable, HCS {
 		if (v.dot(v2) > 0) {
 			float linkWeight = linkWeightTransform(link.getWeight());
 			if (!link.isEstablished()) {
-				Stroke dashed = new BasicStroke(0.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+				Stroke dashed = new BasicStroke(0.1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
 						new float[] { 0.3f }, 0);
 				g2d.setStroke(dashed);
 			} else {
@@ -118,7 +118,7 @@ public class LinkWrapper implements Animable, HCS {
 
 			// Msg
 			if (showMsh) {
-				String dispMsg = link.getNumberOfTransitingElements() + " " + link;
+				String dispMsg = Integer.toString(link.getNumberOfTransitingElements());
 				Rectangle2D bound = g2d.getFontMetrics().getStringBounds(dispMsg, g2d);
 				Vector2D mspPos = p1.add(p2).multiply(1 / 2.0);
 				mspPos = mspPos.add(slideNorm.multiply(0.4));

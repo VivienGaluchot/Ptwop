@@ -85,4 +85,8 @@ public class DataBuffer<E> {
 		set.addAll(buffer);
 		return set;
 	}
+
+	public synchronized void clear() {
+		buffer.clear();
+	}
 }

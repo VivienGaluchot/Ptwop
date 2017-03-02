@@ -96,6 +96,12 @@ public class Link implements Steppable, NPair {
 		established = v;
 	}
 
+	public void clearBuffers() {
+		while (!buffer.isEmpty())
+			net.signalRemovedData(buffer.pop());
+		waitQueue.clear();
+	}
+
 	public void computeWeight() {
 		weight = latency / ((1 - loss));
 	}
