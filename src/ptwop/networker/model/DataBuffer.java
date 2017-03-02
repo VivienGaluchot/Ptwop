@@ -16,21 +16,21 @@ public class DataBuffer<E> {
 	/**
 	 * @return true only if the buffer is empty
 	 */
-	public synchronized boolean isEmpty() {
+	public boolean isEmpty() {
 		return buffer.isEmpty();
 	}
 
 	/**
 	 * @return true only if the buffer is full
 	 */
-	public synchronized boolean isFull() {
+	public boolean isFull() {
 		return buffer.size() >= bufferSize;
 	}
 
 	/**
 	 * Add element to the ordained buffer
 	 */
-	public synchronized boolean push(E data) {
+	public boolean push(E data) {
 		if (isFull())
 			return false;
 
@@ -38,7 +38,7 @@ public class DataBuffer<E> {
 		return true;
 	}
 
-	public synchronized boolean addOnTop(E data) {
+	public boolean addOnTop(E data) {
 		if (isFull())
 			return false;
 
@@ -49,7 +49,7 @@ public class DataBuffer<E> {
 	/**
 	 * Get top element of the buffer and remove it from the buffer
 	 */
-	public synchronized E pop() {
+	public E pop() {
 		if (isEmpty())
 			return null;
 
@@ -59,7 +59,7 @@ public class DataBuffer<E> {
 	/**
 	 * Get top element of the buffer, don't remove it
 	 */
-	public synchronized E get() {
+	public E get() {
 		if (isEmpty())
 			return null;
 
@@ -69,24 +69,24 @@ public class DataBuffer<E> {
 	/**
 	 * @return the maximum number of element the buffer can hold
 	 */
-	public synchronized int size() {
+	public int size() {
 		return bufferSize;
 	}
 
 	/**
 	 * @return the current number of element in the buffer
 	 */
-	public synchronized int numerOfElements() {
+	public int numerOfElements() {
 		return buffer.size();
 	}
 
-	public synchronized Set<E> getElements() {
+	public Set<E> getElements() {
 		HashSet<E> set = new HashSet<>();
 		set.addAll(buffer);
 		return set;
 	}
 
-	public synchronized void clear() {
+	public void clear() {
 		buffer.clear();
 	}
 }

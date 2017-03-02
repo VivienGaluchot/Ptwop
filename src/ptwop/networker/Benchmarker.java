@@ -78,16 +78,16 @@ public class Benchmarker {
 		XYSeriesCollection bandwith = new XYSeriesCollection();
 		XYSeriesCollection linknumber = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int nC = 100;
-		int nNode = 20;
-		int nThreads = 8;
-		for (int t = 0; t < nThreads; t++) {
+		int threadWorkNumber = 10;
+		int threadNumber = 8;
+		int nNode = 50;
+		for (int t = 0; t < threadNumber; t++) {
 			Thread runner = new Thread() {
 				@Override
 				public void run() {
-					for (int i = 0; i < nC / nThreads; i++) {
+					for (int i = 0; i < threadWorkNumber; i++) {
 						Network net = new Network(p2pcreator);
-						interconnectedNodes(net, nNode);
+						setToInterconnectedNetwork(net, nNode);
 						net.track = true;
 						Node alone = connectNodeAndWait(net);
 						synchronized (bandwith) {
@@ -108,31 +108,36 @@ public class Benchmarker {
 				e.printStackTrace();
 			}
 		}
-		displayMinMaxMoy(bandwith, moyCollection1, name + " connection d'un noeud", "t (ms)", "Nombre de messages");
-		displayMinMaxMoy(linknumber, moyCollection2, name + " connection d'un noeud", "t (ms)", "Nombre de liens");
+		title1 = "Connection d'un noeud (" + threadNumber * threadWorkNumber + "essais, " + nNode + "noeuds)";
+		displayMinMaxMoy(bandwith, moyCollection1, name + " " + title1, "t (ms)", "Nombre de messages");
+		title2 = "Connection d'un noeud (" + threadNumber * threadWorkNumber + "essais, " + nNode + "noeuds)";
+		displayMinMaxMoy(linknumber, moyCollection2, name + " " + title2, "t (ms)", "Nombre de liens");
 	}
 
 	public static void evaluateOneNodeConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection connexionTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int nEssais = 8;
+		int threadWorkNumber = 1;
+		int threadNumber = 8;
 		int nNodeMax = 70;
-		for (int essai = 0; essai < nEssais; essai++) {
+		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {
 				@Override
 				public void run() {
-					XYSeries series = new XYSeries(this.hashCode());
-					Network net = new Network(p2pcreator);
-					interconnectedNodes(net, 2);
-					for (int i = 0; i < nNodeMax; i++) {
-						long st = net.getTime();
-						connectNodeAndWait(net);
-						long et = net.getTime();
-						series.add(i, et - st);
-						System.out.println(name + " : passe " + i);
-					}
-					synchronized (connexionTime) {
-						connexionTime.addSeries(series);
+					for (int essai = 0; essai < threadWorkNumber; essai++) {
+						XYSeries series = new XYSeries(this.hashCode());
+						Network net = new Network(p2pcreator);
+						setToInterconnectedNetwork(net, 2);
+						for (int i = 0; i < nNodeMax; i++) {
+							long st = net.getTime();
+							connectNodeAndWait(net);
+							long et = net.getTime();
+							series.add(i, et - st);
+							System.out.println(name + " : passe " + i);
+						}
+						synchronized (connexionTime) {
+							connexionTime.addSeries(series);
+						}
 					}
 				}
 			};
@@ -243,11 +248,20 @@ public class Benchmarker {
 		int messageNumber;
 		do {
 			net.doTimeStep();
-			messageNumber = getPendingMessageNumber(net);
+			messageNumber = 0;
+			for (Node n : net.getNodes()) {
+				for (Link l : n.getLinks()) {
+					messageNumber += l.getNumberOfPendingMessages();
+					if(messageNumber > 0)
+						break;
+				}
+				if(messageNumber > 0)
+					break;
+			}
 		} while (messageNumber > 0);
 	}
 
-	public static Network interconnectedNodes(Network net, int nodeNumber) {
+	public static Network setToInterconnectedNetwork(Network net, int nodeNumber) {
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
@@ -266,22 +280,7 @@ public class Benchmarker {
 			e.printStackTrace();
 		}
 		reachStability(net);
-		// while (alone.getLinks().size() < (net.getNodes().size() - 1))
-		// net.doTimeStep();
-		// // few more steps
-		// for (int j = 0; j < 10; j++)
-		// net.doTimeStep();
 		return alone;
-	}
-
-	public static int getPendingMessageNumber(Network net) {
-		int res = 0;
-		for (Node n : net.getNodes()) {
-			for (Link l : n.getLinks()) {
-				res += l.getNumberOfPendingMessages();
-			}
-		}
-		return res;
 	}
 
 	public static int getTransitingMessagesNumber(Network net) {

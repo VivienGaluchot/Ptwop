@@ -126,7 +126,7 @@ public class Network implements Steppable {
 	}
 
 	@Override
-	public synchronized void doTimeStep() {
+	public void doTimeStep() {
 		time++;
 		for (Node n : nodes) {
 			n.doTimeStep();

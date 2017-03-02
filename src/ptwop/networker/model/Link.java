@@ -1,7 +1,6 @@
 package ptwop.networker.model;
 
 import java.io.IOException;
-import java.util.Random;
 import java.util.Set;
 
 import ptwop.network.NAddress;
@@ -18,7 +17,7 @@ public class Link implements Steppable, NPair {
 
 	private long latency;
 	private float loss;
-	private Random rand;
+	// private Random rand;
 
 	private Node source;
 	private Node dest;
@@ -50,7 +49,7 @@ public class Link implements Steppable, NPair {
 		this.dest = dest;
 		this.latency = latency;
 		this.loss = loss;
-		rand = new Random();
+		// rand = new Random();
 
 		buffer = new DataBuffer<>(packetSize);
 		waitQueue = new DataBuffer<>(1000);
@@ -179,7 +178,7 @@ public class Link implements Steppable, NPair {
 	 *            data to send
 	 * @return true if the data have been successfully added, false otherwise
 	 */
-	public synchronized boolean push(Data data) {
+	public boolean push(Data data) {
 		if (!established && !(data.data instanceof DataTCP))
 			return false;
 
@@ -195,7 +194,7 @@ public class Link implements Steppable, NPair {
 	 * The data have a probability to be lost, according the loss parameter
 	 */
 	@Override
-	public synchronized void doTimeStep() {
+	public void doTimeStep() {
 		pushedThisRound = 0;
 		while (!buffer.isFull() && !waitQueue.isEmpty()) {
 			push(waitQueue.pop());
@@ -207,15 +206,10 @@ public class Link implements Steppable, NPair {
 			net.signalRemovedData(tdata);
 
 			// x float in [0:1[
-			float x = rand.nextFloat();
-			if (x >= loss)
+			// float x = rand.nextFloat();
+			// if (x >= loss)
 				dest.handleData(source, tdata.data);
-			else
-				try {
-					send(tdata.data);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			// TODO else
 		}
 	}
 

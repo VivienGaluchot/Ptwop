@@ -30,7 +30,7 @@ public class Node extends NServent implements Steppable {
 		linkMap = HashBiMap.create();
 	}
 
-	public synchronized void addLink(Link link) {
+	public void addLink(Link link) {
 		if (linkMap.containsKey(link.getDestNode()))
 			throw new IllegalArgumentException(
 					"Link " + link + " - destination already present : " + link.getDestNode());
@@ -40,23 +40,23 @@ public class Node extends NServent implements Steppable {
 		net.signalNewLink(link);
 	}
 
-	public synchronized void removeLink(Link link) {
+	public void removeLink(Link link) {
 		if (linkMap.inverse().remove(link) == null)
 			throw new IllegalArgumentException("Can't remove unconnected link : " + link);
 		pairQuit(link);
 		net.signalRemovedLink(link);
 	}
 
-	public synchronized void removeLinkTo(Node node) {
+	public void removeLinkTo(Node node) {
 		Link link = linkMap.get(node);
 		removeLink(link);
 	}
 
-	public synchronized Link getLinkTo(Node n) {
+	public Link getLinkTo(Node n) {
 		return linkMap.get(n);
 	}
 
-	public synchronized Set<Link> getLinks() {
+	public Set<Link> getLinks() {
 		return Collections.unmodifiableSet(linkMap.inverse().keySet());
 	}
 
@@ -76,7 +76,7 @@ public class Node extends NServent implements Steppable {
 		this.id = id;
 	}
 
-	public synchronized void handleData(Node source, Data data) {
+	public void handleData(Node source, Data data) {
 		if (!linkMap.containsKey(source))
 			addLink(new Link(net, this, source));
 		incommingMessage(linkMap.get(source), data.data);
