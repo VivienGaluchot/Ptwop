@@ -106,7 +106,7 @@ public class Link implements Steppable, NPair {
 	}
 
 	public void computeWeight() {
-		weight = latency / ((1 - loss));
+		weight = latency / (transmissionBuffer.size() * ((1 - loss)));
 	}
 
 	public Set<TimedData> getTransitingDatas() {
