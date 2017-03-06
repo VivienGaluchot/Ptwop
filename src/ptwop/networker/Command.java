@@ -47,9 +47,13 @@ public class Command extends JPanel {
 	private JButton disconnect;
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
+	
+	// P2P info
 	private JLabel p2pInfo;
 	private JLabel p2pName;
 	private DefaultTableModel p2pUserModel;
+	private JComboBox<P2PUser> p2pPairComboBox;
+	private JButton sendTo;
 
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
 	String[] p2pUsersColumnNames = { "Name", "Address" };
@@ -135,7 +139,9 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					node.connectTo(new NetworkerNAddress(((Node) pairComboBox.getSelectedItem()).getId()));
+					Node n = (Node) pairComboBox.getSelectedItem();
+					if (n != null)
+						node.connectTo(new NetworkerNAddress(n));
 					update();
 				} catch (IOException ex) {
 					Dialog.displayError(null, ex.getMessage());
@@ -203,6 +209,21 @@ public class Command extends JPanel {
 		p2pUserModel = new DefaultTableModel();
 		p2pUsers.setModel(p2pUserModel);
 		listScroller = new JScrollPane(p2pUsers);
+		p2pPairComboBox = new JComboBox<>();
+		sendTo = new JButton("Envois");
+		sendTo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					P2PUser user = (P2PUser) p2pPairComboBox.getSelectedItem();
+					net.getP2P(node).sendTo(user, new String("Hello world"));
+					update();
+				} catch (IOException ex) {
+					Dialog.displayError(null, ex.getMessage());
+				}
+			}
+		});
+		sendTo.setEnabled(false);
 
 		subPanel.add(new JLabel("info : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
@@ -214,6 +235,10 @@ public class Command extends JPanel {
 				new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(listScroller, new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(p2pPairComboBox, new GridBagConstraints(0, 3, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(sendTo, new GridBagConstraints(1, 3, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -276,6 +301,15 @@ public class Command extends JPanel {
 				i++;
 			}
 			p2pUserModel.setDataVector(usersInfo, p2pUsersColumnNames);
+			
+			p2pPairComboBox.removeAllItems();
+			p2pPairComboBox.setEnabled(true);
+			p2p.getUsers();
+			for (P2PUser l : p2p.getUsers()) {
+				p2pPairComboBox.addItem(l);
+			}
+			sendTo.setEnabled(true);
+			
 		} else {
 			nodeName.setText("");
 			pairComboBox.removeAllItems();
@@ -286,6 +320,9 @@ public class Command extends JPanel {
 			p2pInfo.setText("");
 			p2pName.setText("");
 			p2pUserModel.setDataVector(new Object[0][], p2pUsersColumnNames);
+			p2pPairComboBox.removeAllItems();
+			p2pPairComboBox.setEnabled(false);
+			sendTo.setEnabled(false);
 		}
 	}
 

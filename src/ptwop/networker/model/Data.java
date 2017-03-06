@@ -5,9 +5,14 @@ public class Data {
 
 	private long creationTime;
 
-	public Data(Object data, long creationTime) {
+	public int part;
+	public int nPart;
+
+	public Data(Object data, long creationTime, int part, int nPart) {
 		this.data = data;
 		this.creationTime = creationTime;
+		this.part = part;
+		this.nPart = nPart;
 	}
 
 	public long getEllapsedTime(long currentTime) {
@@ -16,6 +21,6 @@ public class Data {
 
 	@Override
 	public String toString() {
-		return data.toString();
+		return data.toString() + " " + (part+1) + "/" + nPart;
 	}
 }

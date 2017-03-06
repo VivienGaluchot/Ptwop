@@ -3,6 +3,7 @@ package ptwop.networker.model;
 import java.io.IOException;
 import java.util.Set;
 
+import ptwop.common.Util;
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
 
@@ -19,9 +20,12 @@ public class Link implements Steppable, NPair {
 	private float loss;
 	// private Random rand;
 
+	// 64 bytes
+	public static int transmissionUnit = 64;
+
 	private Node source;
 	private Node dest;
-	private DataBuffer<TimedData> buffer;
+	private DataBuffer<TimedData> transmissionBuffer;
 	private DataBuffer<Data> waitQueue;
 
 	private float weight;
@@ -51,7 +55,7 @@ public class Link implements Steppable, NPair {
 		this.loss = loss;
 		// rand = new Random();
 
-		buffer = new DataBuffer<>(packetSize);
+		transmissionBuffer = new DataBuffer<>(packetSize);
 		waitQueue = new DataBuffer<>(1000);
 		computeWeight();
 
@@ -96,8 +100,8 @@ public class Link implements Steppable, NPair {
 	}
 
 	public void clearBuffers() {
-		while (!buffer.isEmpty())
-			net.signalRemovedData(buffer.pop());
+		while (!transmissionBuffer.isEmpty())
+			net.signalRemovedData(transmissionBuffer.pop());
 		waitQueue.clear();
 	}
 
@@ -106,11 +110,11 @@ public class Link implements Steppable, NPair {
 	}
 
 	public Set<TimedData> getTransitingDatas() {
-		return buffer.getElements();
+		return transmissionBuffer.getElements();
 	}
 
 	public boolean isFull() {
-		return buffer.isFull();
+		return transmissionBuffer.isFull();
 	}
 
 	public Node getDestNode() {
@@ -122,15 +126,15 @@ public class Link implements Steppable, NPair {
 	}
 
 	public int getNumberOfTransitingElements() {
-		return buffer.numerOfElements();
+		return transmissionBuffer.numerOfElements();
 	}
 
 	public int getNumberOfPendingMessages() {
-		return buffer.numerOfElements() + waitQueue.numerOfElements();
+		return transmissionBuffer.numerOfElements() + waitQueue.numerOfElements();
 	}
 
 	public int getSize() {
-		return buffer.size();
+		return transmissionBuffer.size();
 	}
 
 	public float getWeight() {
@@ -178,17 +182,42 @@ public class Link implements Steppable, NPair {
 	 *            data to send
 	 * @return true if the data have been successfully added, false otherwise
 	 */
-	public boolean push(Data data) {
-		if (!established && !(data.data instanceof DataTCP))
+	private boolean pushObject(Object data) {
+		if (!established && !(data instanceof DataTCP))
 			return false;
 
+		byte[] bytes = Util.serialize(data);
+		int l = 0;
+		if(bytes != null)
+			l = bytes.length;
+		else
+			return false;
+		int nPart = l / transmissionUnit;
+		if(nPart * transmissionUnit < l)
+			nPart++;
+		
+		for (int i = 0; i < nPart; i++) {
+			Data d = new Data(data, net.getTime(), i, nPart);
+			boolean pushed = false;
+			if (waitQueue.isEmpty())
+				pushed = pushData(d);
+			if (!pushed)
+				pushed = waitQueue.push(d);
+			if (!pushed)
+				return false;
+		}
+
+		return true;
+	}
+	
+	private boolean pushData(Data data){
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data, pushedThisRound++);
-		boolean pushed = buffer.push(tdata);
+		boolean pushed = transmissionBuffer.push(tdata);
 		if (pushed)
 			net.signalNewData(tdata, this);
 		return pushed;
 	}
-
+	
 	/**
 	 * Will push data's buffer to the destNode if the latency have been elapsed.
 	 * The data have a probability to be lost, according the loss parameter
@@ -196,18 +225,19 @@ public class Link implements Steppable, NPair {
 	@Override
 	public void doTimeStep() {
 		pushedThisRound = 0;
-		while (!buffer.isFull() && !waitQueue.isEmpty()) {
-			push(waitQueue.pop());
+		while (!transmissionBuffer.isFull() && !waitQueue.isEmpty()) {
+			pushData(waitQueue.pop());
 		}
 
 		// push data to node when it's time
-		while (!buffer.isEmpty() && (buffer.get().outTime <= net.getTime())) {
-			TimedData tdata = buffer.pop();
+		while (!transmissionBuffer.isEmpty() && (transmissionBuffer.get().outTime <= net.getTime())) {
+			TimedData tdata = transmissionBuffer.pop();
 			net.signalRemovedData(tdata);
 
 			// x float in [0:1[
 			// float x = rand.nextFloat();
 			// if (x >= loss)
+			if(tdata.data.part == tdata.data.nPart - 1)
 				dest.handleData(source, tdata.data);
 			// TODO else
 		}
@@ -217,17 +247,10 @@ public class Link implements Steppable, NPair {
 
 	@Override
 	public void send(Object o) throws IOException {
-		Data d = new Data(o, net.getTime());
+		boolean pushed = pushObject(o);
 
-		boolean pushed = false;
-		if (waitQueue.isEmpty())
-			pushed = push(d);
-
-		if (!pushed) {
-			boolean onQueue = waitQueue.push(d);
-			if (!onQueue)
-				throw new IOException("waitQueue full");
-		}
+		if (!pushed)
+			throw new IOException("waitQueue full");
 	}
 
 	@Override
