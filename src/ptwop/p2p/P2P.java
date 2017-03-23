@@ -33,6 +33,13 @@ public interface P2P {
 	 * @throws IOException
 	 */
 	public void sendTo(P2PUser dest, Object msg) throws IOException;
+	
+	/**
+	 * send msg to some users contained in dests set
+	 * 
+	 * @param msg
+	 */
+	public void anycast(Set<P2PUser> dests, Object msg);
 
 	/**
 	 * get the p2p network user set

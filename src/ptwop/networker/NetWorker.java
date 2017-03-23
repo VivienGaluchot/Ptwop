@@ -22,7 +22,7 @@ import ptwop.networker.display.NetworkWrapper;
 import ptwop.networker.model.Network;
 import ptwop.networker.model.P2PCreator;
 import ptwop.p2p.P2P;
-import ptwop.p2p.flood.FloodV2;
+import ptwop.p2p.flood.FloodV1;
 
 public class NetWorker {
 	private static JTextPane console;
@@ -76,13 +76,13 @@ public class NetWorker {
 		Network net = new Network(new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV2(n, nameGenerator.getWord(6));
+				return new FloodV1(n, nameGenerator.getWord(6));
 			}
 		});
 		int nodeNumber = 10;
 		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
-		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
+		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
 		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
 		net.addNewNodes(nodeNumber);
 

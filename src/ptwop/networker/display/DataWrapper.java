@@ -51,7 +51,7 @@ public class DataWrapper implements Animable, HCS {
 
 		// Shape
 		Vector2D dataPos = linkWrapper.getP2().subtract(linkWrapper.getP1()).multiply(advance).add(linkWrapper.getP1());
-		dataPos = dataPos.add(linkWrapper.getSlideNorm().multiply((dataRadius * 2.1) * (data.slide + 0.7)));
+		dataPos = dataPos.add(linkWrapper.getSlideNorm().multiply((dataRadius * 0.7) * (data.slide + 0.7)));
 		shape = new Ellipse2D.Double(dataPos.x - dataRadius, dataPos.y - dataRadius, dataRadius * 2, dataRadius * 2);
 		g2d.fill(shape);
 
