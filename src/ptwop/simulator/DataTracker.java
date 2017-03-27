@@ -1,4 +1,4 @@
-package ptwop.networker;
+package ptwop.simulator;
 
 import java.util.ArrayList;
 

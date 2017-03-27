@@ -1,4 +1,4 @@
-package ptwop.networker;
+package ptwop.simulator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,13 +7,13 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
-import ptwop.networker.model.Link;
-import ptwop.networker.model.Network;
-import ptwop.networker.model.NetworkerNAddress;
-import ptwop.networker.model.Node;
-import ptwop.networker.model.P2PCreator;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.*;
+import ptwop.simulator.model.Link;
+import ptwop.simulator.model.Network;
+import ptwop.simulator.model.NetworkerNAddress;
+import ptwop.simulator.model.Node;
+import ptwop.simulator.model.P2PCreator;
 
 public class Benchmarker {
 

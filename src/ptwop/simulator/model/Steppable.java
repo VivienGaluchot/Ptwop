@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 public interface Steppable {
 	public void doTimeStep();

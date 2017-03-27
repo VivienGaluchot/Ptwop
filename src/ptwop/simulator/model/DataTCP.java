@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

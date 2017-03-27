@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 public class Data {
 	public Object data;

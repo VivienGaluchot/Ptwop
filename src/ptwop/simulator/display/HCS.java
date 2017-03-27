@@ -1,4 +1,4 @@
-package ptwop.networker.display;
+package ptwop.simulator.display;
 
 import java.awt.Shape;
 

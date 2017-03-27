@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 import java.io.IOException;
 import java.util.Set;
@@ -16,7 +16,7 @@ import ptwop.network.NPair;
 public class Link implements Steppable, NPair {
 	private Network net;
 
-	private long latency;
+	private int latency;
 	private float loss;
 	// private Random rand;
 
@@ -47,7 +47,7 @@ public class Link implements Steppable, NPair {
 	 * @param packetSize
 	 *            number max of data who can be on the link at the same time
 	 */
-	public Link(Network net, Node source, Node dest, long latency, float loss, int packetSize) {
+	public Link(Network net, Node source, Node dest, int latency, float loss, int packetSize) {
 		this.net = net;
 		this.source = source;
 		this.dest = dest;
@@ -72,7 +72,7 @@ public class Link implements Steppable, NPair {
 	 * @param dest
 	 */
 	public Link(Network net, Node source, Node dest) {
-		this(net, source, dest, net.getLatencyRandomizer().nextLong(), net.getLossRandomizer().nextFloat(),
+		this(net, source, dest, net.getLatencyRandomizer().nextInt(), net.getLossRandomizer().nextFloat(),
 				net.getPacketSizeRandomizer().nextInt());
 	}
 
@@ -141,7 +141,7 @@ public class Link implements Steppable, NPair {
 		return weight;
 	}
 
-	public long getLatency() {
+	public int getLatency() {
 		return latency;
 	}
 

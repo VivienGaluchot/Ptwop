@@ -1,4 +1,4 @@
-package ptwop.networker.display;
+package ptwop.simulator.display;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,7 +9,7 @@ import java.awt.geom.Rectangle2D;
 
 import ptwop.common.gui.Animable;
 import ptwop.common.math.Vector2D;
-import ptwop.networker.model.TimedData;
+import ptwop.simulator.model.TimedData;
 
 public class DataWrapper implements Animable, HCS {
 	private NetworkWrapper netWrapper;

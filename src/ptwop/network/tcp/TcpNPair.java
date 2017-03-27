@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Random;
 
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
@@ -20,6 +21,11 @@ public class TcpNPair implements NPair, Runnable {
 
 	private int pairListeningPort;
 
+	private long lastPingStart; // in ms
+	private float latency; // in ms
+	private int pingThreshold = 5000; // // in ms, 5s
+	int pingValue;
+
 	public TcpNPair(int listeningPort, Socket socket, NPairHandler handler) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
@@ -32,8 +38,13 @@ public class TcpNPair implements NPair, Runnable {
 			pairListeningPort = (Integer) in.readObject();
 			System.out.println("Pair listening port : " + pairListeningPort);
 
+			latency = 0;
+			lastPingStart = System.currentTimeMillis();
+			Random c = new Random();
+			pingValue = c.nextInt();
+
 			runner = new Thread(this);
-			runner.setName("TcpNetworkUser runner");
+			runner.setName("TcpNetworkUser runner " + getAddress().toString());
 			runner.start();
 		} catch (ClassNotFoundException e) {
 			socket.close();
@@ -44,7 +55,13 @@ public class TcpNPair implements NPair, Runnable {
 
 	@Override
 	public void send(Object o) throws IOException {
-		out.writeObject(o);
+		if ((System.currentTimeMillis()) - lastPingStart > pingThreshold) {
+			out.writeObject(o);
+			lastPingStart = System.currentTimeMillis();
+			out.writeObject(generatePing());
+		} else {
+			out.writeObject(o);
+		}
 	}
 
 	@Override
@@ -69,7 +86,17 @@ public class TcpNPair implements NPair, Runnable {
 		while (run) {
 			try {
 				Object o = in.readObject();
-				handler.incommingMessage(this, o);
+				if (o instanceof Ping) {
+					Ping p = (Ping) o;
+					if (checkPing(p))
+						latency = (float) ((int) (System.currentTimeMillis() - lastPingStart) * 0.3 + latency * 0.7);
+					else
+						out.writeObject(new Ping(p.x));
+					System.out.println("Ping received " + latency);
+				} else {
+					handler.incommingMessage(this, o);
+
+				}
 			} catch (IOException e) {
 				run = false;
 			} catch (ClassNotFoundException e) {
@@ -82,5 +109,23 @@ public class TcpNPair implements NPair, Runnable {
 	@Override
 	public String toString() {
 		return getAddress().toString();
+	}
+
+	@Override
+	public int getLatency() {
+		return Math.round(latency);
+	}
+
+	// PING
+	private Ping generatePing() {
+		return new Ping(pingValue);
+	}
+
+	private boolean checkPing(Ping p) {
+		if (p.x == pingValue) {
+			pingValue++;
+			return true;
+		}
+		return false;
 	}
 }

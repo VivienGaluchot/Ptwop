@@ -47,6 +47,8 @@ public interface P2P {
 	 * @return
 	 */
 	public Set<P2PUser> getUsers();
+	
+	public int getLatency(P2PUser user);
 
 	/**
 	 * Get your User object

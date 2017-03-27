@@ -1,4 +1,4 @@
-package ptwop.networker;
+package ptwop.simulator;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,11 +18,11 @@ import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
-import ptwop.networker.display.NetworkWrapper;
-import ptwop.networker.model.Network;
-import ptwop.networker.model.P2PCreator;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.FloodV1;
+import ptwop.simulator.display.NetworkWrapper;
+import ptwop.simulator.model.Network;
+import ptwop.simulator.model.P2PCreator;
 
 public class NetWorker {
 	private static JTextPane console;

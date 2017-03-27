@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -10,7 +10,7 @@ import com.google.common.collect.HashBiMap;
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
 import ptwop.network.NServent;
-import ptwop.networker.DataTracker;
+import ptwop.simulator.DataTracker;
 
 public class Node extends NServent implements Steppable {
 	private Network net;

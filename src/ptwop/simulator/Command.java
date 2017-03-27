@@ -1,4 +1,4 @@
-package ptwop.networker;
+package ptwop.simulator;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -21,13 +21,13 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import ptwop.common.gui.Dialog;
-import ptwop.networker.display.NetworkWrapper;
-import ptwop.networker.model.Link;
-import ptwop.networker.model.Network;
-import ptwop.networker.model.NetworkerNAddress;
-import ptwop.networker.model.Node;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
+import ptwop.simulator.display.NetworkWrapper;
+import ptwop.simulator.model.Link;
+import ptwop.simulator.model.Network;
+import ptwop.simulator.model.NetworkerNAddress;
+import ptwop.simulator.model.Node;
 
 public class Command extends JPanel {
 	private static final long serialVersionUID = 1L;

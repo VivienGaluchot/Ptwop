@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import ptwop.common.math.GaussianRandom;
-import ptwop.networker.DataTracker;
-import ptwop.networker.display.NetworkWrapper;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
+import ptwop.simulator.DataTracker;
+import ptwop.simulator.display.NetworkWrapper;
 
 public class Network implements Steppable {
 

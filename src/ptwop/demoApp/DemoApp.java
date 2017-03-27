@@ -131,17 +131,31 @@ public class DemoApp {
 							if (e.isShiftDown()) {
 								message.setText(msg + '\n');
 							} else {
-								if (msg.compareTo("\\ls") == 0) {
+								if (msg.startsWith("-ls")) {
 									if (p2p != null) {
 										System.out.println("me- " + p2p.getMyself().toString());
 										for (P2PUser u : p2p.getUsers()) {
 											System.out.println("--- " + u.toString());
 										}
+									} else {
+										System.out.println("p2p not initialized");
+									}
+								} else if(msg.startsWith("-ping")) {
+									System.out.println("me : " + msg);
+									if (p2p != null) {
+										for (P2PUser u : p2p.getUsers()) {
+											System.out.println("--- " + u.toString() + " " + p2p.getLatency(u));
+										}
+									} else {
+										System.out.println("p2p not initialized");
 									}
 								} else {
 									System.out.println("me : " + msg);
 									if (p2p != null)
 										p2p.broadcast(msg);
+									else {
+										System.out.println("p2p not initialized");
+									}
 								}
 								message.setText("");
 							}

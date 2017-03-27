@@ -153,6 +153,17 @@ public class FloodV2 implements P2P, NPairHandler {
 			}
 		}
 	}
+	
+	@Override
+	public void anycast(Set<P2PUser> dests, Object msg) {
+		for (P2PUser u : dests) {
+			try {
+				sendTo(u, msg);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	@Override
 	public void sendTo(P2PUser dest, Object msg) throws IOException {
@@ -254,6 +265,14 @@ public class FloodV2 implements P2P, NPairHandler {
 		} else {
 			System.out.println("Flood>handleMessage : Unknown message class");
 		}
+	}
+	
+	@Override
+	public int getLatency(P2PUser user) {
+		if(otherUsers.containsKey(user))
+			return otherUsers.get(user).getLatency();
+		else
+			throw new IllegalArgumentException("Unknown user, can't get latency : " + user);
 	}
 
 	@Override

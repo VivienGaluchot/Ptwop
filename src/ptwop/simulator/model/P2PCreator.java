@@ -1,4 +1,4 @@
-package ptwop.networker.model;
+package ptwop.simulator.model;
 
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
