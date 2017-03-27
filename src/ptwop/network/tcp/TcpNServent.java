@@ -59,7 +59,7 @@ public class TcpNServent extends NServent implements Runnable {
 			TcpNAddress a = (TcpNAddress) address;
 			System.out.println("connection to " + a);
 			Socket newSocket = new Socket(a.ip, a.port);
-			connectedTo(new TcpNPair(listener.getLocalPort(), newSocket, this));
+			connectedTo(new TcpNPair(listener.getLocalPort(), newSocket, this, false));
 		}
 	}
 
@@ -68,7 +68,7 @@ public class TcpNServent extends NServent implements Runnable {
 		while (!stop) {
 			try {
 				Socket newSocket = listener.accept();
-				TcpNServent.this.incommingConnectionFrom(new TcpNPair(listener.getLocalPort(), newSocket, this));
+				TcpNServent.this.incommingConnectionFrom(new TcpNPair(listener.getLocalPort(), newSocket, this, true));
 			} catch (IOException e) {
 				stop = true;
 			}
