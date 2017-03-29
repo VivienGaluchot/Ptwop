@@ -21,7 +21,7 @@ public class TcpNAddress extends NAddress {
 
 	@Override
 	public int hashCode() {
-		return ip.hashCode() + port;
+		return ip.hashCode() * 7 - 3 * port;
 	}
 
 	@Override

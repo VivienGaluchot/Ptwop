@@ -1,8 +1,8 @@
-package ptwop.p2p.flood.messages;
+package ptwop.p2p.base;
 
 import ptwop.network.NAddress;
 
-public class ConnectTo extends FloodMessage {
+public class ConnectTo extends P2PMessage {
 	private static final long serialVersionUID = 1L;
 	public NAddress address;
 

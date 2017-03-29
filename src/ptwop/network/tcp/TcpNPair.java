@@ -25,7 +25,7 @@ public class TcpNPair implements NPair, Runnable {
 
 	private long lastPingStart; // in ms
 	private int latency; // in ms
-	private int pingDelay = 2000; // // in ms, 5s
+	private int pingDelay = 5000; // // in ms, 5s
 	int pingValue;
 	boolean incomming;
 

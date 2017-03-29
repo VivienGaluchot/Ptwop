@@ -14,10 +14,10 @@ import ptwop.network.NPairHandler;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.flood.messages.ConnectTo;
-import ptwop.p2p.flood.messages.FloodMessage;
-import ptwop.p2p.flood.messages.MessageToApp;
-import ptwop.p2p.flood.messages.MyNameIs;
+import ptwop.p2p.base.ConnectTo;
+import ptwop.p2p.base.MessageToApp;
+import ptwop.p2p.base.MyNameIs;
+import ptwop.p2p.base.P2PMessage;
 
 public class FloodV0 implements P2P, NPairHandler {
 
@@ -169,7 +169,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	public void incommingMessage(NPair user, Object o) {
 		P2PUser senderUser = otherUsers.inverse().get(user);
 
-		if (!(o instanceof FloodMessage)) {
+		if (!(o instanceof P2PMessage)) {
 			System.out.println("Flood>handleMessage : Unknown message class");
 			return;
 		}

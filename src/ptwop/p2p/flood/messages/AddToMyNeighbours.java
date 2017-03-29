@@ -1,8 +1,9 @@
 package ptwop.p2p.flood.messages;
 
 import ptwop.network.NAddress;
+import ptwop.p2p.base.P2PMessage;
 
-public class AddToMyNeighbours extends FloodMessage {
+public class AddToMyNeighbours extends P2PMessage {
 	private static final long serialVersionUID = 1L;
 	public NAddress address;
 
