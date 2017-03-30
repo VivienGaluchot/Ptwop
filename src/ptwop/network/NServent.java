@@ -6,11 +6,11 @@ import java.util.Set;
 
 public abstract class NServent implements NPairHandler {
 	private NPairHandler handler;
-	private Set<NPair> users;
+	private Set<NPair> pairs;
 	private boolean stopping;
 
 	public NServent() {
-		users = new HashSet<>();
+		pairs = new HashSet<>();
 		stopping = false;
 	}
 
@@ -25,7 +25,7 @@ public abstract class NServent implements NPairHandler {
 	public abstract void connectTo(NAddress address) throws IOException;
 
 	public boolean isConnectedTo(NAddress address) {
-		for (NPair u : users) {
+		for (NPair u : pairs) {
 			if (u.getAddress().equals(address)) {
 				return true;
 			}
@@ -35,16 +35,16 @@ public abstract class NServent implements NPairHandler {
 
 	@Override
 	public void incommingConnectionFrom(NPair user) {
-		synchronized (users) {
-			users.add(user);
+		synchronized (pairs) {
+			pairs.add(user);
 		}
 		handler.incommingConnectionFrom(user);
 	}
 
 	@Override
 	public void connectedTo(NPair user) {
-		synchronized (users) {
-			users.add(user);
+		synchronized (pairs) {
+			pairs.add(user);
 		}
 		handler.connectedTo(user);
 	}
@@ -52,8 +52,8 @@ public abstract class NServent implements NPairHandler {
 	@Override
 	public void pairQuit(NPair user) {
 		if (!stopping) {
-			synchronized (users) {
-				users.remove(user);
+			synchronized (pairs) {
+				pairs.remove(user);
 			}
 		}
 		handler.pairQuit(user);
@@ -64,13 +64,13 @@ public abstract class NServent implements NPairHandler {
 		handler.incommingMessage(user, o);
 	}
 
-	public void stop() {
+	public void disconnect() {
 		stopping = true;
-		synchronized (users) {
-			for (NPair user : users) {
+		synchronized (pairs) {
+			for (NPair user : pairs) {
 				user.disconnect();
 			}
-			users.clear();
+			pairs.clear();
 		}
 		stopping = false;
 	}

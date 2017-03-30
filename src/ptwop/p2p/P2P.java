@@ -6,11 +6,15 @@ import java.util.Set;
 import ptwop.network.NAddress;
 
 public interface P2P {
+
 	/**
-	 * connect to a p2p network
+	 * start P2P system
 	 */
 	public void start();
 
+	/**
+	 * connect to a p2p network
+	 */
 	public void connectTo(NAddress address) throws IOException;
 
 	/**
@@ -33,7 +37,7 @@ public interface P2P {
 	 * @throws IOException
 	 */
 	public void sendTo(P2PUser dest, Object msg) throws IOException;
-	
+
 	/**
 	 * send msg to some users contained in dests set
 	 * 
@@ -47,13 +51,6 @@ public interface P2P {
 	 * @return
 	 */
 	public Set<P2PUser> getUsers();
-
-	/**
-	 * Get your User object
-	 * 
-	 * @return
-	 */
-	public P2PUser getMyself();
 
 	/**
 	 * set the message handler, it will be used when a message is received

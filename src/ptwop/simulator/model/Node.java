@@ -40,16 +40,16 @@ public class Node extends NServent implements Steppable {
 		net.signalNewLink(link);
 	}
 
-	public void removeLink(Link link) {
+	public void disconnect(Link link) {
 		if (linkMap.inverse().remove(link) == null)
 			throw new IllegalArgumentException("Can't remove unconnected link : " + link);
-		pairQuit(link);
+		pairQuit(link.getAlias());
 		net.signalRemovedLink(link);
 	}
 
 	public void removeLinkTo(Node node) {
 		Link link = linkMap.get(node);
-		removeLink(link);
+		disconnect(link);
 	}
 
 	public Link getLinkTo(Node n) {
@@ -128,9 +128,10 @@ public class Node extends NServent implements Steppable {
 
 	@Override
 	public void incommingMessage(NPair user, Object o) {
+		Link l = (Link) user;
+
 		if (o instanceof DataTCP) {
 			DataTCP m = (DataTCP) o;
-			Link l = (Link) user;
 			if (m.isSyn()) {
 				l.sendSynAck();
 			} else if (m.isSynAck()) {
@@ -144,7 +145,7 @@ public class Node extends NServent implements Steppable {
 					super.incommingConnectionFrom(user);
 			}
 		} else
-			super.incommingMessage(user, o);
+			super.incommingMessage(l.getAlias(), o);
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 package ptwop.network;
 
 public interface NPairHandler {
-	void incommingConnectionFrom(NPair user);
+	void incommingConnectionFrom(NPair npair);
 
-	void connectedTo(NPair user);
+	void connectedTo(NPair npair);
 
-	void incommingMessage(NPair user, Object o);
+	void incommingMessage(NPair npair, Object o);
 
-	void pairQuit(NPair user);
+	void pairQuit(NPair npair);
 }

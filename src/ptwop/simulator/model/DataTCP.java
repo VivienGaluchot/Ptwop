@@ -36,21 +36,21 @@ public class DataTCP implements Serializable {
 	}
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		if(t == Type.SYN)
+		if (t == Type.SYN)
 			out.writeByte(0);
-		else if(t == Type.ACK)
+		else if (t == Type.ACK)
 			out.writeByte(1);
-		else if(t == Type.SYNACK)
+		else if (t == Type.SYNACK)
 			out.writeByte(2);
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		byte b = in.readByte();
-		if(b == 0)
+		if (b == 0)
 			t = Type.SYN;
-		else if(b == 1)
+		else if (b == 1)
 			t = Type.ACK;
-		else if(b == 2)
+		else if (b == 2)
 			t = Type.SYNACK;
 	}
 }

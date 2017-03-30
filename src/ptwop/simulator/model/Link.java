@@ -27,6 +27,7 @@ public class Link implements Steppable, NPair {
 	private Node dest;
 	private DataBuffer<TimedData> transmissionBuffer;
 	private DataBuffer<Data> waitQueue;
+	private NPair alias;
 
 	private float weight;
 
@@ -53,6 +54,7 @@ public class Link implements Steppable, NPair {
 		this.dest = dest;
 		this.latency = latency;
 		this.loss = loss;
+		this.alias = this;
 		// rand = new Random();
 
 		transmissionBuffer = new DataBuffer<>(packetSize);
@@ -141,6 +143,7 @@ public class Link implements Steppable, NPair {
 		return weight;
 	}
 
+	@Override
 	public int getLatency() {
 		return latency;
 	}
@@ -188,14 +191,14 @@ public class Link implements Steppable, NPair {
 
 		byte[] bytes = Util.serialize(data);
 		int l = 0;
-		if(bytes != null)
+		if (bytes != null)
 			l = bytes.length;
 		else
 			return false;
 		int nPart = l / transmissionUnit;
-		if(nPart * transmissionUnit < l)
+		if (nPart * transmissionUnit < l)
 			nPart++;
-		
+
 		for (int i = 0; i < nPart; i++) {
 			Data d = new Data(data, net.getTime(), i, nPart);
 			boolean pushed = false;
@@ -209,15 +212,15 @@ public class Link implements Steppable, NPair {
 
 		return true;
 	}
-	
-	private boolean pushData(Data data){
+
+	private boolean pushData(Data data) {
 		TimedData tdata = new TimedData(net.getTime(), net.getTime() + latency, data, pushedThisRound++);
 		boolean pushed = transmissionBuffer.push(tdata);
 		if (pushed)
 			net.signalNewData(tdata, this);
 		return pushed;
 	}
-	
+
 	/**
 	 * Will push data's buffer to the destNode if the latency have been elapsed.
 	 * The data have a probability to be lost, according the loss parameter
@@ -237,7 +240,7 @@ public class Link implements Steppable, NPair {
 			// x float in [0:1[
 			// float x = rand.nextFloat();
 			// if (x >= loss)
-			if(tdata.data.part == tdata.data.nPart - 1)
+			if (tdata.data.part == tdata.data.nPart - 1)
 				dest.handleData(source, tdata.data);
 			// TODO else
 		}
@@ -255,12 +258,26 @@ public class Link implements Steppable, NPair {
 
 	@Override
 	public void disconnect() {
-		source.removeLink(this);
+		source.disconnect(this);
 		dest.removeLinkTo(source);
 	}
 
 	@Override
 	public NAddress getAddress() {
 		return dest.getAddress();
+	}
+
+	@Override
+	public void setAlias(NPair pair) {
+		alias = pair;
+	}
+
+	public NPair getAlias() {
+		return alias;
+	}
+
+	@Override
+	public void start() {
+
 	}
 }

@@ -189,16 +189,8 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 	@Override
 	public synchronized void animate(long timeStep) {
 		if (animated)
-			network.doTimeStep();
-
-		// for (Link l : links.keySet())
-		// links.get(l).animate(timeStep);
-		//
-		// for (TimedData d : datas.keySet())
-		// datas.get(d).animate(timeStep);
-		//
-		// for (Node n : nodes.keySet())
-		// nodes.get(n).animate(timeStep);
+			for (int i = 0; i < timeStep; i++)
+				network.doTimeStep();
 	}
 
 	@Override

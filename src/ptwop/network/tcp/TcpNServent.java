@@ -31,7 +31,7 @@ public class TcpNServent extends NServent implements Runnable {
 	}
 
 	@Override
-	public void stop() {
+	public void disconnect() {
 		if (runner != null) {
 			try {
 				listener.close();
@@ -40,7 +40,7 @@ public class TcpNServent extends NServent implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		super.stop();
+		super.disconnect();
 	}
 
 	@Override

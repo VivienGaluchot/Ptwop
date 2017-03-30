@@ -252,10 +252,10 @@ public class Benchmarker {
 			for (Node n : net.getNodes()) {
 				for (Link l : n.getLinks()) {
 					messageNumber += l.getNumberOfPendingMessages();
-					if(messageNumber > 0)
+					if (messageNumber > 0)
 						break;
 				}
-				if(messageNumber > 0)
+				if (messageNumber > 0)
 					break;
 			}
 		} while (messageNumber > 0);

@@ -17,6 +17,7 @@ public class TcpNPair implements NPair, Runnable {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	NPairHandler handler;
+	NPair alias;
 
 	private Thread runner;
 	private boolean run;
@@ -26,15 +27,17 @@ public class TcpNPair implements NPair, Runnable {
 	private long lastPingStart; // in ms
 	private int latency; // in ms
 	private int pingDelay = 5000; // // in ms, 5s
-	int pingValue;
-	boolean incomming;
+	private int pingValue;
+	private boolean initierPing;
+	private Timer pingTimer;
 
 	public TcpNPair(int listeningPort, Socket socket, NPairHandler handler, boolean incomming) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
+		this.initierPing = !incomming;
+		alias = this;
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
-		this.incomming = incomming;
 
 		// sharing listening port
 		out.writeObject(new Integer(listeningPort));
@@ -49,28 +52,31 @@ public class TcpNPair implements NPair, Runnable {
 
 			runner = new Thread(this);
 			runner.setName("TcpNetworkUser runner " + getAddress().toString());
-			runner.start();
-
-			// Timer Ping
-			if (!incomming) {
-				Timer timer = new Timer(true);
-				timer.scheduleAtFixedRate(new TimerTask() {
-					@Override
-					public void run() {
-						try {
-							send(generatePing());
-							lastPingStart = System.currentTimeMillis();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}, pingDelay, pingDelay);
-			}
 		} catch (ClassNotFoundException e) {
 			socket.close();
-			handler.pairQuit(this);
+			handler.pairQuit(alias);
 			throw new IOException("Cant get pair's listening port");
 		}
+	}
+
+	@Override
+	public void start() {
+		// Timer Ping
+		if (initierPing) {
+			pingTimer = new Timer(true);
+			pingTimer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					try {
+						send(generatePing());
+						lastPingStart = System.currentTimeMillis();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}, pingDelay, pingDelay);
+		}
+		runner.start();
 	}
 
 	@Override
@@ -81,6 +87,8 @@ public class TcpNPair implements NPair, Runnable {
 	@Override
 	public void disconnect() {
 		run = false;
+		if (pingTimer != null)
+			pingTimer.cancel();
 		try {
 			socket.close();
 		} catch (IOException e) {
@@ -90,8 +98,7 @@ public class TcpNPair implements NPair, Runnable {
 
 	@Override
 	public NAddress getAddress() {
-		TcpNAddress address = new TcpNAddress(socket.getInetAddress(), pairListeningPort);
-		return address;
+		return new TcpNAddress(socket.getInetAddress(), pairListeningPort);
 	}
 
 	@Override
@@ -102,7 +109,7 @@ public class TcpNPair implements NPair, Runnable {
 				Object o = in.readObject();
 				if (o instanceof Ping) {
 					Ping p = (Ping) o;
-					if (!incomming) {
+					if (initierPing) {
 						if (checkPing(p)) {
 							latency = (int) (System.currentTimeMillis() - lastPingStart);
 							send(p);
@@ -117,21 +124,30 @@ public class TcpNPair implements NPair, Runnable {
 						}
 					}
 				} else {
-					handler.incommingMessage(this, o);
+					handler.incommingMessage(alias, o);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
 				disconnect();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
-		handler.pairQuit(this);
+		handler.pairQuit(alias);
 	}
 
 	@Override
 	public String toString() {
 		return getAddress().toString();
+	}
+
+	@Override
+	public int hashCode() {
+		return getAddress().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return (o instanceof TcpNPair) && ((TcpNPair) o).getAddress().equals(getAddress());
 	}
 
 	@Override
@@ -150,5 +166,13 @@ public class TcpNPair implements NPair, Runnable {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void setAlias(NPair pair) {
+		if (pair == null)
+			throw new IllegalArgumentException("Can't set an alias as null");
+
+		alias = pair;
 	}
 }

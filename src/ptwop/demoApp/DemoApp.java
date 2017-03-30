@@ -36,78 +36,21 @@ import ptwop.p2p.flood.FloodV0;
 
 public class DemoApp {
 
-	private static P2P p2p;
-	private static JTextPane console;
-	private static JScrollPane scrollSole;
+	private P2P p2p;
+	private JTextPane console;
+	private JScrollPane scrollSole;
+	private PrintStream stream;
 
-	private static class ConsoleOutputStream extends OutputStream {
-		private final StringBuilder sb = new StringBuilder();
-
-		@Override
-		public void flush() {
-		}
-
-		@Override
-		public void close() {
-		}
-
-		@Override
-		public void write(int b) throws IOException {
-
-			if (b == '\r')
-				return;
-
-			if (b == '\n') {
-				final String text = sb.toString() + "\n";
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						console.setText(console.getText() + text);
-						scrollSole.getVerticalScrollBar().setValue(scrollSole.getVerticalScrollBar().getMaximum());
-					}
-				});
-				sb.setLength(0);
-
-				return;
-			}
-
-			sb.append((char) b);
-		}
-	}
-
-	private static class Handler implements P2PHandler {
-		@Override
-		public void handleMessage(P2PUser sender, Object o) {
-			System.out.println(sender.getName() + " : \n" + o.toString());
-		}
-
-		@Override
-		public void userConnect(P2PUser user) {
-			System.out.println(user + " connected");
-		}
-
-		@Override
-		public void userDisconnect(P2PUser user) {
-			System.out.println(user + " disconnected");
-		}
-
-		@Override
-		public void userUpdate(P2PUser user) {
-			System.out.println("update of " + user);
-		}
-	}
-
-	public static void main(String[] args) {
-		System.setOut(new PrintStream(new ConsoleOutputStream()));
-
+	public DemoApp(int id) {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 
 		p2p = null;
+		stream = new PrintStream(new ConsoleOutputStream());
 
 		// Fields
-		JTextField listenPort = new JTextField("919", 4);
-		JTextField name = new JTextField("Patrick", 6);
+		JTextField listenPort = new JTextField(Integer.toString(919 + id), 4);
+		JTextField name = new JTextField("Patrick " + id, 6);
 		JTextField pairIp = new JTextField("127.0.0.1", 6);
 		JTextField pairPort = new JTextField("919", 4);
 		JTextPane message = new JTextPane();
@@ -133,28 +76,29 @@ public class DemoApp {
 							} else {
 								if (msg.startsWith("-ls")) {
 									if (p2p != null) {
-										System.out.println("me- " + p2p.getMyself().toString());
+										stream.println("Utilisateurs du systeme");
 										for (P2PUser u : p2p.getUsers()) {
-											System.out.println("--- " + u.toString());
+											stream.println("- " + u.toString());
 										}
 									} else {
-										System.out.println("p2p not initialized");
+										stream.println("p2p not initialized");
 									}
-								} else if(msg.startsWith("-ping")) {
-									System.out.println("me : " + msg);
+								} else if (msg.startsWith("-ping")) {
+									stream.println("me : " + msg);
 									if (p2p != null) {
+										stream.println("Latence");
 										for (P2PUser u : p2p.getUsers()) {
-											System.out.println("--- " + u.toString() + " " + p2p.getLatency(u));
+											stream.println("- " + u.toString() + " " + u.getLatency() + " ms");
 										}
 									} else {
-										System.out.println("p2p not initialized");
+										stream.println("p2p not initialized");
 									}
 								} else {
-									System.out.println("me : " + msg);
+									stream.println("me : " + msg);
 									if (p2p != null)
 										p2p.broadcast(msg);
 									else {
-										System.out.println("p2p not initialized");
+										stream.println("p2p not initialized");
 									}
 								}
 								message.setText("");
@@ -207,10 +151,7 @@ public class DemoApp {
 				try {
 					p2p.connectTo(new TcpNAddress(InetAddress.getByName(pairIp.getText()),
 							Integer.parseInt(pairPort.getText())));
-					pairIp.setEditable(false);
-					pairPort.setEditable(false);
 					disconnect.setEnabled(true);
-					join.setEnabled(false);
 				} catch (NumberFormatException | IOException e) {
 					Dialog.displayError(mainPanel, e.getMessage());
 				}
@@ -224,9 +165,7 @@ public class DemoApp {
 					p2p.stop();
 				listenPort.setEditable(true);
 				name.setEditable(true);
-				pairIp.setEditable(true);
-				pairPort.setEditable(true);
-				join.setEnabled(true);
+				join.setEnabled(false);
 				start.setEnabled(true);
 				disconnect.setEnabled(false);
 			}
@@ -240,18 +179,18 @@ public class DemoApp {
 		subPanel.setBorder(BorderFactory.createTitledBorder("Local"));
 
 		subPanel.add(new JLabel("nom"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(name, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-				new Insets(5, 5, 5, 5), 0, 0));
+				new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(new JLabel("port"), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(listenPort, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(start, new GridBagConstraints(4, 0, 1, 1, 1, 0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-				new Insets(5, 5, 5, 5), 0, 0));
+				new Insets(2, 2, 2, 2), 0, 0));
 
 		mainPanel.add(subPanel, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
@@ -259,21 +198,20 @@ public class DemoApp {
 		subPanel.setBorder(BorderFactory.createTitledBorder("Pair"));
 
 		subPanel.add(new JLabel("ip"), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(pairIp, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-				new Insets(5, 5, 5, 5), 0, 0));
+				new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(new JLabel("port"), new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(pairPort, new GridBagConstraints(5, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 		subPanel.add(join, new GridBagConstraints(6, 0, 2, 1, 1, 0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-				new Insets(5, 5, 5, 5), 0, 0));
+				new Insets(2, 2, 2, 2), 0, 0));
+		subPanel.add(disconnect, new GridBagConstraints(8, 0, 1, 1, 1, 0, GridBagConstraints.EAST,
+				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
 
 		mainPanel.add(subPanel, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-
-		mainPanel.add(disconnect, new GridBagConstraints(0, 2, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
@@ -281,18 +219,83 @@ public class DemoApp {
 		subPanel.setBorder(BorderFactory.createTitledBorder("Messages"));
 
 		subPanel.add(scrollSole, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
 		subPanel.add(message, new GridBagConstraints(0, 2, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
 		mainPanel.add(subPanel, new GridBagConstraints(0, 3, 1, 1, 1, 1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
 		// Window
 
 		Frame frame = new Frame(mainPanel);
 		frame.pack();
+		frame.setBounds(frame.getWidth() * id, frame.getY(), frame.getWidth(), frame.getHeight());
+	}
+
+	public class ConsoleOutputStream extends OutputStream {
+		private final StringBuilder sb = new StringBuilder();
+
+		@Override
+		public void flush() {
+		}
+
+		@Override
+		public void close() {
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+
+			if (b == '\r')
+				return;
+
+			if (b == '\n') {
+				final String text = sb.toString() + "\n";
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						console.setText(console.getText() + text);
+						scrollSole.getVerticalScrollBar().setValue(scrollSole.getVerticalScrollBar().getMaximum());
+					}
+				});
+				sb.setLength(0);
+
+				return;
+			}
+
+			sb.append((char) b);
+		}
+	}
+
+	private class Handler implements P2PHandler {
+		@Override
+		public void handleMessage(P2PUser sender, Object o) {
+			stream.println(sender.getName() + " : " + o.toString());
+		}
+
+		@Override
+		public void userConnect(P2PUser user) {
+			stream.println(user + " connected");
+		}
+
+		@Override
+		public void userDisconnect(P2PUser user) {
+			stream.println(user + " disconnected");
+		}
+
+		@Override
+		public void userUpdate(P2PUser user) {
+			stream.println("update of " + user);
+		}
+	}
+
+	public static void main(String[] args) {
+		new DemoApp(0);
+		new DemoApp(1);
+		new DemoApp(2);
+		new DemoApp(3);
 	}
 
 }

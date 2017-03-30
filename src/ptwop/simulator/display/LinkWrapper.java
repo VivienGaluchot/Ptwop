@@ -80,7 +80,7 @@ public class LinkWrapper implements Animable, HCS {
 			drawC = netWrapper.getHoveredColor();
 		if (isClicked() || source.isClicked())
 			drawC = netWrapper.getClickedColor();
-		if (link.getNumberOfTransitingElements() == 0){
+		if (link.getNumberOfTransitingElements() == 0) {
 			float[] components = drawC.getColorComponents(null);
 			drawC = new Color(components[0], components[1], components[2], 0.25f);
 		}

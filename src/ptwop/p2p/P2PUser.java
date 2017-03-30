@@ -7,21 +7,15 @@ import ptwop.network.NPair;
 
 public class P2PUser implements NPair {
 	private String name;
-	private NAddress address;
-	private NPair npair;
+	private NPair alias;
 
-	public P2PUser(String name, NPair npair) {
-		this(name, null, npair);
+	public P2PUser(NPair alias) {
+		this("noname", alias);
 	}
 
-	public P2PUser(NAddress address, NPair npair) {
-		this("noname", address, npair);
-	}
-
-	public P2PUser(String name, NAddress address, NPair npair) {
+	public P2PUser(String name, NPair alias) {
 		this.name = name;
-		this.address = address;
-		this.npair = npair;
+		this.alias = alias;
 	}
 
 	public String getName() {
@@ -32,42 +26,53 @@ public class P2PUser implements NPair {
 		this.name = name;
 	}
 
-	public NAddress getAddress() {
-		return address;
-	}
-
-	public void setAdress(NAddress address) {
-		this.address = address;
-	}
-
 	@Override
 	public String toString() {
-		return name + " @ " + address;
+		return name + " @ " + getAddress();
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return address.hashCode();
+		return alias.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof P2PUser && ((P2PUser) o).address.equals(address);
+		return alias.equals(o);
 	}
 
 	// NPair
 	@Override
+	public void start() {
+		alias.start();
+	}
+
+	@Override
 	public void send(Object o) throws IOException {
-		npair.send(o);
+		alias.send(o);
+	}
+
+	@Override
+	public NAddress getAddress() {
+		return alias.getAddress();
 	}
 
 	@Override
 	public void disconnect() {
-		npair.disconnect();
+		alias.disconnect();
 	}
 
 	@Override
 	public int getLatency() {
-		return npair.getLatency();
+		return alias.getLatency();
+	}
+
+	public NPair getTrueNPair() {
+		return alias;
+	}
+
+	@Override
+	public void setAlias(NPair pair) {
+		throw new RuntimeException("Can't use setAlias on P2PUser object");
 	}
 }

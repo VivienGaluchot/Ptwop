@@ -47,7 +47,7 @@ public class Command extends JPanel {
 	private JButton disconnect;
 	private JLabel nodeName;
 	private DefaultTableModel linksInfoModel;
-	
+
 	// P2P info
 	private JLabel p2pInfo;
 	private JLabel p2pName;
@@ -154,7 +154,7 @@ public class Command extends JPanel {
 		disconnect.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				node.stop();
+				node.disconnect();
 				update();
 			}
 		});
@@ -225,7 +225,7 @@ public class Command extends JPanel {
 		});
 		sendTo.setEnabled(false);
 
-		subPanel.add(new JLabel("info : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
+		subPanel.add(new JLabel("type : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(p2pInfo, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
 				new Insets(5, 5, 5, 5), 0, 0));
@@ -237,8 +237,8 @@ public class Command extends JPanel {
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(p2pPairComboBox, new GridBagConstraints(0, 3, 1, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(sendTo, new GridBagConstraints(1, 3, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(sendTo, new GridBagConstraints(1, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+				new Insets(5, 5, 5, 5), 0, 0));
 
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -290,7 +290,7 @@ public class Command extends JPanel {
 			// p2p users info
 			P2P p2p = net.getP2P(node);
 			p2pInfo.setText(p2p.toString());
-			p2pName.setText(p2p.getMyself().getName());
+			p2pName.setText(".");
 			Set<P2PUser> users = p2p.getUsers();
 			Object[][] usersInfo = new Object[users.size()][];
 			int i = 0;
@@ -301,7 +301,7 @@ public class Command extends JPanel {
 				i++;
 			}
 			p2pUserModel.setDataVector(usersInfo, p2pUsersColumnNames);
-			
+
 			p2pPairComboBox.removeAllItems();
 			p2pPairComboBox.setEnabled(true);
 			p2p.getUsers();
@@ -309,7 +309,7 @@ public class Command extends JPanel {
 				p2pPairComboBox.addItem(l);
 			}
 			sendTo.setEnabled(true);
-			
+
 		} else {
 			nodeName.setText("");
 			pairComboBox.removeAllItems();

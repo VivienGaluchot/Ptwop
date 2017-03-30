@@ -22,21 +22,28 @@ public class FloodV1 implements P2P, NPairHandler {
 	private NServent manager;
 
 	private Set<P2PUser> otherUsers;
-	private P2PUser myself;
-
 	private Set<Set<NAddress>> neighbours;
 
 	private P2PHandler p2pHandler;
 
+	private String myName;
+
 	public FloodV1(NServent manager, String myName) {
+		this.manager = manager;
+		this.myName = myName;
 		otherUsers = new HashSet<>();
 		neighbours = new HashSet<>();
-		myself = new P2PUser(myName, manager.getAddress(), null);
-		this.manager = manager;
 		manager.setHandler(this);
 	}
 
-	public void addNeighbours(NAddress a, NAddress b) {
+	@Override
+	public String toString() {
+		return "FloodV1 P2P";
+	}
+
+	// System
+
+	private void addNeighbours(NAddress a, NAddress b) {
 		synchronized (neighbours) {
 			if (neighbours.isEmpty()) {
 				Set<NAddress> newSet = new HashSet<>();
@@ -67,7 +74,7 @@ public class FloodV1 implements P2P, NPairHandler {
 		}
 	}
 
-	public boolean areNeighbours(NAddress a, NAddress b) {
+	private boolean areNeighbours(NAddress a, NAddress b) {
 		synchronized (neighbours) {
 			for (Set<NAddress> s : neighbours) {
 				if (s.contains(a) && s.contains(b)) {
@@ -78,7 +85,7 @@ public class FloodV1 implements P2P, NPairHandler {
 		return false;
 	}
 
-	public void removeFromNeighbours(NAddress a) {
+	private void removeFromNeighbours(NAddress a) {
 		synchronized (neighbours) {
 			Set<NAddress> removedFrom = null;
 			for (Set<NAddress> s : neighbours) {
@@ -91,23 +98,18 @@ public class FloodV1 implements P2P, NPairHandler {
 		}
 	}
 
-	public void sendUserListTo(P2PUser user) {
-		try {
-			synchronized (otherUsers) {
-				for (P2PUser u : otherUsers) {
+	private void sendUserListTo(P2PUser user) {
+		synchronized (otherUsers) {
+			for (P2PUser u : otherUsers) {
+				try {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
 						user.send(new ConnectTo(u.getAddress()));
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public String toString() {
-		return "Flood P2P";
 	}
 
 	// P2P Interface
@@ -124,8 +126,7 @@ public class FloodV1 implements P2P, NPairHandler {
 
 	@Override
 	public void stop() {
-		System.out.println("stop()");
-		manager.stop();
+		manager.disconnect();
 		synchronized (otherUsers) {
 			for (P2PUser u : otherUsers) {
 				u.disconnect();
@@ -169,20 +170,17 @@ public class FloodV1 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public P2PUser getMyself() {
-		return myself;
-	}
-
-	@Override
 	public void setMessageHandler(P2PHandler handler) {
 		p2pHandler = handler;
 	}
 
-	// NetworkUserHandler
+	// NPairHandler interface
 
 	@Override
 	public void incommingConnectionFrom(NPair pair) {
-		P2PUser user = new P2PUser(pair.getAddress(), pair);
+		P2PUser user = new P2PUser(pair);
+		pair.setAlias(user);
+		pair.start();
 		sendUserListTo(user);
 
 		synchronized (otherUsers) {
@@ -191,7 +189,7 @@ public class FloodV1 implements P2P, NPairHandler {
 		p2pHandler.userConnect(user);
 
 		try {
-			user.send(new MyNameIs(myself.getName()));
+			user.send(new MyNameIs(myName));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -199,34 +197,18 @@ public class FloodV1 implements P2P, NPairHandler {
 
 	@Override
 	public void connectedTo(NPair pair) {
-		P2PUser user = new P2PUser(pair.getAddress(), pair);
-		sendUserListTo(user);
-
-		synchronized (otherUsers) {
-			otherUsers.add(user);
-		}
-		p2pHandler.userConnect(user);
-
-		try {
-			user.send(new MyNameIs(myself.getName()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		incommingConnectionFrom(pair);
 	}
 
 	@Override
 	public void incommingMessage(NPair npair, Object o) {
-		if (!(npair instanceof P2PUser)) {
-			System.out.println("Flood>handleMessage : Wrong user class");
-			return;
-		}
+		if (!(npair instanceof P2PUser))
+			throw new IllegalArgumentException("Wrong user class");
 
 		P2PUser pair = (P2PUser) npair;
 
-		if (!(o instanceof P2PMessage)) {
-			System.out.println("Flood>handleMessage : Unknown message class");
-			return;
-		}
+		if (!(o instanceof P2PMessage))
+			throw new IllegalArgumentException("Unknown message class");
 
 		if (o instanceof MyNameIs) {
 			MyNameIs m = (MyNameIs) o;
@@ -245,7 +227,7 @@ public class FloodV1 implements P2P, NPairHandler {
 			MessageToApp m = (MessageToApp) o;
 			p2pHandler.handleMessage(pair, m.msg);
 		} else {
-			System.out.println("Flood>handleMessage : Unknown message class");
+			System.out.println("Flood>incommingMessage : Unknown message class");
 		}
 	}
 

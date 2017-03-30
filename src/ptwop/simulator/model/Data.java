@@ -21,6 +21,6 @@ public class Data {
 
 	@Override
 	public String toString() {
-		return data.toString() + " " + (part+1) + "/" + nPart;
+		return data.toString() + " " + (part + 1) + "/" + nPart;
 	}
 }
