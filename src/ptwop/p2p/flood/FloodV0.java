@@ -154,8 +154,6 @@ public class FloodV0 implements P2P, NPairHandler {
 			p2pHandler.userUpdate(pair);
 		} else if (o instanceof ConnectTo) {
 			ConnectTo m = (ConnectTo) o;
-			// System.out.println("Message from " + senderUser + " : " +
-			// "ConnectTo " + m.address);
 			try {
 				manager.connectTo(m.address);
 			} catch (IOException e) {

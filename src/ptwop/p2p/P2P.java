@@ -13,14 +13,14 @@ public interface P2P {
 	public void start();
 
 	/**
-	 * connect to a p2p network
-	 */
-	public void connectTo(NAddress address) throws IOException;
-
-	/**
 	 * disconnect from the p2p network
 	 */
 	public void stop();
+
+	/**
+	 * connect to a p2p network
+	 */
+	public void connectTo(NAddress address) throws IOException;
 
 	/**
 	 * send msg to all users
