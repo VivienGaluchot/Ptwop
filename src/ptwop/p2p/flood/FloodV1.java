@@ -16,6 +16,8 @@ import ptwop.p2p.base.ConnectTo;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.base.MyNameIs;
 import ptwop.p2p.base.P2PMessage;
+import ptwop.p2p.base.RoutingMessage;
+import ptwop.p2p.routing.Router;
 
 public class FloodV1 implements P2P, NPairHandler {
 
@@ -25,12 +27,14 @@ public class FloodV1 implements P2P, NPairHandler {
 	private Set<Set<NAddress>> neighbours;
 
 	private P2PHandler p2pHandler;
+	protected Router router;
 
 	private String myName;
 
-	public FloodV1(NServent manager, String myName) {
+	public FloodV1(NServent manager, String myName, Router router) {
 		this.manager = manager;
 		this.myName = myName;
+		this.router = router;
 		otherUsers = new HashSet<>();
 		neighbours = new HashSet<>();
 		manager.setHandler(this);
@@ -103,13 +107,37 @@ public class FloodV1 implements P2P, NPairHandler {
 			for (P2PUser u : otherUsers) {
 				try {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
-						user.send(new ConnectTo(u.getAddress()));
+						sendTo(user, new ConnectTo(u.getAddress()));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
+	}
+	
+
+	
+	public void sendTo(NAddress destAddress, Object msg) {
+		try {
+			sendTo(getP2PUserWithAddress(destAddress), msg);
+		} catch (IOException e) {
+			System.out.println("Can't route message to " + destAddress + " : " + e.getMessage());
+		}
+	}
+
+	// TODO improve this
+	public P2PUser getP2PUserWithAddress(NAddress address) {
+		P2PUser user = null;
+		for (P2PUser u : otherUsers) {
+			if (u.getAddress().equals(address)) {
+				user = u;
+				break;
+			}
+		}
+		if (user == null)
+			throw new IllegalArgumentException("Can't find user with address " + address);
+		return user;
 	}
 
 	// P2P Interface
@@ -161,7 +189,7 @@ public class FloodV1 implements P2P, NPairHandler {
 
 	@Override
 	public void sendTo(P2PUser dest, Object msg) throws IOException {
-		dest.send(new MessageToApp(msg));
+		router.getRoute(otherUsers, dest).send(new MessageToApp(msg));
 	}
 
 	@Override
@@ -210,6 +238,22 @@ public class FloodV1 implements P2P, NPairHandler {
 		if (!(o instanceof P2PMessage))
 			throw new IllegalArgumentException("Unknown message class");
 
+		// Routing
+		if (o instanceof RoutingMessage) {
+			RoutingMessage rm = (RoutingMessage) o;
+			if (rm.destAddress != null) {
+				// To forward
+				if (rm.sourceAddress == null)
+					rm.sourceAddress = npair.getAddress();
+				sendTo(rm.destAddress, rm);
+				return;
+			} else {
+				// To process
+				o = rm.object;
+				pair = getP2PUserWithAddress(rm.sourceAddress);
+			}
+		}
+		
 		if (o instanceof MyNameIs) {
 			MyNameIs m = (MyNameIs) o;
 			pair.setName(m.name);

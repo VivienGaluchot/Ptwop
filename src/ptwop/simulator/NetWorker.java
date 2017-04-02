@@ -19,7 +19,9 @@ import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
+import ptwop.p2p.flood.FloodV0;
 import ptwop.p2p.flood.FloodV2;
+import ptwop.p2p.routing.DumbRouter;
 import ptwop.simulator.display.NetworkWrapper;
 import ptwop.simulator.model.Network;
 import ptwop.simulator.model.P2PCreator;
@@ -100,7 +102,7 @@ public class NetWorker {
 		Network net = new Network(new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV2(n, nameGenerator.getWord(6));
+				return new FloodV0(n, nameGenerator.getWord(6), new DumbRouter());
 			}
 		});
 

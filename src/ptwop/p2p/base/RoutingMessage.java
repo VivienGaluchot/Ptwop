@@ -32,4 +32,9 @@ public class RoutingMessage extends P2PMessage {
 
 		this.object = object;
 	}
+
+	@Override
+	public String toString() {
+		return "R " + object.toString();
+	}
 }

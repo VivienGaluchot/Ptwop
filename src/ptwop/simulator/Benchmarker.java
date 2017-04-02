@@ -10,6 +10,7 @@ import ptwop.network.NServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.*;
 import ptwop.p2p.routing.DumbRouter;
+import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.model.BenchmarkData;
 import ptwop.simulator.model.Link;
 import ptwop.simulator.model.Network;
@@ -24,19 +25,19 @@ public class Benchmarker {
 		P2PCreator floodV0Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV0(n, "", new DumbRouter());
+				return new FloodV0(n, "", new StockasticRouter());
 			}
 		};
 		P2PCreator floodV1Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "");
+				return new FloodV1(n, "", new DumbRouter());
 			}
 		};
 		P2PCreator floodV2Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV2(n, "");
+				return new FloodV2(n, "", new DumbRouter());
 			}
 		};
 
