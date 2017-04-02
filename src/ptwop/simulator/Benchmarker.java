@@ -9,6 +9,7 @@ import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.*;
+import ptwop.simulator.model.BenchmarkData;
 import ptwop.simulator.model.Link;
 import ptwop.simulator.model.Network;
 import ptwop.simulator.model.NetworkerNAddress;
@@ -37,7 +38,16 @@ public class Benchmarker {
 				return new FloodV2(n, "");
 			}
 		};
+		
+		// Routing
+		initMoyCollections("Temps de broadcast en fonction de la taille du message", "Taille (octets)", "t (ms)", null,
+				null, null);
+		evaluateBroadcastTimeOverMessageSize(floodV0Creator, "FloodV0");
+		evaluateBroadcastTimeOverMessageSize(floodV1Creator, "FloodV1");
+		evaluateBroadcastTimeOverMessageSize(floodV2Creator, "FloodV2");
+		displayMoyCollections();
 
+		// Interconnection
 		initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud", "t (ms)",
 				"Nombre de liens");
 		evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
@@ -49,6 +59,7 @@ public class Benchmarker {
 		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
 		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
 		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
+		displayMoyCollections();
 	}
 
 	static XYSeriesCollection moyCollection1;
@@ -154,6 +165,61 @@ public class Benchmarker {
 				"Nombre de noeuds", "t (ms)");
 	}
 
+	public static void evaluateBroadcastTimeOverMessageSize(P2PCreator p2pcreator, String name) {
+		XYSeriesCollection broadcastTime = new XYSeriesCollection();
+		ArrayList<Thread> runners = new ArrayList<>();
+		int threadWorkNumber = 10;
+		int threadNumber = 8;
+		int networkSize = 20;
+		for (int essai = 0; essai < threadNumber; essai++) {
+			Thread runner = new Thread() {
+				@Override
+				public void run() {
+					for (int essai = 0; essai < threadWorkNumber; essai++) {
+						System.out.println("Passe " + essai + "/" + threadWorkNumber);
+						Network net = new Network(p2pcreator);
+						setToInterconnectedNetwork(net, networkSize);
+						for (Node n : net.getNodes())
+							n.track = true;
+						Node n0 = net.getNode(0);
+						int n_sent = 0;
+						for (int i = 1; i < 1000; i += (1 + i / 10)) {
+							n_sent++;
+							net.getP2P(n0).broadcast(new BenchmarkData(i));
+							// attente que tout le monde ait reçus
+							boolean stop = false;
+							while (!stop) {
+								net.doTimeStep();
+								stop = true;
+								for (int j = 1; j < networkSize; j++) {
+									Node n = net.getNode(j);
+									if (n.timeToReceive.datas.size() < n_sent)
+										stop = false;
+								}
+							}
+						}
+						synchronized (broadcastTime) {
+							for (int i = 1; i < networkSize; i++) {
+								Node n = net.getNode(i);
+								broadcastTime.addSeries(n.timeToReceive.getXYSerie());
+							}
+						}
+					}
+				}
+			};
+			runners.add(runner);
+			runner.start();
+		}
+		for (Thread runner : runners)
+			try {
+				runner.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		displayMinMaxMoy(broadcastTime, moyCollection1,
+				name + " Temps de broadcast en fonction de la taille du message", "Taille (octets)", "t (ms)");
+	}
+
 	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, XYSeriesCollection moySerie,
 			String title, String xAxis, String yAxis) {
 		new Chart(title, xAxis, yAxis, getYMinMaxMoy(new XYSeriesCollection(), moySerie, messageNumbersDataset));
@@ -194,6 +260,16 @@ public class Benchmarker {
 							max = n.doubleValue();
 						moy += n;
 						nb++;
+					} else if (value instanceof Long) {
+						Long n = (Long) value;
+						if (n < min)
+							min = n.doubleValue();
+						if (n > max)
+							max = n.doubleValue();
+						moy += n;
+						nb++;
+					} else {
+						throw new IllegalArgumentException("Unsupported Number class");
 					}
 					doMore = true;
 				}

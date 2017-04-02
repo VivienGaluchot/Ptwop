@@ -10,6 +10,7 @@ import com.google.common.collect.HashBiMap;
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
 import ptwop.network.NServent;
+import ptwop.simulator.Data2DTracker;
 import ptwop.simulator.DataTracker;
 
 public class Node extends NServent implements Steppable {
@@ -20,6 +21,7 @@ public class Node extends NServent implements Steppable {
 
 	/* BENCHMARK */
 	public boolean track = false;
+	public Data2DTracker<Integer, Long> timeToReceive = new Data2DTracker<>();
 	public DataTracker<Integer> linkNumberTracker = new DataTracker<>();
 	public DataTracker<Integer> totalBandwithUsed = new DataTracker<>();
 
@@ -79,7 +81,12 @@ public class Node extends NServent implements Steppable {
 	public void handleData(Node source, Data data) {
 		if (!linkMap.containsKey(source))
 			addLink(new Link(net, this, source));
-		incommingMessage(linkMap.get(source), data.data);
+
+		if (track && data.isBenchmarkData() && data.isLastPart()) {
+			timeToReceive.addData(data.getSize(), data.getEllapsedTime(net.getTime()));
+		}
+
+		incommingMessage(linkMap.get(source), data.object);
 	}
 
 	@Override
@@ -144,8 +151,9 @@ public class Node extends NServent implements Steppable {
 				if (!isConnectedTo(user.getAddress()))
 					super.incommingConnectionFrom(user);
 			}
-		} else
+		} else {
 			super.incommingMessage(l.getAlias(), o);
+		}
 	}
 
 	@Override

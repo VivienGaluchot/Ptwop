@@ -51,7 +51,7 @@ public class NetWorker {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void display(Network net) {
 		console = new JTextPane();
 		console.setEditable(false);
 		console.setFont(new Font("Consolas", Font.PLAIN, 12));
@@ -72,25 +72,11 @@ public class NetWorker {
 		AnimationPanel mainPanel = new AnimationPanel(spaceTransform);
 		spaceTransform.setFather(mainPanel);
 
-		WordGenerator nameGenerator = new WordGenerator();
-		Network net = new Network(new P2PCreator() {
-			@Override
-			public P2P createP2P(NServent n) {
-				return new FloodV2(n, nameGenerator.getWord(6));
-			}
-		});
-		int nodeNumber = 10;
-		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
-		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
-		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
-		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
-		net.addNewNodes(nodeNumber);
-
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform);
 		Command command = new Command(mainWrapper);
 		mainWrapper.setCommand(command);
 		spaceTransform.setAnimable(mainWrapper);
-		spaceTransform.setGraphicSize(nodeNumber * 2 + 10);
+		spaceTransform.setGraphicSize(net.getNodes().size() * 2 + 10);
 
 		mainWrapper.putInCircle();
 
@@ -107,5 +93,24 @@ public class NetWorker {
 		thread.startAnimation();
 		Frame frame = new Frame(mainPanel, command, "Networker");
 		frame.setLocation(frame.getLocation().x - 200, frame.getLocation().y);
+	}
+
+	public static void main(String[] args) {
+		WordGenerator nameGenerator = new WordGenerator();
+		Network net = new Network(new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV2(n, nameGenerator.getWord(6));
+			}
+		});
+
+		int nodeNumber = 10;
+		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
+		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
+		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
+		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
+		net.addNewNodes(nodeNumber);
+
+		display(net);
 	}
 }

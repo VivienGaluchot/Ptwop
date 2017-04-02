@@ -3,7 +3,6 @@ package ptwop.simulator.model;
 import java.io.IOException;
 import java.util.Set;
 
-import ptwop.common.Util;
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
 
@@ -181,31 +180,26 @@ public class Link implements Steppable, NPair {
 	 * latency time will be reached. The data have a probability to be lost,
 	 * according the loss parameter
 	 * 
-	 * @param data
+	 * @param o
 	 *            data to send
 	 * @return true if the data have been successfully added, false otherwise
 	 */
-	private boolean pushObject(Object data) {
-		if (!established && !(data instanceof DataTCP))
+	private boolean pushObject(Object o) {
+		if (!established && !(o instanceof DataTCP))
 			return false;
-
-		byte[] bytes = Util.serialize(data);
-		int l = 0;
-		if (bytes != null)
-			l = bytes.length;
-		else
-			return false;
-		int nPart = l / transmissionUnit;
-		if (nPart * transmissionUnit < l)
+		
+		Data data = new Data(o, net.getTime(), transmissionUnit);
+		
+		int nPart = data.getSize() / transmissionUnit;
+		if (nPart * transmissionUnit < data.getSize())
 			nPart++;
 
 		for (int i = 0; i < nPart; i++) {
-			Data d = new Data(data, net.getTime(), i, nPart);
 			boolean pushed = false;
 			if (waitQueue.isEmpty())
-				pushed = pushData(d);
+				pushed = pushData(data.getPart(i));
 			if (!pushed)
-				pushed = waitQueue.push(d);
+				pushed = waitQueue.push(data.getPart(i));
 			if (!pushed)
 				return false;
 		}
