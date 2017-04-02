@@ -53,6 +53,14 @@ public interface P2P {
 	public Set<P2PUser> getUsers();
 
 	/**
+	 * Find the user with the address given, return null if not present
+	 * 
+	 * @param address
+	 * @return user with address given
+	 */
+	public P2PUser getUserWithAddress(NAddress address);
+
+	/**
 	 * set the message handler, it will be used when a message is received
 	 * 
 	 * @param handler

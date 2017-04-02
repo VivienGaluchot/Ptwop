@@ -13,7 +13,6 @@ public class Data {
 	public int nPart;
 
 	private Data() {
-
 	}
 
 	public Data(Object object, long creationTime, int transmissionUnit) {

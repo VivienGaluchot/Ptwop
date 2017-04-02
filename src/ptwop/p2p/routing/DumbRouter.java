@@ -1,14 +1,37 @@
 package ptwop.p2p.routing;
 
-import java.util.Set;
+import java.io.IOException;
 
 import ptwop.p2p.P2PUser;
 
-public class DumbRouter implements Router {
+public class DumbRouter extends Router {
+	public DumbRouter() {
+		super();
+	}
 
 	@Override
-	public P2PUser getRoute(Set<P2PUser> choices, P2PUser destination) {
+	public P2PUser getRoute(P2PUser destination) {
 		return destination;
 	}
 
+	public void routeTo(P2PUser dest, Object msg) throws IOException {
+		P2PUser trueDest = getRoute(dest);
+		if (trueDest.equals(dest))
+			trueDest.send(new RoutingMessage(null, null, msg));
+		else
+			trueDest.send(new RoutingMessage(null, dest, msg));
+	}
+
+	public void processRoutingMessage(P2PUser npair, RoutingMessage rm) throws IOException {
+		if (rm.sourceAddress == null)
+			rm.sourceAddress = npair.getAddress();
+		if (rm.destAddress != null) {
+			// To forward
+			routeTo(p2p.getUserWithAddress(rm.destAddress), rm);
+			return;
+		} else {
+			// To process
+			handler.incommingMessage(npair, rm.object);
+		}
+	}
 }

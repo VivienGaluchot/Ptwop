@@ -20,7 +20,6 @@ import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.FloodV0;
-import ptwop.p2p.flood.FloodV2;
 import ptwop.p2p.routing.DumbRouter;
 import ptwop.simulator.display.NetworkWrapper;
 import ptwop.simulator.model.Network;

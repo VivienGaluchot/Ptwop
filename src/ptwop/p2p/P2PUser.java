@@ -38,10 +38,7 @@ public class P2PUser implements NPair {
 
 	@Override
 	public boolean equals(Object o) {
-		if (alias != this)
-			return alias.equals(o);
-		else
-			return o == this;
+		return o instanceof NPair && getAddress().equals(((NPair) o).getAddress());
 	}
 
 	// NPair
@@ -50,11 +47,11 @@ public class P2PUser implements NPair {
 		alias.start();
 	}
 
-	@Override
 	/**
 	 * Should not be used to send information to this node directly This
 	 * information won't be routed
 	 */
+	@Override
 	public void send(Object o) throws IOException {
 		alias.send(o);
 	}

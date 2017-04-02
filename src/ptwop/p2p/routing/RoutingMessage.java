@@ -1,7 +1,8 @@
-package ptwop.p2p.base;
+package ptwop.p2p.routing;
 
 import ptwop.network.NAddress;
 import ptwop.p2p.P2PUser;
+import ptwop.p2p.base.P2PMessage;
 
 public class RoutingMessage extends P2PMessage {
 	private static final long serialVersionUID = 1L;
