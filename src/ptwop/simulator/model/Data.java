@@ -2,6 +2,7 @@ package ptwop.simulator.model;
 
 import ptwop.common.Util;
 import ptwop.p2p.base.MessageToApp;
+import ptwop.p2p.routing.RoutingMessage;
 
 public class Data {
 	public Object object;
@@ -17,9 +18,15 @@ public class Data {
 
 	public Data(Object object, long creationTime, int transmissionUnit) {
 		this.object = object;
-		
+
 		if (isBenchmarkData()) {
-			BenchmarkData d = (BenchmarkData) ((MessageToApp) object).msg;
+			BenchmarkData d;
+			if (object instanceof RoutingMessage) {
+				RoutingMessage rm = (RoutingMessage) object;
+				d = (BenchmarkData) ((MessageToApp) rm.object).msg;
+			} else {
+				d = (BenchmarkData) ((MessageToApp) object).msg;
+			}
 			size = d.size;
 		} else {
 			byte[] bytes = Util.serialize(object);
@@ -38,7 +45,12 @@ public class Data {
 	}
 
 	public boolean isBenchmarkData() {
-		return (object instanceof MessageToApp && ((MessageToApp) object).msg instanceof BenchmarkData);
+		if (object instanceof RoutingMessage) {
+			RoutingMessage rm = (RoutingMessage) object;
+			return (rm.object instanceof MessageToApp && ((MessageToApp) rm.object).msg instanceof BenchmarkData);
+		} else {
+			return (object instanceof MessageToApp && ((MessageToApp) object).msg instanceof BenchmarkData);
+		}
 	}
 
 	public Data getPart(int i) {

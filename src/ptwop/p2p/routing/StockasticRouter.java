@@ -1,5 +1,7 @@
 package ptwop.p2p.routing;
 
+import java.io.IOException;
+
 import ptwop.p2p.P2PUser;
 
 public class StockasticRouter extends DumbRouter {
@@ -8,8 +10,13 @@ public class StockasticRouter extends DumbRouter {
 		super();
 	}
 
-	public double relativeBestUserProbability(P2PUser user) {
-		return 1 / (user.getLatency() + 1);
+	@Override
+	public void routeTo(P2PUser dest, Object msg) throws IOException {
+		P2PUser trueDest = getRoute(dest);
+		if (trueDest.equals(dest))
+			trueDest.send(msg);
+		else
+			trueDest.send(new RoutingMessage(null, dest, msg));
 	}
 
 	@Override
@@ -41,4 +48,7 @@ public class StockasticRouter extends DumbRouter {
 		return destination;
 	}
 
+	private double relativeBestUserProbability(P2PUser user) {
+		return 1 / (user.getLatency() + 1);
+	}
 }

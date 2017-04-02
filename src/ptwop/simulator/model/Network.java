@@ -202,9 +202,12 @@ public class Network implements Steppable {
 				nj.addLink(lj);
 				ni.incommingConnectionFrom(li);
 				nj.connectedTo(lj);
+				
+				for (Link l : nj.getLinks())
+					l.clearBuffers();
+				for (Link l : ni.getLinks())
+					l.clearBuffers();
 			}
-			for (Link l : ni.getLinks())
-				l.clearBuffers();
 		}
 	}
 }
