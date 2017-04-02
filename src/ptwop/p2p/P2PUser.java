@@ -48,6 +48,10 @@ public class P2PUser implements NPair {
 	}
 
 	@Override
+	/**
+	 * Should not be used to send information to this node directly
+	 * This information won't be routed
+	 */
 	public void send(Object o) throws IOException {
 		alias.send(o);
 	}

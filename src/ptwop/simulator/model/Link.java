@@ -45,7 +45,7 @@ public class Link implements Steppable, NPair {
 	 * @param lossdata's
 	 *            loss probability
 	 * @param packetSize
-	 *            number max of data who can be on the link at the same time
+	 *            maximum size of data who can be on the link at the same time
 	 */
 	public Link(Network net, Node source, Node dest, int latency, float loss, int packetSize) {
 		this.net = net;
