@@ -21,6 +21,7 @@ import ptwop.network.NServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.FloodV0;
 import ptwop.p2p.routing.DumbRouter;
+import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.display.NetworkWrapper;
 import ptwop.simulator.model.Network;
 import ptwop.simulator.model.P2PCreator;
@@ -101,7 +102,7 @@ public class NetWorker {
 		Network net = new Network(new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV0(n, nameGenerator.getWord(6), new DumbRouter());
+				return new FloodV0(n, nameGenerator.getWord(6), new StockasticRouter());
 			}
 		});
 

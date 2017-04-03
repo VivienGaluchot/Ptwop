@@ -1,7 +1,6 @@
 package ptwop.p2p.routing;
 
 import ptwop.network.NAddress;
-import ptwop.p2p.P2PUser;
 import ptwop.p2p.base.P2PMessage;
 
 public class RoutingMessage extends P2PMessage {
@@ -20,22 +19,14 @@ public class RoutingMessage extends P2PMessage {
 
 	public Object object;
 
-	public RoutingMessage(P2PUser sender, P2PUser dest, Object object) {
-		if (sender != null)
-			sourceAddress = sender.getAddress();
-		else
-			sourceAddress = null;
-
-		if (dest != null)
-			destAddress = dest.getAddress();
-		else
-			destAddress = null;
-
+	public RoutingMessage(NAddress sender, NAddress dest, Object object) {
+		sourceAddress = sender;
+		destAddress = dest;
 		this.object = object;
 	}
 
 	@Override
 	public String toString() {
-		return "R " + object.toString();
+		return "R " + destAddress + " [" + object.toString() + "]";
 	}
 }

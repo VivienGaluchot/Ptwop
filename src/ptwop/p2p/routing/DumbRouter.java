@@ -20,7 +20,7 @@ public class DumbRouter extends Router {
 		if (trueDest.equals(dest))
 			trueDest.send(msg);
 		else
-			trueDest.send(new RoutingMessage(null, dest, msg));
+			trueDest.send(new RoutingMessage(null, dest.getAddress(), msg));
 	}
 
 	@Override
@@ -29,7 +29,11 @@ public class DumbRouter extends Router {
 			rm.sourceAddress = npair.getAddress();
 		if (rm.destAddress != null) {
 			// To forward
-			routeTo(p2p.getUserWithAddress(rm.destAddress), rm.object);
+			P2PUser next = p2p.getUserWithAddress(rm.destAddress);
+			if(next != null)
+				routeTo(next, rm.object);
+			else
+				npair.send(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
 			return;
 		} else {
 			// To process

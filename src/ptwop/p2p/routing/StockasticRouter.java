@@ -16,7 +16,7 @@ public class StockasticRouter extends DumbRouter {
 		if (trueDest.equals(dest))
 			trueDest.send(msg);
 		else
-			trueDest.send(new RoutingMessage(null, dest, msg));
+			trueDest.send(new RoutingMessage(null, dest.getAddress(), msg));
 	}
 
 	@Override
@@ -44,11 +44,10 @@ public class StockasticRouter extends DumbRouter {
 				return u;
 			}
 		}
-
 		return destination;
 	}
 
 	private double relativeBestUserProbability(P2PUser user) {
-		return 1 / (user.getLatency() + 1);
+		return 1 / (user.getLatency() + 1.0);
 	}
 }

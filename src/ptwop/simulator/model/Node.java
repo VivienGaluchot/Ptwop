@@ -82,7 +82,8 @@ public class Node extends NServent implements Steppable {
 		if (!linkMap.containsKey(source))
 			addLink(new Link(net, this, source));
 
-		if (track && data.isBenchmarkData() && data.isLastPart()) {
+		// Check if data is benchmarkdata and for me
+		if (track && data.isLastPart() && data.benchmarkData != null && data.destAddress == null) {
 			timeToReceive.addData(data.getSize(), data.getEllapsedTime(net.getTime()));
 		}
 

@@ -1,11 +1,14 @@
 package ptwop.simulator.model;
 
 import ptwop.common.Util;
+import ptwop.network.NAddress;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.routing.RoutingMessage;
 
 public class Data {
 	public Object object;
+	public BenchmarkData benchmarkData;
+	public NAddress destAddress;
 
 	private long creationTime;
 	private int size;
@@ -18,16 +21,22 @@ public class Data {
 
 	public Data(Object object, long creationTime, int transmissionUnit) {
 		this.object = object;
+		benchmarkData = null;
 
-		if (isBenchmarkData()) {
-			BenchmarkData d;
-			if (object instanceof RoutingMessage) {
-				RoutingMessage rm = (RoutingMessage) object;
-				d = (BenchmarkData) ((MessageToApp) rm.object).msg;
-			} else {
-				d = (BenchmarkData) ((MessageToApp) object).msg;
-			}
-			size = d.size;
+		// open routing message
+		if (object instanceof RoutingMessage) {
+			destAddress = ((RoutingMessage) object).destAddress;
+			object = ((RoutingMessage) object).object;
+		}
+
+		// open message to app
+		if (object instanceof MessageToApp)
+			object = ((MessageToApp) object).msg;
+
+		// size computing
+		if (object instanceof BenchmarkData) {
+			benchmarkData = (BenchmarkData) object;
+			size = ((BenchmarkData) object).size;
 		} else {
 			byte[] bytes = Util.serialize(object);
 			int l = 0;
@@ -35,6 +44,7 @@ public class Data {
 				l = bytes.length;
 			size = l;
 		}
+
 		this.creationTime = creationTime;
 
 		nPart = size / transmissionUnit;
@@ -44,20 +54,12 @@ public class Data {
 		this.part = 0;
 	}
 
-	public boolean isBenchmarkData() {
-		if (object instanceof RoutingMessage) {
-			RoutingMessage rm = (RoutingMessage) object;
-			return (rm.object instanceof MessageToApp && ((MessageToApp) rm.object).msg instanceof BenchmarkData);
-		} else {
-			return (object instanceof MessageToApp && ((MessageToApp) object).msg instanceof BenchmarkData);
-		}
-	}
-
 	public Data getPart(int i) {
 		if (i >= nPart)
 			throw new IllegalArgumentException("Part number should be in range [0;nPart[");
 
 		Data partData = new Data();
+		partData.benchmarkData = benchmarkData;
 		partData.object = object;
 		partData.creationTime = creationTime;
 		partData.size = size;

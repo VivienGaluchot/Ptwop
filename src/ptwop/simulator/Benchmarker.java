@@ -45,9 +45,9 @@ public class Benchmarker {
 		initMoyCollections("Temps de broadcast en fonction de la taille du message", "Taille (octets)", "t (ms)", null,
 				null, null);
 		evaluateBroadcastTimeOverMessageSize(floodV0Creator, "FloodV0");
-//		evaluateBroadcastTimeOverMessageSize(floodV1Creator, "FloodV1");
-//		evaluateBroadcastTimeOverMessageSize(floodV2Creator, "FloodV2");
-//		displayMoyCollections();
+		evaluateBroadcastTimeOverMessageSize(floodV1Creator, "FloodV1");
+		evaluateBroadcastTimeOverMessageSize(floodV2Creator, "FloodV2");
+		displayMoyCollections();
 //
 //		// Interconnection
 //		initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud", "t (ms)",
@@ -171,7 +171,7 @@ public class Benchmarker {
 		XYSeriesCollection broadcastTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
 		int threadWorkNumber = 10;
-		int threadNumber = 1;
+		int threadNumber = 8;
 		int networkSize = 20;
 		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {

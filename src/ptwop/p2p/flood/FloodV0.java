@@ -49,7 +49,8 @@ public class FloodV0 implements P2P, NPairHandler {
 			for (P2PUser u : otherUsers) {
 				if (!u.equals(user)) {
 					try {
-						router.routeTo(user, new ConnectTo(u.getAddress()));
+						// router.routeTo(user, new ConnectTo(u.getAddress()));
+						user.send(new ConnectTo(u.getAddress()));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -130,8 +131,8 @@ public class FloodV0 implements P2P, NPairHandler {
 				break;
 			}
 		}
-		if (user == null)
-			throw new IllegalArgumentException("Can't find user with address " + address);
+		if(user == null)
+			System.out.println("Warning, didn't find user with address " + address);
 		return user;
 	}
 
@@ -150,7 +151,8 @@ public class FloodV0 implements P2P, NPairHandler {
 		p2pHandler.userConnect(user);
 
 		try {
-			router.routeTo(user, new MyNameIs(myName));
+			// router.routeTo(user, new MyNameIs(myName));
+			user.send(new MyNameIs(myName));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
