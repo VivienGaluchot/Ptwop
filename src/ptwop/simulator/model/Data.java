@@ -1,14 +1,13 @@
 package ptwop.simulator.model;
 
 import ptwop.common.Util;
-import ptwop.network.NAddress;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.routing.RoutingMessage;
 
 public class Data {
 	public Object object;
 	public BenchmarkData benchmarkData;
-	public NAddress destAddress;
+	public boolean destinationReached;
 
 	private long creationTime;
 	private int size;
@@ -25,8 +24,10 @@ public class Data {
 
 		// open routing message
 		if (object instanceof RoutingMessage) {
-			destAddress = ((RoutingMessage) object).destAddress;
+			destinationReached = ((RoutingMessage) object).destAddress == null;
 			object = ((RoutingMessage) object).object;
+		} else {
+			destinationReached = true;
 		}
 
 		// open message to app
@@ -60,6 +61,7 @@ public class Data {
 
 		Data partData = new Data();
 		partData.benchmarkData = benchmarkData;
+		partData.destinationReached = destinationReached;
 		partData.object = object;
 		partData.creationTime = creationTime;
 		partData.size = size;

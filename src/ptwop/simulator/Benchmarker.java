@@ -172,7 +172,7 @@ public class Benchmarker {
 		ArrayList<Thread> runners = new ArrayList<>();
 		int threadWorkNumber = 10;
 		int threadNumber = 8;
-		int networkSize = 20;
+		int networkSize = 15;
 		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {
 				@Override
