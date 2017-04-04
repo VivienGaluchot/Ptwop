@@ -117,12 +117,14 @@ public class NetWorker {
 				new Object[] { new DumbRouter(), new StockasticRouter() });
 		if (router == null)
 			return;
-		
+
 		System.out.println("Networker with " + router + " " + p2p);
 
 		try {
+			@SuppressWarnings("unchecked")
 			Constructor<P2P> p2pConstructor = (Constructor<P2P>) p2p.getClass().getConstructor(NServent.class,
 					String.class, Router.class);
+			@SuppressWarnings("unchecked")
 			Constructor<Router> routerConstructor = (Constructor<Router>) router.getClass().getConstructor();
 
 			P2PCreator pcreator = new P2PCreator() {

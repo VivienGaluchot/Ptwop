@@ -8,9 +8,9 @@ public class DumbRouter extends Router {
 	public DumbRouter() {
 		super();
 	}
-	
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return "DumbRouter";
 	}
 
