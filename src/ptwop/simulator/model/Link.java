@@ -187,9 +187,9 @@ public class Link implements Steppable, NPair {
 	private boolean pushObject(Object o) {
 		if (!established && !(o instanceof DataTCP))
 			return false;
-		
+
 		Data data = new Data(o, net.getTime(), transmissionUnit);
-		
+
 		int nPart = data.getSize() / transmissionUnit;
 		if (nPart * transmissionUnit < data.getSize())
 			nPart++;

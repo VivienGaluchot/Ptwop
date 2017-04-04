@@ -42,26 +42,26 @@ public class Benchmarker {
 		};
 
 		// Routing
-		initMoyCollections("Temps de broadcast en fonction de la taille du message", "Taille (octets)", "t (ms)", null,
-				null, null);
-		evaluateBroadcastTimeOverMessageSize(floodV0Creator, "FloodV0");
-		evaluateBroadcastTimeOverMessageSize(floodV1Creator, "FloodV1");
-		evaluateBroadcastTimeOverMessageSize(floodV2Creator, "FloodV2");
+		initMoyCollections("Reception d'un message broadcast", "Taille de message (octets)", "Latence (ms)", null, null,
+				null);
+		evaluateBroadcastTimeOverMessageSize(floodV0Creator, "StockasticRouter");
+		evaluateBroadcastTimeOverMessageSize(floodV1Creator, "DumbRouter");
+		evaluateBroadcastTimeOverMessageSize(floodV2Creator, "DumbRouter");
 		displayMoyCollections();
-//
-//		// Interconnection
-//		initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud", "t (ms)",
-//				"Nombre de liens");
-//		evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
-//		evaluateOneConnectionOverTime(floodV1Creator, "FloodV1");
-//		evaluateOneConnectionOverTime(floodV2Creator, "FloodV2");
-//		displayMoyCollections();
-//
-//		initMoyCollections("Temps de connexion d'un noeud au réseau", "Nombre de noeuds", "t (ms)", null, null, null);
-//		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
-//		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
-//		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
-//		displayMoyCollections();
+
+		// Interconnection
+		initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud", "t (ms)",
+				"Nombre de liens");
+		evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
+		evaluateOneConnectionOverTime(floodV1Creator, "FloodV1");
+		evaluateOneConnectionOverTime(floodV2Creator, "FloodV2");
+		displayMoyCollections();
+
+		initMoyCollections("Temps de connexion d'un noeud au réseau", "Nombre de noeuds", "t (ms)", null, null, null);
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
+		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
+		displayMoyCollections();
 	}
 
 	static XYSeriesCollection moyCollection1;
@@ -218,8 +218,8 @@ public class Benchmarker {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		displayMinMaxMoy(broadcastTime, moyCollection1,
-				name + " Temps de broadcast en fonction de la taille du message", "Taille (octets)", "t (ms)");
+		displayMinMaxMoy(broadcastTime, moyCollection1, "Reception d'un message broadcast : routage " + name,
+				"Taille de message (octets)", "Latence (ms)");
 	}
 
 	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, XYSeriesCollection moySerie,

@@ -131,7 +131,7 @@ public class FloodV0 implements P2P, NPairHandler {
 				break;
 			}
 		}
-		if(user == null)
+		if (user == null)
 			System.out.println("Warning, didn't find user with address " + address);
 		return user;
 	}

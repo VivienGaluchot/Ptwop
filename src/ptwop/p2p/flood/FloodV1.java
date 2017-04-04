@@ -101,7 +101,7 @@ public class FloodV1 extends FloodV0 {
 	}
 
 	// NPairHandler interface
-	
+
 	@Override
 	public void incommingConnectionFrom(NPair pair) {
 		P2PUser user = new P2PUser(pair);

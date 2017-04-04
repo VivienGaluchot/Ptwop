@@ -87,7 +87,8 @@ public class Network implements Steppable {
 		p2p.setMessageHandler(new P2PHandler() {
 			@Override
 			public void handleMessage(P2PUser sender, Object o) {
-				// System.out.println("Node " + n + " | received from " + sender + " : " + o);
+				// System.out.println("Node " + n + " | received from " + sender
+				// + " : " + o);
 			}
 
 			@Override
@@ -202,7 +203,7 @@ public class Network implements Steppable {
 				nj.addLink(lj);
 				ni.incommingConnectionFrom(li);
 				nj.connectedTo(lj);
-				
+
 				for (Link l : nj.getLinks())
 					l.clearBuffers();
 				for (Link l : ni.getLinks())

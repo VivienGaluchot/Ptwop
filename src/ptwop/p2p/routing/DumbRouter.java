@@ -30,7 +30,7 @@ public class DumbRouter extends Router {
 		if (rm.destAddress != null) {
 			// To forward
 			P2PUser next = p2p.getUserWithAddress(rm.destAddress);
-			if(next != null)
+			if (next != null)
 				routeTo(next, rm.object);
 			else
 				npair.send(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
