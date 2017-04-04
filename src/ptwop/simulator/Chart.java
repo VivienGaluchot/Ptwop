@@ -22,12 +22,13 @@ public class Chart extends ApplicationFrame {
 				true, false);
 
 		ChartPanel chartPanel = new ChartPanel(chart);
-		chartPanel.setPreferredSize(new Dimension(560, 367));
+		chartPanel.setPreferredSize(new Dimension(600, 400));
 		setContentPane(chartPanel);
 
 		// Create an NumberAxis
 		NumberAxis xAxis = new NumberAxis();
 		xAxis.setTickUnit(new NumberTickUnit(Math.round(dataSet.getSeries(0).getMaxX() / 10)));
+		xAxis.setLabel(lbx);
 
 		// Assign it to the chart
 		XYPlot plot = (XYPlot) chart.getPlot();

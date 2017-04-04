@@ -9,6 +9,17 @@ public class StockasticRouter extends DumbRouter {
 	public StockasticRouter() {
 		super();
 	}
+	
+	// TODO send the info only once to all user
+	public void broadcast(Object msg){
+		for (P2PUser u : p2p.getUsers()) {
+			try {
+				u.send(msg);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	@Override
 	public void routeTo(P2PUser dest, Object msg) throws IOException {
@@ -23,23 +34,13 @@ public class StockasticRouter extends DumbRouter {
 	public P2PUser getRoute(P2PUser destination) {
 		double totalProb = 0;
 		for (P2PUser u : p2p.getUsers()) {
-			double currentProb;
-			if (u != destination)
-				currentProb = relativeBestUserProbability(u);
-			else
-				currentProb = 2 * relativeBestUserProbability(u);
-			totalProb += currentProb;
+			totalProb += relativeBestUserProbability(destination, u);
 		}
 
 		double p = Math.random() * totalProb;
 		double cumulativeProbability = 0;
 		for (P2PUser u : p2p.getUsers()) {
-			double currentProb;
-			if (u != destination)
-				currentProb = relativeBestUserProbability(u);
-			else
-				currentProb = 2 * relativeBestUserProbability(u);
-			cumulativeProbability += currentProb;
+			cumulativeProbability += relativeBestUserProbability(destination, u);
 			if (p <= cumulativeProbability) {
 				return u;
 			}
@@ -47,7 +48,11 @@ public class StockasticRouter extends DumbRouter {
 		return destination;
 	}
 
-	private double relativeBestUserProbability(P2PUser user) {
-		return 1 / (user.getLatency() + 1.0);
+	private double relativeBestUserProbability(P2PUser destination, P2PUser user) {
+		double lat = user.getLatency();
+		if (user.equals(destination))
+			return 2 / (lat * lat * lat + 1.0);
+		else
+			return 1 / (lat * lat * lat + 1.0);
 	}
 }

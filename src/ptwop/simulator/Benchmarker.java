@@ -20,12 +20,35 @@ import ptwop.simulator.model.P2PCreator;
 
 public class Benchmarker {
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
+		if (true) {
 
+			// Routing
+			P2PCreator DumbRouterCreator = new P2PCreator() {
+				@Override
+				public P2P createP2P(NServent n) {
+					return new FloodV0(n, "", new DumbRouter());
+				}
+			};
+			P2PCreator StockasticRouterCreator = new P2PCreator() {
+				@Override
+				public P2P createP2P(NServent n) {
+					return new FloodV1(n, "", new StockasticRouter());
+				}
+			};
+
+			initMoyCollections("Broadcast", "Taille de message (octets)", "Latence (ms)", null, null, null);
+			evaluateBroadcastTimeOverMessageSize(DumbRouterCreator, "DumbRouter");
+			evaluateBroadcastTimeOverMessageSize(StockasticRouterCreator, "StockasticRouter");
+			displayMoyCollections();
+		}
+
+		// Interconnection
 		P2PCreator floodV0Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV0(n, "", new StockasticRouter());
+				return new FloodV0(n, "", new DumbRouter());
 			}
 		};
 		P2PCreator floodV1Creator = new P2PCreator() {
@@ -40,28 +63,21 @@ public class Benchmarker {
 				return new FloodV2(n, "", new DumbRouter());
 			}
 		};
+		if (false) {
+			initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud",
+					"t (ms)", "Nombre de liens");
+			evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
+			evaluateOneConnectionOverTime(floodV1Creator, "FloodV1");
+			evaluateOneConnectionOverTime(floodV2Creator, "FloodV2");
+			displayMoyCollections();
 
-		// Routing
-		initMoyCollections("Reception d'un message broadcast", "Taille de message (octets)", "Latence (ms)", null, null,
-				null);
-		evaluateBroadcastTimeOverMessageSize(floodV0Creator, "StockasticRouter");
-		evaluateBroadcastTimeOverMessageSize(floodV1Creator, "DumbRouter");
-		evaluateBroadcastTimeOverMessageSize(floodV2Creator, "DumbRouter");
-		displayMoyCollections();
-
-		// Interconnection
-		initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud", "t (ms)",
-				"Nombre de liens");
-		evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
-		evaluateOneConnectionOverTime(floodV1Creator, "FloodV1");
-		evaluateOneConnectionOverTime(floodV2Creator, "FloodV2");
-		displayMoyCollections();
-
-		initMoyCollections("Temps de connexion d'un noeud au réseau", "Nombre de noeuds", "t (ms)", null, null, null);
-		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
-		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
-		evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
-		displayMoyCollections();
+			initMoyCollections("Temps de connexion d'un noeud au réseau", "Nombre de noeuds", "t (ms)", null, null,
+					null);
+			evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
+			evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
+			evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
+			displayMoyCollections();
+		}
 	}
 
 	static XYSeriesCollection moyCollection1;
@@ -122,9 +138,9 @@ public class Benchmarker {
 			}
 		}
 		title1 = "Connection d'un noeud (" + threadNumber * threadWorkNumber + "essais, " + nNode + "noeuds)";
-		displayMinMaxMoy(bandwith, moyCollection1, name + " " + title1, "t (ms)", "Nombre de messages");
+		displayMinMaxMoy(bandwith, moyCollection1, name, name + " " + title1, "t (ms)", "Nombre de messages");
 		title2 = "Connection d'un noeud (" + threadNumber * threadWorkNumber + "essais, " + nNode + "noeuds)";
-		displayMinMaxMoy(linknumber, moyCollection2, name + " " + title2, "t (ms)", "Nombre de liens");
+		displayMinMaxMoy(linknumber, moyCollection2, name, name + " " + title2, "t (ms)", "Nombre de liens");
 	}
 
 	public static void evaluateOneNodeConnexionTimeOverNumberOfNodes(P2PCreator p2pcreator, String name) {
@@ -163,15 +179,15 @@ public class Benchmarker {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		displayMinMaxMoy(connexionTime, moyCollection1, name + " temps de connexion d'un noeud au réseau",
+		displayMinMaxMoy(connexionTime, moyCollection1, name, name + " temps de connexion d'un noeud au réseau",
 				"Nombre de noeuds", "t (ms)");
 	}
 
 	public static void evaluateBroadcastTimeOverMessageSize(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection broadcastTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int threadWorkNumber = 10;
-		int threadNumber = 8;
+		int threadWorkNumber = 50;
+		int threadNumber = 4;
 		int networkSize = 15;
 		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {
@@ -185,7 +201,7 @@ public class Benchmarker {
 							n.track = true;
 						Node n0 = net.getNode(0);
 						int n_sent = 0;
-						for (int i = 1; i < 1000; i += (1 + i / 10)) {
+						for (int i = 10; i <= 500; i += (i / 10 + 1)) {
 							n_sent++;
 							net.getP2P(n0).broadcast(new BenchmarkData(i));
 							// attente que tout le monde ait reçus
@@ -218,17 +234,18 @@ public class Benchmarker {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		displayMinMaxMoy(broadcastTime, moyCollection1, "Reception d'un message broadcast : routage " + name,
+		displayMinMaxMoy(broadcastTime, moyCollection1, name, "15 users - Broadcast : routage " + name,
 				"Taille de message (octets)", "Latence (ms)");
 	}
 
 	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, XYSeriesCollection moySerie,
-			String title, String xAxis, String yAxis) {
-		new Chart(title, xAxis, yAxis, getYMinMaxMoy(new XYSeriesCollection(), moySerie, messageNumbersDataset));
+			String moySerieName, String title, String xAxis, String yAxis) {
+		new Chart(title, xAxis, yAxis,
+				getYMinMaxMoy(new XYSeriesCollection(), moySerie, moySerieName, messageNumbersDataset));
 	}
 
 	public static XYSeriesCollection getYMinMaxMoy(XYSeriesCollection outDataSet, XYSeriesCollection moyDataSet,
-			XYSeriesCollection inDataSet) {
+			String moySerieName, XYSeriesCollection inDataSet) {
 		XYSeries minS = new XYSeries("min");
 		XYSeries moyS = new XYSeries("moy");
 		XYSeries maxS = new XYSeries("max");
@@ -287,7 +304,7 @@ public class Benchmarker {
 		outDataSet.addSeries(moyS);
 		outDataSet.addSeries(maxS);
 		if (moyDataSet != null) {
-			moyS.setKey(moyDataSet.getSeriesCount());
+			moyS.setKey("moy" + moySerieName);
 			moyDataSet.addSeries(moyS);
 		}
 		return outDataSet;
@@ -340,9 +357,9 @@ public class Benchmarker {
 	}
 
 	public static Network setToInterconnectedNetwork(Network net, int nodeNumber) {
-		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
+		GaussianRandom linkLatency = new GaussianRandom(5, 2000, 60, 40);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
-		GaussianRandom linkPacketSize = new GaussianRandom(1, 15, 3, 2);
+		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
 		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
 		net.addNewNodes(nodeNumber);
 		net.setToFullyInterconnected();

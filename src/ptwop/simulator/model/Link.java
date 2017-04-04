@@ -57,7 +57,7 @@ public class Link implements Steppable, NPair {
 		// rand = new Random();
 
 		transmissionBuffer = new DataBuffer<>(packetSize);
-		waitQueue = new DataBuffer<>(1000);
+		waitQueue = new DataBuffer<>(10000);
 		computeWeight();
 
 		pushedThisRound = 0;
@@ -234,7 +234,7 @@ public class Link implements Steppable, NPair {
 			// x float in [0:1[
 			// float x = rand.nextFloat();
 			// if (x >= loss)
-			if (tdata.data.part == tdata.data.nPart - 1)
+			if (tdata.data.isLastPart())
 				dest.handleData(source, tdata.data);
 			// TODO else
 		}
