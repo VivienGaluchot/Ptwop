@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -14,15 +16,21 @@ import javax.swing.SwingUtilities;
 import passgen.WordGenerator;
 import ptwop.common.gui.AnimationPanel;
 import ptwop.common.gui.AnimationThread;
+import ptwop.common.gui.Dialog;
 import ptwop.common.gui.Frame;
 import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.flood.FloodV0;
+import ptwop.p2p.flood.FloodV1;
+import ptwop.p2p.flood.FloodV2;
+import ptwop.p2p.routing.DumbRouter;
+import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.display.NetworkWrapper;
 import ptwop.simulator.model.Network;
+import ptwop.simulator.model.Node;
 import ptwop.simulator.model.P2PCreator;
 
 public class NetWorker {
@@ -98,20 +106,52 @@ public class NetWorker {
 
 	public static void main(String[] args) {
 		WordGenerator nameGenerator = new WordGenerator();
-		Network net = new Network(new P2PCreator() {
-			@Override
-			public P2P createP2P(NServent n) {
-				return new FloodV0(n, nameGenerator.getWord(6), new StockasticRouter());
-			}
-		});
 
-		int nodeNumber = 10;
-		GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
-		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
-		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
-		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
-		net.addNewNodes(nodeNumber);
+		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un système P2P",
+				new Object[] { new FloodV0(new Node(null), "", new DumbRouter()),
+						new FloodV1(new Node(null), "", new DumbRouter()),
+						new FloodV2(new Node(null), "", new DumbRouter()) });
+		if (p2p == null)
+			return;
+		Router router = (Router) Dialog.JListDialog(null, "Selectionner un routeur",
+				new Object[] { new DumbRouter(), new StockasticRouter() });
+		if (router == null)
+			return;
+		
+		System.out.println("Networker with " + router + " " + p2p);
 
-		display(net);
+		try {
+			Constructor<P2P> p2pConstructor = (Constructor<P2P>) p2p.getClass().getConstructor(NServent.class,
+					String.class, Router.class);
+			Constructor<Router> routerConstructor = (Constructor<Router>) router.getClass().getConstructor();
+
+			P2PCreator pcreator = new P2PCreator() {
+				@Override
+				public P2P createP2P(NServent n) {
+					try {
+						Router router = routerConstructor.newInstance();
+						P2P p2p = p2pConstructor.newInstance(n, nameGenerator.getWord(5), router);
+						return p2p;
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException e) {
+						e.printStackTrace();
+					}
+					return null;
+				}
+			};
+
+			Network net = new Network(pcreator);
+			int nodeNumber = 10;
+			GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
+			GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
+			GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
+			net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
+			net.addNewNodes(nodeNumber);
+
+			display(net);
+
+		} catch (NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -21,11 +21,13 @@ public class Data {
 	public Data(Object object, long creationTime, int transmissionUnit) {
 		this.object = object;
 		benchmarkData = null;
+		size = 0;
 
 		// open routing message
 		if (object instanceof RoutingMessage) {
 			destinationReached = ((RoutingMessage) object).destAddress == null;
 			object = ((RoutingMessage) object).object;
+			size = 16; // dest and sender address estimate
 		} else {
 			destinationReached = true;
 		}
@@ -37,13 +39,13 @@ public class Data {
 		// size computing
 		if (object instanceof BenchmarkData) {
 			benchmarkData = (BenchmarkData) object;
-			size = ((BenchmarkData) object).size;
+			size += ((BenchmarkData) object).size;
 		} else {
 			byte[] bytes = Util.serialize(object);
 			int l = 0;
 			if (bytes != null)
 				l = bytes.length;
-			size = l;
+			size += l;
 		}
 
 		this.creationTime = creationTime;

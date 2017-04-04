@@ -1,6 +1,8 @@
 package ptwop.common.gui;
 
 import java.awt.Component;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JOptionPane;
 
@@ -22,5 +24,20 @@ public class Dialog {
 	public static String NameDialog(Component frame) {
 		return (String) JOptionPane.showInputDialog(frame, "Entrer votre nom :", "Nom", JOptionPane.PLAIN_MESSAGE, null,
 				null, "patrick");
+	}
+
+	public static Object JListDialog(Component frame, String text, List<Object> objects) {
+		Object[] array = objects.toArray();
+		return JListDialog(frame, text, array);
+	}
+
+	public static Object JListDialog(Component frame, String text, Set<Object> objects) {
+		Object[] array = objects.toArray();
+		return JListDialog(frame, text, array);
+	}
+
+	public static Object JListDialog(Component frame, String text, Object[] objects) {
+		return JOptionPane.showInputDialog(null, text, "Selection", JOptionPane.QUESTION_MESSAGE, null, objects,
+				objects[0]);
 	}
 }

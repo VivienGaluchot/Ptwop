@@ -91,7 +91,8 @@ public class FloodV1 extends FloodV0 {
 			for (P2PUser u : otherUsers) {
 				try {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
-						router.routeTo(user, new ConnectTo(u.getAddress()));
+						// router.routeTo(user, new ConnectTo(u.getAddress()));
+						user.send(new ConnectTo(u.getAddress()));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -115,7 +116,8 @@ public class FloodV1 extends FloodV0 {
 		p2pHandler.userConnect(user);
 
 		try {
-			router.routeTo(user, new MyNameIs(myName));
+			// router.routeTo(user, new MyNameIs(myName));
+			user.send(new MyNameIs(myName));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

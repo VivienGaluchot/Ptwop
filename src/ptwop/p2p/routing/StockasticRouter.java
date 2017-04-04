@@ -10,6 +10,11 @@ public class StockasticRouter extends DumbRouter {
 		super();
 	}
 	
+	@Override
+	public String toString(){
+		return "StockasticRouter";
+	}
+	
 	// TODO send the info only once to all user
 	public void broadcast(Object msg){
 		for (P2PUser u : p2p.getUsers()) {

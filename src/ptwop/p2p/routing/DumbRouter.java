@@ -8,6 +8,11 @@ public class DumbRouter extends Router {
 	public DumbRouter() {
 		super();
 	}
+	
+	@Override
+	public String toString(){
+		return "DumbRouter";
+	}
 
 	@Override
 	public P2PUser getRoute(P2PUser destination) {
