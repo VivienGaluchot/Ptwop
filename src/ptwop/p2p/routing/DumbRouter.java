@@ -23,9 +23,9 @@ public class DumbRouter extends Router {
 	public void routeTo(P2PUser dest, Object msg) throws IOException {
 		P2PUser trueDest = getRoute(dest);
 		if (trueDest.equals(dest))
-			trueDest.send(msg);
+			trueDest.sendDirectly(msg);
 		else
-			trueDest.send(new RoutingMessage(null, dest.getAddress(), msg));
+			trueDest.sendDirectly(new RoutingMessage(null, dest.getAddress(), msg));
 	}
 
 	@Override
@@ -34,15 +34,15 @@ public class DumbRouter extends Router {
 			rm.sourceAddress = npair.getAddress();
 		if (rm.destAddress != null) {
 			// To forward
-			P2PUser next = p2p.getUserWithAddress(rm.destAddress);
+			P2PUser next = p2p.getUser(rm.destAddress);
 			if (next != null)
 				routeTo(next, rm.object);
 			else
-				npair.send(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
+				npair.sendDirectly(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
 			return;
 		} else {
 			// To process
-			handler.incommingMessage(npair, rm.object);
+			handler.incommingMessage(npair.getBindedNPair(), rm.object);
 		}
 	}
 }

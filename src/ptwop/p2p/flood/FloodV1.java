@@ -87,12 +87,11 @@ public class FloodV1 extends FloodV0 {
 	}
 
 	protected void sendUserListTo(P2PUser user) {
-		synchronized (otherUsers) {
-			for (P2PUser u : otherUsers) {
+		synchronized (users) {
+			for (P2PUser u : users) {
 				try {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
-						// router.routeTo(user, new ConnectTo(u.getAddress()));
-						user.send(new ConnectTo(u.getAddress()));
+						user.sendDirectly(new ConnectTo(u.getAddress()));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -102,38 +101,10 @@ public class FloodV1 extends FloodV0 {
 	}
 
 	// NPairHandler interface
-
-	@Override
-	public void incommingConnectionFrom(NPair pair) {
-		P2PUser user = new P2PUser(pair);
-		pair.setAlias(user);
-		pair.start();
-		sendUserListTo(user);
-
-		synchronized (otherUsers) {
-			otherUsers.add(user);
-		}
-		p2pHandler.userConnect(user);
-
-		try {
-			// router.routeTo(user, new MyNameIs(myName));
-			user.send(new MyNameIs(myName));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void connectedTo(NPair pair) {
-		incommingConnectionFrom(pair);
-	}
-
+	
 	@Override
 	public void incommingMessage(NPair npair, Object o) {
-		if (!(npair instanceof P2PUser))
-			throw new IllegalArgumentException("Wrong user class");
-
-		P2PUser pair = (P2PUser) npair;
+		P2PUser pair = pairUserMap.get(npair);
 
 		if (!(o instanceof P2PMessage))
 			throw new IllegalArgumentException("Unknown message class");

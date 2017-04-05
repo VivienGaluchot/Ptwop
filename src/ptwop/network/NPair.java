@@ -36,13 +36,4 @@ public interface NPair {
 	 * @return latency time in ms
 	 */
 	public int getLatency();
-
-	/**
-	 * When a message is received from this pair, the alias will be given as
-	 * receiver
-	 * 
-	 * @param pair
-	 *            alias
-	 */
-	public void setAlias(NPair pair);
 }

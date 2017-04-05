@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import ptwop.network.NAddress;
+import ptwop.network.NPair;
 
 public interface P2P {
 
@@ -58,7 +59,15 @@ public interface P2P {
 	 * @param address
 	 * @return user with address given
 	 */
-	public P2PUser getUserWithAddress(NAddress address);
+	public P2PUser getUser(NAddress address);
+
+	/**
+	 * Find the user binded with the pair given, return null if not present
+	 * 
+	 * @param address
+	 * @return user with address given
+	 */
+	public P2PUser getUser(NPair pair);
 
 	/**
 	 * set the message handler, it will be used when a message is received

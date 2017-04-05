@@ -45,7 +45,7 @@ public class Node extends NServent implements Steppable {
 	public void disconnect(Link link) {
 		if (linkMap.inverse().remove(link) == null)
 			throw new IllegalArgumentException("Can't remove unconnected link : " + link);
-		pairQuit(link.getAlias());
+		pairQuit(link);
 		net.signalRemovedLink(link);
 	}
 
@@ -153,7 +153,7 @@ public class Node extends NServent implements Steppable {
 					super.incommingConnectionFrom(user);
 			}
 		} else {
-			super.incommingMessage(l.getAlias(), o);
+			super.incommingMessage(l, o);
 		}
 	}
 

@@ -26,7 +26,6 @@ public class Link implements Steppable, NPair {
 	private Node dest;
 	private DataBuffer<TimedData> transmissionBuffer;
 	private DataBuffer<Data> waitQueue;
-	private NPair alias;
 
 	private float weight;
 
@@ -53,7 +52,6 @@ public class Link implements Steppable, NPair {
 		this.dest = dest;
 		this.latency = latency;
 		this.loss = loss;
-		this.alias = this;
 		// rand = new Random();
 
 		transmissionBuffer = new DataBuffer<>(packetSize);
@@ -108,6 +106,7 @@ public class Link implements Steppable, NPair {
 
 	public void computeWeight() {
 		weight = latency / (transmissionBuffer.size() * ((1 - loss)));
+		weight = latency;
 	}
 
 	public Set<TimedData> getTransitingDatas() {
@@ -259,15 +258,6 @@ public class Link implements Steppable, NPair {
 	@Override
 	public NAddress getAddress() {
 		return dest.getAddress();
-	}
-
-	@Override
-	public void setAlias(NPair pair) {
-		alias = pair;
-	}
-
-	public NPair getAlias() {
-		return alias;
 	}
 
 	@Override

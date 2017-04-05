@@ -51,18 +51,15 @@ public class LinkWrapper implements Animable, HCS {
 		return slideNorm;
 	}
 
+	static float minWeight = Float.MAX_VALUE;
+	static float maxWeight = Float.MIN_VALUE;
+	static float maxsize = 0.15f;
+	static float minsize = 0.05f;
 	private static float linkWeightTransform(float weight) {
-		float maxsize = 0.15f;
-		float minsize = 0.05f;
-		float range = 100;
-		float x;
-		if (0 <= weight && weight < range)
-			x = (float) (Math.cos(10 * weight / (Math.PI * range)) + 1f) / 2f;
-		else if (weight >= range)
-			x = 0;
-		else
-			x = 1;
-		return x * (maxsize - minsize) + minsize;
+		minWeight = Math.min(minWeight, weight);
+		maxWeight = Math.max(maxWeight, weight);
+		float x = -((maxWeight - minWeight) / 2) * (weight - (maxWeight + minWeight) / 2);
+		return (float) ((maxsize - minsize) / (1 + Math.exp(x))) + minsize;
 	}
 
 	@Override

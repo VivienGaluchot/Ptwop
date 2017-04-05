@@ -32,8 +32,8 @@ import ptwop.network.tcp.TcpNServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.flood.FloodV1;
-import ptwop.p2p.routing.StockasticRouter;
+import ptwop.p2p.flood.*;
+import ptwop.p2p.routing.*;
 
 public class DemoApp {
 
@@ -77,7 +77,7 @@ public class DemoApp {
 							} else {
 								if (msg.startsWith("-ls")) {
 									if (p2p != null) {
-										stream.println("Utilisateurs du systeme");
+										stream.println("Utilisateurs");
 										for (P2PUser u : p2p.getUsers()) {
 											stream.println("- " + u.toString());
 										}
@@ -89,7 +89,8 @@ public class DemoApp {
 									if (p2p != null) {
 										stream.println("Latence");
 										for (P2PUser u : p2p.getUsers()) {
-											stream.println("- " + u.toString() + " " + u.getLatency() + " ms");
+											stream.println("- " + u.toString() + " " + u.getBindedNPair().getLatency()
+													+ " ms");
 										}
 									} else {
 										stream.println("p2p not initialized");

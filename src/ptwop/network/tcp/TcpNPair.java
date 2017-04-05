@@ -17,7 +17,6 @@ public class TcpNPair implements NPair, Runnable {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	NPairHandler handler;
-	NPair alias;
 
 	private Thread runner;
 	private boolean run;
@@ -35,7 +34,6 @@ public class TcpNPair implements NPair, Runnable {
 		this.socket = socket;
 		this.handler = handler;
 		this.initierPing = !incomming;
-		alias = this;
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 
@@ -54,7 +52,7 @@ public class TcpNPair implements NPair, Runnable {
 			runner.setName("TcpNetworkUser runner " + getAddress().toString());
 		} catch (ClassNotFoundException e) {
 			socket.close();
-			handler.pairQuit(alias);
+			handler.pairQuit(this);
 			throw new IOException("Cant get pair's listening port");
 		}
 	}
@@ -124,7 +122,7 @@ public class TcpNPair implements NPair, Runnable {
 						}
 					}
 				} else {
-					handler.incommingMessage(alias, o);
+					handler.incommingMessage(this, o);
 				}
 			} catch (IOException e) {
 				disconnect();
@@ -132,7 +130,7 @@ public class TcpNPair implements NPair, Runnable {
 				e.printStackTrace();
 			}
 		}
-		handler.pairQuit(alias);
+		handler.pairQuit(this);
 	}
 
 	@Override
@@ -166,13 +164,5 @@ public class TcpNPair implements NPair, Runnable {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void setAlias(NPair pair) {
-		if (pair == null)
-			throw new IllegalArgumentException("Can't set an alias as null");
-
-		alias = pair;
 	}
 }
