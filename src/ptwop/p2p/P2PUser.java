@@ -41,8 +41,8 @@ public class P2PUser {
 		return o instanceof P2PUser && getAddress().equals(((P2PUser) o).getAddress());
 	}
 
-	public void sendDirectly(Object o) throws IOException {
-		bindedNPair.send(o);
+	public void sendDirectly(byte[] bytes) throws IOException {
+		bindedNPair.send(bytes);
 	}
 
 	public NAddress getAddress() {

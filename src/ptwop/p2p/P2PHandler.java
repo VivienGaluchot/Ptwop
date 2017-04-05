@@ -11,7 +11,7 @@ public interface P2PHandler {
 	 *            : object received
 	 * @throws IOException
 	 */
-	void handleMessage(P2PUser sender, Object o);
+	void handleMessage(P2PUser sender, byte[] bytes);
 
 	void userConnect(P2PUser user);
 

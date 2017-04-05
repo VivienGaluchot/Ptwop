@@ -16,7 +16,7 @@ public interface NPair {
 	 *            object to send
 	 * @throws IOException
 	 */
-	public void send(Object o) throws IOException;
+	public void send(byte[] bytes) throws IOException;
 
 	/**
 	 * Disconnect from pair

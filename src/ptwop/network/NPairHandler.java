@@ -5,7 +5,7 @@ public interface NPairHandler {
 
 	void connectedTo(NPair npair);
 
-	void incommingMessage(NPair npair, Object o);
+	void incommingMessage(NPair npair, byte[] bytes);
 
 	void pairQuit(NPair npair);
 }

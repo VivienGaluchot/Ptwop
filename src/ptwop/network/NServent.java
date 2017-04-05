@@ -60,8 +60,8 @@ public abstract class NServent implements NPairHandler {
 	}
 
 	@Override
-	public void incommingMessage(NPair user, Object o) {
-		handler.incommingMessage(user, o);
+	public void incommingMessage(NPair user, byte[] bytes) {
+		handler.incommingMessage(user, bytes);
 	}
 
 	public void disconnect() {

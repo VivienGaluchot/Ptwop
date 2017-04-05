@@ -1,8 +1,8 @@
 package ptwop.network.tcp;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Random;
 import java.util.Timer;
@@ -14,8 +14,8 @@ import ptwop.network.NPairHandler;
 
 public class TcpNPair implements NPair, Runnable {
 	private Socket socket;
-	private ObjectOutputStream out;
-	private ObjectInputStream in;
+	private DataOutputStream out;
+	private DataInputStream in;
 	NPairHandler handler;
 
 	private Thread runner;
@@ -30,32 +30,75 @@ public class TcpNPair implements NPair, Runnable {
 	private boolean initierPing;
 	private Timer pingTimer;
 
+	private static enum MessageType {
+		PING((byte) 0), DATA((byte) 1);
+		private byte b = 0;
+
+		MessageType(byte v) {
+			b = v;
+		}
+
+		public byte byteCode() {
+			return b;
+		}
+	}
+
 	public TcpNPair(int listeningPort, Socket socket, NPairHandler handler, boolean incomming) throws IOException {
 		this.socket = socket;
 		this.handler = handler;
 		this.initierPing = !incomming;
-		out = new ObjectOutputStream(socket.getOutputStream());
-		in = new ObjectInputStream(socket.getInputStream());
+		out = new DataOutputStream(socket.getOutputStream());
+		in = new DataInputStream(socket.getInputStream());
 
 		// sharing listening port
-		out.writeObject(new Integer(listeningPort));
+		out.writeInt(new Integer(listeningPort));
+		pairListeningPort = in.readInt();
+		System.out.println("Pair listening port : " + pairListeningPort);
+
+		latency = 0;
+		lastPingStart = System.currentTimeMillis();
+		Random c = new Random();
+		pingValue = c.nextInt();
+
+		runner = new Thread(this);
+		runner.setName("TcpNetworkUser runner " + getAddress().toString());
+	}
+
+	// Ping
+
+	private void sendPing() throws IOException {
+		sendPing(pingValue);
+	}
+
+	private synchronized void sendPing(int code) throws IOException {
+		out.writeByte(MessageType.PING.byteCode());
+		out.writeInt(code);
+	}
+
+	private void handlePingMessage(int code) {
 		try {
-			pairListeningPort = (Integer) in.readObject();
-			System.out.println("Pair listening port : " + pairListeningPort);
+			if (initierPing) {
+				if (code == pingValue) {
+					pingValue++;
+					latency = (int) (System.currentTimeMillis() - lastPingStart);
+					sendPing(code);
 
-			latency = 0;
-			lastPingStart = System.currentTimeMillis();
-			Random c = new Random();
-			pingValue = c.nextInt();
-
-			runner = new Thread(this);
-			runner.setName("TcpNetworkUser runner " + getAddress().toString());
-		} catch (ClassNotFoundException e) {
-			socket.close();
-			handler.pairQuit(this);
-			throw new IOException("Cant get pair's listening port");
+				}
+			} else {
+				if (pingValue != code) {
+					pingValue = code;
+					sendPing(code);
+					lastPingStart = System.currentTimeMillis();
+				} else {
+					latency = (int) (System.currentTimeMillis() - lastPingStart);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
+
+	// NPair
 
 	@Override
 	public void start() {
@@ -66,7 +109,7 @@ public class TcpNPair implements NPair, Runnable {
 				@Override
 				public void run() {
 					try {
-						send(generatePing());
+						sendPing();
 						lastPingStart = System.currentTimeMillis();
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -78,8 +121,10 @@ public class TcpNPair implements NPair, Runnable {
 	}
 
 	@Override
-	public synchronized void send(Object o) throws IOException {
-		out.writeObject(o);
+	public synchronized void send(byte[] bytes) throws IOException {
+		out.writeByte(MessageType.DATA.byteCode());
+		out.writeInt(bytes.length);
+		out.write(bytes);
 	}
 
 	@Override
@@ -104,30 +149,17 @@ public class TcpNPair implements NPair, Runnable {
 		run = true;
 		while (run) {
 			try {
-				Object o = in.readObject();
-				if (o instanceof Ping) {
-					Ping p = (Ping) o;
-					if (initierPing) {
-						if (checkPing(p)) {
-							latency = (int) (System.currentTimeMillis() - lastPingStart);
-							send(p);
-						}
-					} else {
-						if (pingValue != p.x) {
-							pingValue = p.x;
-							send(p);
-							lastPingStart = System.currentTimeMillis();
-						} else {
-							latency = (int) (System.currentTimeMillis() - lastPingStart);
-						}
-					}
-				} else {
-					handler.incommingMessage(this, o);
+				byte messageType = in.readByte();
+				if (messageType == MessageType.DATA.byteCode()) {
+					int length = in.readInt();
+					byte[] bytes = new byte[length];
+					handler.incommingMessage(this, bytes);
+				} else if (messageType == MessageType.PING.byteCode()) {
+					int code = in.readInt();
+					handlePingMessage(code);
 				}
 			} catch (IOException e) {
 				disconnect();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
 			}
 		}
 		handler.pairQuit(this);
@@ -151,18 +183,5 @@ public class TcpNPair implements NPair, Runnable {
 	@Override
 	public int getLatency() {
 		return latency;
-	}
-
-	// PING
-	private Ping generatePing() {
-		return new Ping(pingValue);
-	}
-
-	private boolean checkPing(Ping p) {
-		if (p.x == pingValue) {
-			pingValue++;
-			return true;
-		}
-		return false;
 	}
 }

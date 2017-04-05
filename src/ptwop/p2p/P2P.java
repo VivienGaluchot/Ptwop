@@ -28,7 +28,7 @@ public interface P2P {
 	 * 
 	 * @param msg
 	 */
-	public void broadcast(Object msg);
+	public void broadcast(byte[] bytes);
 
 	/**
 	 * send the message msg to user dest
@@ -37,14 +37,14 @@ public interface P2P {
 	 * @param msg
 	 * @throws IOException
 	 */
-	public void sendTo(P2PUser dest, Object msg) throws IOException;
+	public void sendTo(P2PUser dest, byte[] bytes) throws IOException;
 
 	/**
 	 * send msg to some users contained in dests set
 	 * 
 	 * @param msg
 	 */
-	public void anycast(Set<P2PUser> dests, Object msg);
+	public void anycast(Set<P2PUser> dests, byte[] bytes);
 
 	/**
 	 * get the p2p network user set
