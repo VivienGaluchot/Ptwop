@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import ptwop.network.NAddress;
 
 public class TcpNAddress extends NAddress {
-	private static final long serialVersionUID = 1L;
 	public InetAddress ip;
 	public int port;
 
@@ -31,5 +30,24 @@ public class TcpNAddress extends NAddress {
 			return ip.equals(a.ip) && port == a.port;
 		}
 		return false;
+	}
+
+
+	@Override
+	public int byteSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void serialize(int start, byte[] bytes) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deserialize(byte[] bytes) {
+		// TODO Auto-generated method stub
+		
 	}
 }

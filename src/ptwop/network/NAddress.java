@@ -1,8 +1,7 @@
 package ptwop.network;
 
-import java.io.Serializable;
-
-public abstract class NAddress implements Serializable {
-	private static final long serialVersionUID = 1L;
-
+public abstract class NAddress{
+	public abstract int byteSize();
+	public abstract void serialize(int start, byte[] bytes);
+	public abstract void deserialize(byte[] bytes);
 }

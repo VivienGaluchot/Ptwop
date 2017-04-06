@@ -29,16 +29,18 @@ public class TcpNPair implements NPair, Runnable {
 	private int pingValue;
 	private boolean initierPing;
 	private Timer pingTimer;
-
+	
 	private static enum MessageType {
-		PING((byte) 0), DATA((byte) 1);
+		PING, DATA;
+
 		private byte b = 0;
 
-		MessageType(byte v) {
-			b = v;
+		MessageType() {
+			if ((b = (byte) this.ordinal()) > Byte.MAX_VALUE)
+				throw new RuntimeException("Can't create more than " + Byte.MAX_VALUE + " ByteEnum");
 		}
 
-		public byte byteCode() {
+		public byte value() {
 			return b;
 		}
 	}
@@ -71,7 +73,7 @@ public class TcpNPair implements NPair, Runnable {
 	}
 
 	private synchronized void sendPing(int code) throws IOException {
-		out.writeByte(MessageType.PING.byteCode());
+		out.writeByte(MessageType.PING.value());
 		out.writeInt(code);
 	}
 
@@ -122,7 +124,7 @@ public class TcpNPair implements NPair, Runnable {
 
 	@Override
 	public synchronized void send(byte[] bytes) throws IOException {
-		out.writeByte(MessageType.DATA.byteCode());
+		out.writeByte(MessageType.DATA.value());
 		out.writeInt(bytes.length);
 		out.write(bytes);
 	}
@@ -150,11 +152,11 @@ public class TcpNPair implements NPair, Runnable {
 		while (run) {
 			try {
 				byte messageType = in.readByte();
-				if (messageType == MessageType.DATA.byteCode()) {
+				if (messageType == MessageType.DATA.value()) {
 					int length = in.readInt();
 					byte[] bytes = new byte[length];
 					handler.incommingMessage(this, bytes);
-				} else if (messageType == MessageType.PING.byteCode()) {
+				} else if (messageType == MessageType.PING.value()) {
 					int code = in.readInt();
 					handlePingMessage(code);
 				}

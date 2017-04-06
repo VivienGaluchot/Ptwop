@@ -89,7 +89,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void broadcast(Object msg) {
+	public void broadcast(byte[] bytes) {
 		synchronized (users) {
 			for (P2PUser u : users) {
 				try {
@@ -102,7 +102,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void anycast(Set<P2PUser> dests, Object msg) {
+	public void anycast(Set<P2PUser> dests, byte[] bytes) {
 		for (P2PUser u : dests) {
 			try {
 				sendTo(u, msg);
@@ -113,7 +113,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void sendTo(P2PUser dest, Object msg) throws IOException {
+	public void sendTo(P2PUser dest, byte[] bytes) throws IOException {
 		router.routeTo(dest, new MessageToApp(msg));
 	}
 
@@ -180,7 +180,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void incommingMessage(NPair pair, Object o) {
+	public void incommingMessage(NPair pair, byte[] bytes) {
 		P2PUser user = pairUserMap.get(pair);
 		if (user == null)
 			throw new IllegalArgumentException("Unknown pair");
