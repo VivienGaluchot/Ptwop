@@ -14,6 +14,7 @@ import ptwop.network.NPair;
  */
 public class Link implements Steppable, NPair {
 	private Network net;
+	private Link pairLink;
 
 	private int latency;
 	private float loss;
@@ -46,8 +47,9 @@ public class Link implements Steppable, NPair {
 	 * @param packetSize
 	 *            maximum size of data who can be on the link at the same time
 	 */
-	public Link(Network net, Node source, Node dest, int latency, float loss, int packetSize) {
+	public Link(Network net, Link pairLink, Node source, Node dest, int latency, float loss, int packetSize) {
 		this.net = net;
+		this.pairLink = pairLink;
 		this.source = source;
 		this.dest = dest;
 		this.latency = latency;
@@ -70,9 +72,17 @@ public class Link implements Steppable, NPair {
 	 * @param source
 	 * @param dest
 	 */
-	public Link(Network net, Node source, Node dest) {
-		this(net, source, dest, net.getLatencyRandomizer().nextInt(), net.getLossRandomizer().nextFloat(),
+	public Link(Network net, Link pairLink, Node source, Node dest) {
+		this(net, pairLink, source, dest, net.getLatencyRandomizer().nextInt(), net.getLossRandomizer().nextFloat(),
 				net.getPacketSizeRandomizer().nextInt());
+	}
+	
+	public void setPairLink(Link pairLink) {
+		this.pairLink = pairLink;
+	}
+	
+	public Link getPairLink() {
+		return this.pairLink;
 	}
 
 	@Override
@@ -143,7 +153,10 @@ public class Link implements Steppable, NPair {
 
 	@Override
 	public int getLatency() {
-		return latency;
+		if (pairLink != null)
+			return latency + pairLink.latency;
+		else
+			return 0;
 	}
 
 	public float getLoss() {
@@ -234,7 +247,7 @@ public class Link implements Steppable, NPair {
 			// float x = rand.nextFloat();
 			// if (x >= loss)
 			if (tdata.data.isLastPart())
-				dest.handleData(source, tdata.data);
+				dest.handleData(this, tdata.data);
 			// TODO else
 		}
 	}

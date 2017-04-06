@@ -195,10 +195,11 @@ public class Network implements Steppable {
 			for (int j = i + 1; j < nodes.size(); j++) {
 				Node nj = getNode(j);
 				// interconnect nodes ni and nj
-				Link li = new Link(this, ni, nj);
+				Link li = new Link(this, null, ni, nj);
 				li.setEstablished(true);
 				ni.addLink(li);
-				Link lj = new Link(this, nj, ni);
+				Link lj = new Link(this, li, nj, ni);
+				li.setPairLink(lj);
 				lj.setEstablished(true);
 				nj.addLink(lj);
 				ni.incommingConnectionFrom(li);

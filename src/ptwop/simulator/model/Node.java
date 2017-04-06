@@ -78,16 +78,19 @@ public class Node extends NServent implements Steppable {
 		this.id = id;
 	}
 
-	public void handleData(Node source, Data data) {
-		if (!linkMap.containsKey(source))
-			addLink(new Link(net, this, source));
+	public void handleData(Link emitter, Data data) {
+		if (!linkMap.containsKey(emitter.getSourceNode())) {
+			Link l = new Link(net, emitter, this, emitter.getSourceNode());
+			addLink(l);
+			emitter.setPairLink(l);
+		}
 
 		// Check if data is benchmarkdata and for me
 		if (track && data.isLastPart() && data.benchmarkData != null && data.destinationReached) {
 			timeToReceive.addData(data.getSize(), data.getEllapsedTime(net.getTime()));
 		}
 
-		incommingMessage(linkMap.get(source), data.object);
+		incommingMessage(emitter.getPairLink(), data.object);
 	}
 
 	@Override
@@ -126,7 +129,7 @@ public class Node extends NServent implements Steppable {
 
 	@Override
 	public void start() {
-		// System.out.println("Starting node " + this);
+		
 	}
 
 	@Override
@@ -167,7 +170,7 @@ public class Node extends NServent implements Steppable {
 			if (n == null)
 				throw new IOException("Address unreachable");
 
-			Link l = new Link(net, this, n);
+			Link l = new Link(net, null, this, n);
 			if (!linkMap.containsValue(l)) {
 				addLink(l);
 				l.sendSyn();
