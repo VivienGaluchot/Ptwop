@@ -29,20 +29,24 @@ public class DumbRouter extends Router {
 	}
 
 	@Override
-	public void processRoutingMessage(P2PUser npair, RoutingMessage rm) throws IOException {
+	public void processRoutingMessage(P2PUser user, RoutingMessage rm) throws IOException {
 		if (rm.sourceAddress == null)
-			rm.sourceAddress = npair.getAddress();
+			rm.sourceAddress = user.getAddress();
+		
 		if (rm.destAddress != null) {
-			// To forward
+			// next : user to forward
 			P2PUser next = p2p.getUser(rm.destAddress);
 			if (next != null)
+				// forward
 				routeTo(next, rm.object);
 			else
-				npair.sendDirectly(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
-			return;
+				// return message to sender
+				user.sendDirectly(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
 		} else {
 			// To process
-			handler.incommingMessage(npair.getBindedNPair(), rm.object);
+			P2PUser source = p2p.getUser(rm.sourceAddress);
+			if(source != null)
+				handler.incommingMessage(source.getBindedNPair(), rm.object);
 		}
 	}
 }

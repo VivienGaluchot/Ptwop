@@ -59,7 +59,7 @@ public class LinkWrapper implements Animable, HCS {
 		minWeight = Math.min(minWeight, weight);
 		maxWeight = Math.max(maxWeight, weight);
 		float x = -((maxWeight - minWeight) / 2) * (weight - (maxWeight + minWeight) / 2);
-		return (float) ((maxsize - minsize) / (1 + Math.exp(x))) + minsize;
+		return (float) ((maxsize - minsize) / (1 + Math.exp(-x))) + minsize;
 	}
 
 	@Override

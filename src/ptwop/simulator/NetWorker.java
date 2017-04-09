@@ -25,7 +25,9 @@ import ptwop.p2p.P2P;
 import ptwop.p2p.flood.FloodV0;
 import ptwop.p2p.flood.FloodV1;
 import ptwop.p2p.flood.FloodV2;
+import ptwop.p2p.routing.BayesianRouter;
 import ptwop.p2p.routing.DumbRouter;
+import ptwop.p2p.routing.LogRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.display.NetworkWrapper;
@@ -114,7 +116,7 @@ public class NetWorker {
 		if (p2p == null)
 			return;
 		Router router = (Router) Dialog.JListDialog(null, "Selectionner un routeur",
-				new Object[] { new DumbRouter(), new StockasticRouter() });
+				new Object[] { new DumbRouter(), new StockasticRouter(), new LogRouter(), new BayesianRouter() });
 		if (router == null)
 			return;
 

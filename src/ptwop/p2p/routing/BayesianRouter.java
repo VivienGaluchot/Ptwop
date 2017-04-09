@@ -1,11 +1,8 @@
 package ptwop.p2p.routing;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
 import ptwop.p2p.P2PUser;
 
-public class BayesianRouter extends DumbRouter {
+public class BayesianRouter extends LogRouter {
 
 	public BayesianRouter() {
 		super();
@@ -40,26 +37,5 @@ public class BayesianRouter extends DumbRouter {
 			return 2 / (lat * lat * lat + 1.0);
 		else
 			return 1 / (lat * lat * lat + 1.0);
-	}
-
-	// Learning
-	
-	private HashMap<Integer, SendRecord> idSendMap;
-	private HashSet<LatencyRecord> latencyRecords;
-
-	/**
-	 * Record used to keep track of message sent and learn from them
-	 *
-	 */
-	private class SendRecord {
-		P2PUser destination;
-		P2PUser route;
-		long sendTime;
-	}
-
-	private class LatencyRecord {
-		P2PUser destination;
-		P2PUser route;
-		long latency;
 	}
 }

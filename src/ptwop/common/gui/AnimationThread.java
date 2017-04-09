@@ -50,7 +50,13 @@ public class AnimationThread implements Runnable {
 
 		while (runAnimation) {
 			long now = System.currentTimeMillis();
-			mainPanel.animate(now - lastMs);
+			
+			try{
+				mainPanel.animate(now - lastMs);
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+			
 			lastMs = now;
 			try {
 				SwingUtilities.invokeAndWait(new Runnable() {

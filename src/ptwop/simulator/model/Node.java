@@ -83,6 +83,8 @@ public class Node extends NServent implements Steppable {
 			Link l = new Link(net, emitter, this, emitter.getSourceNode());
 			addLink(l);
 			emitter.setPairLink(l);
+		} else if(emitter.getPairLink() == null) {
+			emitter.setPairLink(linkMap.get(emitter.getSourceNode()));
 		}
 
 		// Check if data is benchmarkdata and for me

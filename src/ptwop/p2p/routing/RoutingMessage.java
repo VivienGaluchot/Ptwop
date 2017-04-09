@@ -19,14 +19,48 @@ public class RoutingMessage extends P2PMessage {
 
 	public Object object;
 
+	public int id;
+
 	public RoutingMessage(NAddress sender, NAddress dest, Object object) {
 		sourceAddress = sender;
 		destAddress = dest;
 		this.object = object;
+		id = 0;
+	}
+
+	public boolean isFromDirectSender() {
+		return sourceAddress == null;
+	}
+
+	public boolean isToForward() {
+		return destAddress != null;
+	}
+
+	public boolean isResponse() {
+		return object == null;
+	}
+
+	public RoutingMessage getResponse() {
+		RoutingMessage rm = new RoutingMessage(destAddress, sourceAddress, null);
+		rm.id = id;
+		return rm;
 	}
 
 	@Override
 	public String toString() {
-		return "R " + destAddress + " [" + object.toString() + "]";
+		String str = "R, ";
+		if (isToForward())
+			str += "Forward to " + destAddress + ", ";
+		else
+			str += "Keep, ";
+		if (isFromDirectSender())
+			str += "From me, ";
+		else
+			str += "From " + sourceAddress + ", ";
+		if (isResponse())
+			str += "Response";
+		else
+			str += "[" + object.toString() + "]";
+		return str;
 	}
 }
