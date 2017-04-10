@@ -1,11 +1,12 @@
 package ptwop.p2p.routing;
 
+import ptwop.common.Clock;
 import ptwop.p2p.P2PUser;
 
 public class BayesianRouter extends LogRouter {
 
-	public BayesianRouter() {
-		super();
+	public BayesianRouter(Clock clock) {
+		super(clock);
 	}
 
 	@Override

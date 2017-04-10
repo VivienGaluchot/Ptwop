@@ -2,20 +2,26 @@ package ptwop.p2p.routing;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import ptwop.common.Clock;
 import ptwop.p2p.P2PUser;
 
 public class LogRouter extends DumbRouter {
 
 	private int msgCounter;
+	private Clock clock;
 
 	// Learning
 
-	private HashMap<Integer, SendRecord> idSendMap;
-	private HashMap<P2PUser, LatencyRecord> latencyRecords;
+	private Map<Integer, SendRecord> idSendMap;
+	private Map<P2PUser, Set<LatencyRecord>> latencyRecords;
 
-	public LogRouter() {
+	public LogRouter(Clock clock) {
 		super();
+		this.clock = clock;
 		msgCounter = 0;
 		idSendMap = new HashMap<>();
 		latencyRecords = new HashMap<>();
@@ -30,20 +36,18 @@ public class LogRouter extends DumbRouter {
 	public void routeTo(P2PUser dest, Object msg) throws IOException {
 		sendRoutingMessage(dest, new RoutingMessage(null, dest.getAddress(), msg));
 	}
-	
+
 	private void sendRoutingMessage(P2PUser dest, RoutingMessage rm) throws IOException {
 		P2PUser trueDest = getRoute(dest);
 
 		if (trueDest.equals(dest))
 			rm.destAddress = null;
-		
+
 		synchronized (idSendMap) {
 			rm.id = msgCounter;
 			trueDest.sendDirectly(rm);
 
-			SendRecord sd = new SendRecord();
-			sd.destination = dest;
-			sd.route = trueDest;
+			SendRecord sd = new SendRecord(dest, trueDest, clock.getTime());
 			idSendMap.put(msgCounter, sd);
 
 			msgCounter++;
@@ -71,12 +75,13 @@ public class LogRouter extends DumbRouter {
 					// ping response from pair
 					idSendMap.remove(sd);
 
-					LatencyRecord lr = new LatencyRecord();
-					lr.route = sd.route;
-					latencyRecords.put(p2p.getUser(rm.sourceAddress), lr);
+					LatencyRecord lr = new LatencyRecord(sd.route, (int) (clock.getTime() - sd.sendTime));
+					if (!latencyRecords.containsKey(sd.destination))
+						latencyRecords.put(sd.destination, new HashSet<>());
+					latencyRecords.get(sd.destination).add(lr);
 				} else {
 					P2PUser source = p2p.getUser(rm.sourceAddress);
-					if(source != null && rm.object != null) {
+					if (source != null && rm.object != null) {
 						// handle and respond
 						handler.incommingMessage(source.getBindedNPair(), rm.object);
 						// reply pings
@@ -97,10 +102,26 @@ public class LogRouter extends DumbRouter {
 		public P2PUser destination;
 		public P2PUser route;
 		public long sendTime;
+
+		public SendRecord(P2PUser destination, P2PUser route, long sendTime) {
+			this.destination = destination;
+			this.route = route;
+			this.sendTime = sendTime;
+		}
 	}
 
-	private class LatencyRecord {
-		public P2PUser route;
-		public long latency;
+	public Set<LatencyRecord> getLarencyRecords(P2PUser destination) {
+		return latencyRecords.get(destination);
+	}
+
+	public long getObservedLatency(P2PUser destination, P2PUser route, long defaultValue) {
+		Set<LatencyRecord> lrs = latencyRecords.get(destination);
+		if (lrs != null) {
+			for (LatencyRecord lr : lrs) {
+				if (lr.route == route)
+					return lr.latency;
+			}
+		}
+		return defaultValue;
 	}
 }

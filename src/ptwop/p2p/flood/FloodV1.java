@@ -12,13 +12,22 @@ import ptwop.p2p.base.ConnectTo;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.base.MyNameIs;
 import ptwop.p2p.base.P2PMessage;
+import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.RoutingMessage;
 
 public class FloodV1 extends FloodV0 {
 
 	protected Set<Set<NAddress>> neighbours;
+	
+	public FloodV1(NServent manager) {
+		this(manager, "unamed", new DumbRouter());
+	}
 
+	public FloodV1(NServent manager, Router router) {
+		this(manager, "unamed", router);
+	}
+	
 	public FloodV1(NServent manager, String myName, Router router) {
 		super(manager, myName, router);
 		neighbours = new HashSet<>();

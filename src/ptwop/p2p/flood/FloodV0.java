@@ -18,6 +18,7 @@ import ptwop.p2p.base.ConnectTo;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.base.MyNameIs;
 import ptwop.p2p.base.P2PMessage;
+import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.RoutingMessage;
 
@@ -31,7 +32,15 @@ public class FloodV0 implements P2P, NPairHandler {
 	protected P2PHandler p2pHandler;
 	protected Router router;
 	protected String myName;
+	
+	public FloodV0(NServent manager) {
+		this(manager, "unamed", new DumbRouter());
+	}
 
+	public FloodV0(NServent manager, Router router) {
+		this(manager, "unamed", router);
+	}
+	
 	public FloodV0(NServent manager, String myName, Router router) {
 		this.manager = manager;
 		this.myName = myName;

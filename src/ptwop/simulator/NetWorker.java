@@ -14,6 +14,7 @@ import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
 import passgen.WordGenerator;
+import ptwop.common.SystemClock;
 import ptwop.common.gui.AnimationPanel;
 import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Dialog;
@@ -109,14 +110,14 @@ public class NetWorker {
 	public static void main(String[] args) {
 		WordGenerator nameGenerator = new WordGenerator();
 
-		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un système P2P",
-				new Object[] { new FloodV0(new Node(null), "", new DumbRouter()),
-						new FloodV1(new Node(null), "", new DumbRouter()),
-						new FloodV2(new Node(null), "", new DumbRouter()) });
+		P2P[] p2ps = { new FloodV0(new Node(null), "", new DumbRouter()),
+				new FloodV1(new Node(null), "", new DumbRouter()), new FloodV2(new Node(null), "", new DumbRouter()) };
+		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(new SystemClock()), new BayesianRouter(new SystemClock()) };
+
+		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un système P2P", p2ps);
 		if (p2p == null)
 			return;
-		Router router = (Router) Dialog.JListDialog(null, "Selectionner un routeur",
-				new Object[] { new DumbRouter(), new StockasticRouter(), new LogRouter(), new BayesianRouter() });
+		Router router = (Router) Dialog.JListDialog(null, "Selectionner un routeur", routers);
 		if (router == null)
 			return;
 
