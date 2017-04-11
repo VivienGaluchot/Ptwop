@@ -8,8 +8,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
+import ptwop.p2p.P2PUser;
 import ptwop.p2p.flood.*;
 import ptwop.p2p.routing.DumbRouter;
+import ptwop.p2p.routing.StockasticLogRouter;
 import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.model.BenchmarkData;
 import ptwop.simulator.model.Link;
@@ -37,10 +39,17 @@ public class Benchmarker {
 					return new FloodV1(n, "", new StockasticRouter());
 				}
 			};
+			P2PCreator StockasticLogRouterCreator = new P2PCreator() {
+				@Override
+				public P2P createP2P(NServent n) {
+					return new FloodV1(n, "", new StockasticLogRouter());
+				}
+			};
 
 			initMoyCollections("Broadcast", "Taille de message (octets)", "Latence (ms)", null, null, null);
 			evaluateBroadcastTimeOverMessageSize(DumbRouterCreator, "DumbRouter");
 			evaluateBroadcastTimeOverMessageSize(StockasticRouterCreator, "StockasticRouter");
+			evaluateBroadcastTimeOverMessageSize(StockasticLogRouterCreator, "StockasticLogRouter");
 			displayMoyCollections();
 		}
 
@@ -201,7 +210,7 @@ public class Benchmarker {
 							n.track = true;
 						Node n0 = net.getNode(0);
 						int n_sent = 0;
-						for (int i = 10; i <= 500; i += (i / 10 + 1)) {
+						for (int i = 10; i <= 500; i += i/2) {
 							n_sent++;
 							net.getP2P(n0).broadcast(new BenchmarkData(i));
 							// attente que tout le monde ait reçus

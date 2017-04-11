@@ -5,6 +5,7 @@ import java.util.Set;
 
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
+import ptwop.p2p.routing.Router;
 
 public interface P2P {
 
@@ -75,4 +76,8 @@ public interface P2P {
 	 * @param handler
 	 */
 	public void setMessageHandler(P2PHandler handler);
+	
+	public void setRouter(Router router);
+	
+	public Router getRouter();
 }

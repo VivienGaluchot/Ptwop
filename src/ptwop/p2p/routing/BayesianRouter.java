@@ -5,6 +5,10 @@ import ptwop.p2p.P2PUser;
 
 public class BayesianRouter extends LogRouter {
 
+	public BayesianRouter() {
+		super();
+	}
+
 	public BayesianRouter(Clock clock) {
 		super(clock);
 	}
@@ -32,11 +36,26 @@ public class BayesianRouter extends LogRouter {
 		return destination;
 	}
 
-	private double relativeBestUserProbability(P2PUser destination, P2PUser user) {
-		double lat = user.getBindedNPair().getLatency();
-		if (user.equals(destination))
-			return 2 / (lat * lat * lat + 1.0);
-		else
-			return 1 / (lat * lat * lat + 1.0);
+	private double relativeBestUserProbability(P2PUser destination, P2PUser route) {
+		double lat = route.getBindedNPair().getLatency();
+		int latency = (int) Math.round(lat);
+		return probabilityBestRouteWithLatency(destination, route, latency)
+				* probabilityGettingLatency(destination, route, latency)
+				/ probabilityGettingLatencyWhileBeeingBestRoute(destination, route, latency);
+	}
+
+	private double probabilityBestRouteWithLatency(P2PUser destination, P2PUser route, int latency) {
+		// TODO
+		return 1;
+	}
+
+	private double probabilityGettingLatency(P2PUser destination, P2PUser route, int latency) {
+		// TODO
+		return 1;
+	}
+
+	private double probabilityGettingLatencyWhileBeeingBestRoute(P2PUser destination, P2PUser route, int latency) {
+		// TODO
+		return 1;
 	}
 }

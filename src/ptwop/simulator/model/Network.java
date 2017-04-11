@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ptwop.common.Clock;
 import ptwop.common.math.GaussianRandom;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
@@ -42,6 +43,15 @@ public class Network implements Steppable {
 		latency = null;
 		loss = null;
 		wrapper = null;
+	}
+	
+	public Clock getClock(){
+		return new Clock(){
+			@Override
+			public long getTime() {
+				return time;
+			}
+		};
 	}
 
 	// Wrapper signal
@@ -83,6 +93,7 @@ public class Network implements Steppable {
 		nodes.add(n);
 
 		P2P p2p = creator.createP2P(n);
+		p2p.getRouter().setClock(getClock());
 		p2ps.put(n, p2p);
 		p2p.setMessageHandler(new P2PHandler() {
 			@Override

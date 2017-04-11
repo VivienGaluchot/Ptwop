@@ -2,6 +2,7 @@ package ptwop.p2p.routing;
 
 import java.io.IOException;
 
+import ptwop.common.Clock;
 import ptwop.network.NPairHandler;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
@@ -10,10 +11,24 @@ public abstract class Router {
 
 	protected P2P p2p;
 	protected NPairHandler handler;
+	protected Clock clock;
 
 	public Router() {
+		this(null);
+	}
+
+	public Router(Clock clock) {
 		p2p = null;
 		handler = null;
+		this.clock = clock;
+	}
+
+	public Clock getClock() {
+		return clock;
+	}
+
+	public void setClock(Clock clock) {
+		this.clock = clock;
 	}
 
 	public P2P getP2p() {

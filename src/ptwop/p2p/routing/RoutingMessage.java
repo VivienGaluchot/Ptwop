@@ -17,9 +17,9 @@ public class RoutingMessage extends P2PMessage {
 	 */
 	public NAddress destAddress = null;
 
-	public Object object;
+	public Object object = null;
 
-	public int id;
+	public int id = 0;
 
 	public RoutingMessage(NAddress sender, NAddress dest, Object object) {
 		sourceAddress = sender;
@@ -40,6 +40,11 @@ public class RoutingMessage extends P2PMessage {
 		return object == null;
 	}
 
+	/**
+	 * Same id, dest <=> source, object = null
+	 * 
+	 * @return
+	 */
 	public RoutingMessage getResponse() {
 		RoutingMessage rm = new RoutingMessage(destAddress, sourceAddress, null);
 		rm.id = id;

@@ -2,11 +2,17 @@ package ptwop.p2p.routing;
 
 import java.io.IOException;
 
+import ptwop.common.Clock;
 import ptwop.p2p.P2PUser;
 
 public class DumbRouter extends Router {
+	
 	public DumbRouter() {
 		super();
+	}
+	
+	public DumbRouter(Clock clock) {
+		super(clock);
 	}
 
 	@Override

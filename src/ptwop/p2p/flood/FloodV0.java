@@ -32,7 +32,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	protected P2PHandler p2pHandler;
 	protected Router router;
 	protected String myName;
-	
+
 	public FloodV0(NServent manager) {
 		this(manager, "unamed", new DumbRouter());
 	}
@@ -40,7 +40,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	public FloodV0(NServent manager, Router router) {
 		this(manager, "unamed", router);
 	}
-	
+
 	public FloodV0(NServent manager, String myName, Router router) {
 		this.manager = manager;
 		this.myName = myName;
@@ -234,5 +234,15 @@ public class FloodV0 implements P2P, NPairHandler {
 			pairUserMap.remove(pair);
 		}
 		p2pHandler.userDisconnect(user);
+	}
+
+	@Override
+	public void setRouter(Router router) {
+		this.router = router;
+	}
+
+	@Override
+	public Router getRouter() {
+		return router;
 	}
 }

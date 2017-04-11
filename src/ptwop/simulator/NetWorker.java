@@ -30,6 +30,7 @@ import ptwop.p2p.routing.BayesianRouter;
 import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.LogRouter;
 import ptwop.p2p.routing.Router;
+import ptwop.p2p.routing.StockasticLogRouter;
 import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.display.NetworkWrapper;
 import ptwop.simulator.model.Network;
@@ -112,7 +113,8 @@ public class NetWorker {
 
 		P2P[] p2ps = { new FloodV0(new Node(null), "", new DumbRouter()),
 				new FloodV1(new Node(null), "", new DumbRouter()), new FloodV2(new Node(null), "", new DumbRouter()) };
-		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(new SystemClock()), new BayesianRouter(new SystemClock()) };
+		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(), new StockasticLogRouter(),
+				new BayesianRouter() };
 
 		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un système P2P", p2ps);
 		if (p2p == null)
@@ -135,6 +137,7 @@ public class NetWorker {
 				public P2P createP2P(NServent n) {
 					try {
 						Router router = routerConstructor.newInstance();
+						router.setClock(new SystemClock());
 						P2P p2p = p2pConstructor.newInstance(n, nameGenerator.getWord(5), router);
 						return p2p;
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
