@@ -3,13 +3,13 @@ package ptwop.p2p.routing;
 import ptwop.common.Clock;
 import ptwop.p2p.P2PUser;
 
-public class StockasticLogRouter extends LogRouter {
+public class StockasticLogRouter2 extends LogRouter {
 
-	public StockasticLogRouter() {
+	public StockasticLogRouter2() {
 		super();
 	}
 
-	public StockasticLogRouter(Clock clock) {
+	public StockasticLogRouter2(Clock clock) {
 		super(clock);
 	}
 
@@ -38,11 +38,14 @@ public class StockasticLogRouter extends LogRouter {
 
 	private double relativeBestUserProbability(P2PUser destination, P2PUser user) {
 		Integer lat = getObservedLatency(destination, user);
-		if (lat == null)
-			lat = user.getBindedNPair().getLatency() * 5;
-		if (user.equals(destination))
-			return 2 / (lat * lat * lat + 1.0);
-		else
-			return 1 / (lat * lat * lat + 1.0);
+		if (lat == null) {
+			lat = user.getBindedNPair().getLatency();
+			if (user.equals(destination))
+				return 2 / (lat * lat * lat + 1.0);
+			else
+				return 1 / (lat * lat * lat + 1.0);
+		} else {
+			return 1 / (lat + 1.0);
+		}
 	}
 }

@@ -21,7 +21,8 @@ public class Node extends NServent implements Steppable {
 
 	/* BENCHMARK */
 	public boolean track = false;
-	public Data2DTracker<Integer, Long> timeToReceive = new Data2DTracker<>();
+	public Data2DTracker<Integer, Long> sizeVsTimeToReceive = new Data2DTracker<>();
+	public Data2DTracker<Integer, Long> idVsTimeToReceive = new Data2DTracker<>();
 	public DataTracker<Integer> linkNumberTracker = new DataTracker<>();
 	public DataTracker<Integer> totalBandwithUsed = new DataTracker<>();
 
@@ -89,7 +90,8 @@ public class Node extends NServent implements Steppable {
 
 		// Check if data is benchmarkdata and for me
 		if (track && data.isLastPart() && data.benchmarkData != null && data.destinationReached) {
-			timeToReceive.addData(data.getSize(), data.getEllapsedTime(net.getTime()));
+			sizeVsTimeToReceive.addData(data.getSize(), data.getEllapsedTime(net.getTime()));
+			idVsTimeToReceive.addData(data.benchmarkData.id, data.getEllapsedTime(net.getTime()));
 		}
 
 		incommingMessage(emitter.getPairLink(), data.object);

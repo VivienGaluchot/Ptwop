@@ -8,6 +8,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
+import ptwop.p2p.P2PUser;
 import ptwop.p2p.flood.*;
 import ptwop.p2p.routing.*;
 import ptwop.simulator.model.BenchmarkData;
@@ -21,28 +22,43 @@ public class Benchmarker {
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
+
+		// Routing
+		P2PCreator DumbRouterCreator = new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV1(n, "", new DumbRouter());
+			}
+		};
+		P2PCreator StockasticRouterCreator = new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV1(n, "", new StockasticRouter());
+			}
+		};
+		P2PCreator StockasticLogRouterCreator = new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV1(n, "", new StockasticLogRouter());
+			}
+		};
+		P2PCreator StockasticLogRouter2Creator = new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV1(n, "", new StockasticLogRouter2());
+			}
+		};
+
 		if (true) {
+			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
+			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
+			// evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
+			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
+			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
+			displayMoyCollections();
+		}
 
-			// Routing
-			P2PCreator DumbRouterCreator = new P2PCreator() {
-				@Override
-				public P2P createP2P(NServent n) {
-					return new FloodV0(n, "", new DumbRouter());
-				}
-			};
-			P2PCreator StockasticRouterCreator = new P2PCreator() {
-				@Override
-				public P2P createP2P(NServent n) {
-					return new FloodV1(n, "", new StockasticRouter());
-				}
-			};
-			P2PCreator StockasticLogRouterCreator = new P2PCreator() {
-				@Override
-				public P2P createP2P(NServent n) {
-					return new FloodV1(n, "", new StockasticLogRouter());
-				}
-			};
-
+		if (false) {
 			initMoyCollections("Broadcast", "Taille de message (octets)", "Latence (ms)", null, null, null);
 			evaluateBroadcastTimeOverMessageSize(DumbRouterCreator, "DumbRouter");
 			evaluateBroadcastTimeOverMessageSize(StockasticRouterCreator, "StockasticRouter");
@@ -206,26 +222,15 @@ public class Benchmarker {
 						for (Node n : net.getNodes())
 							n.track = true;
 						Node n0 = net.getNode(0);
-						int n_sent = 0;
-						for (int i = 10; i <= 500; i += i / 2) {
-							n_sent++;
+						for (int i = 10; i <= 500; i += i / 20 + 1) {
 							net.getP2P(n0).broadcast(new BenchmarkData(i));
 							// attente que tout le monde ait reçus
-							boolean stop = false;
-							while (!stop) {
-								net.doTimeStep();
-								stop = true;
-								for (int j = 1; j < networkSize; j++) {
-									Node n = net.getNode(j);
-									if (n.timeToReceive.datas.size() < n_sent)
-										stop = false;
-								}
-							}
+							reachStability(net, 10);
 						}
 						synchronized (broadcastTime) {
 							for (int i = 1; i < networkSize; i++) {
 								Node n = net.getNode(i);
-								broadcastTime.addSeries(n.timeToReceive.getXYSerie());
+								broadcastTime.addSeries(n.sizeVsTimeToReceive.getXYSerie());
 							}
 						}
 					}
@@ -242,6 +247,58 @@ public class Benchmarker {
 			}
 		displayMinMaxMoy(broadcastTime, moyCollection1, name, "15 users - Broadcast : routage " + name,
 				"Taille de message (octets)", "Latence (ms)");
+	}
+
+	public static void evaluateSendTimeOverTime(P2PCreator p2pcreator, String name) {
+		XYSeriesCollection broadcastTime = new XYSeriesCollection();
+		ArrayList<Thread> runners = new ArrayList<>();
+		int threadWorkNumber = 80;
+		int threadNumber = 4;
+		int networkSize = 15;
+		for (int essai = 0; essai < threadNumber; essai++) {
+			Thread runner = new Thread() {
+				@Override
+				public void run() {
+					for (int essai = 0; essai < threadWorkNumber; essai++) {
+						System.out.println("Passe " + essai + "/" + threadWorkNumber);
+						Network net = new Network(p2pcreator);
+						setToInterconnectedNetwork(net, networkSize);
+						Node n0 = net.getNode(0);
+						for (int i = 1; i < networkSize; i++) {
+							Node n = net.getNode(i);
+							n.track = true;
+						}
+						P2P senderP2P = net.getP2P(n0);
+						for (int i = 0; i < 20; i++) {
+							try {
+								P2PUser receiver = senderP2P.getUser(net.getNode(1).getAddress());
+								senderP2P.sendTo(receiver, new BenchmarkData(64, i));
+								// attente que tout le monde ait reçus
+								reachStability(net, 10);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+						synchronized (broadcastTime) {
+							for (int i = 1; i < networkSize; i++) {
+								Node n = net.getNode(i);
+								broadcastTime.addSeries(n.idVsTimeToReceive.getXYSerie());
+							}
+						}
+					}
+				}
+			};
+			runners.add(runner);
+			runner.start();
+		}
+		for (Thread runner : runners)
+			try {
+				runner.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		displayMinMaxMoy(broadcastTime, moyCollection1, name, "Envois d'un message, routeur " + name, "Message envoyés",
+				"Latence (ms)");
 	}
 
 	public static void displayMinMaxMoy(XYSeriesCollection messageNumbersDataset, XYSeriesCollection moySerie,
@@ -345,8 +402,9 @@ public class Benchmarker {
 		return outDataSet;
 	}
 
-	public static void reachStability(Network net) {
+	public static void reachStability(Network net, int overStep) {
 		int messageNumber;
+		int i = 0;
 		do {
 			net.doTimeStep();
 			messageNumber = 0;
@@ -359,7 +417,11 @@ public class Benchmarker {
 				if (messageNumber > 0)
 					break;
 			}
-		} while (messageNumber > 0);
+			if (messageNumber == 0)
+				i++;
+			else
+				i = 0;
+		} while (i < overStep);
 	}
 
 	public static Network setToInterconnectedNetwork(Network net, int nodeNumber) {
@@ -380,7 +442,7 @@ public class Benchmarker {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		reachStability(net);
+		reachStability(net, 0);
 		return alone;
 	}
 

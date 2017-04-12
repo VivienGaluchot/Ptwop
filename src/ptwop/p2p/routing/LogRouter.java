@@ -139,13 +139,12 @@ public class LogRouter extends DumbRouter {
 			latencyRecords.get(dest).put(next, new Integer(latency));
 	}
 
-	public int getObservedLatency(P2PUser dest, P2PUser next, int defaultValue) {
+	public Integer getObservedLatency(P2PUser dest, P2PUser next) {
 		Map<P2PUser, Integer> destMap = latencyRecords.get(dest);
 		if (destMap != null) {
 			Integer latency = destMap.get(next);
-			if (latency != null)
-				return latency;
+			return latency;
 		}
-		return defaultValue;
+		return null;
 	}
 }
