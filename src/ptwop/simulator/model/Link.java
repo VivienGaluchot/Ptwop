@@ -76,11 +76,11 @@ public class Link implements Steppable, NPair {
 		this(net, pairLink, source, dest, net.getLatencyRandomizer().nextInt(), net.getLossRandomizer().nextFloat(),
 				net.getPacketSizeRandomizer().nextInt());
 	}
-	
+
 	public void setPairLink(Link pairLink) {
 		this.pairLink = pairLink;
 	}
-	
+
 	public Link getPairLink() {
 		return this.pairLink;
 	}

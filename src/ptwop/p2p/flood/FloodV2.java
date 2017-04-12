@@ -9,7 +9,7 @@ import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 
 public class FloodV2 extends FloodV1 {
-	
+
 	public FloodV2(NServent manager) {
 		this(manager, "unamed", new DumbRouter());
 	}
@@ -17,7 +17,7 @@ public class FloodV2 extends FloodV1 {
 	public FloodV2(NServent manager, Router router) {
 		this(manager, "unamed", router);
 	}
-	
+
 	public FloodV2(NServent manager, String myName, Router router) {
 		super(manager, myName, router);
 	}

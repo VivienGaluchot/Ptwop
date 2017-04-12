@@ -8,7 +8,7 @@ public class StockasticRouter extends DumbRouter {
 	public StockasticRouter() {
 		super();
 	}
-	
+
 	public StockasticRouter(Clock clock) {
 		super(clock);
 	}

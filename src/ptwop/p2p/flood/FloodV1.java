@@ -19,7 +19,7 @@ import ptwop.p2p.routing.RoutingMessage;
 public class FloodV1 extends FloodV0 {
 
 	protected Set<Set<NAddress>> neighbours;
-	
+
 	public FloodV1(NServent manager) {
 		this(manager, "unamed", new DumbRouter());
 	}
@@ -27,7 +27,7 @@ public class FloodV1 extends FloodV0 {
 	public FloodV1(NServent manager, Router router) {
 		this(manager, "unamed", router);
 	}
-	
+
 	public FloodV1(NServent manager, String myName, Router router) {
 		super(manager, myName, router);
 		neighbours = new HashSet<>();
@@ -110,7 +110,7 @@ public class FloodV1 extends FloodV0 {
 	}
 
 	// NPairHandler interface
-	
+
 	@Override
 	public void incommingMessage(NPair npair, Object o) {
 		P2PUser pair = pairUserMap.get(npair);

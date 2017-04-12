@@ -76,8 +76,8 @@ public interface P2P {
 	 * @param handler
 	 */
 	public void setMessageHandler(P2PHandler handler);
-	
+
 	public void setRouter(Router router);
-	
+
 	public Router getRouter();
 }

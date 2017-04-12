@@ -83,7 +83,7 @@ public class Node extends NServent implements Steppable {
 			Link l = new Link(net, emitter, this, emitter.getSourceNode());
 			addLink(l);
 			emitter.setPairLink(l);
-		} else if(emitter.getPairLink() == null) {
+		} else if (emitter.getPairLink() == null) {
 			emitter.setPairLink(linkMap.get(emitter.getSourceNode()));
 		}
 
@@ -131,7 +131,7 @@ public class Node extends NServent implements Steppable {
 
 	@Override
 	public void start() {
-		
+
 	}
 
 	@Override

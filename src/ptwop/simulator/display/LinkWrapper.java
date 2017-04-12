@@ -55,6 +55,7 @@ public class LinkWrapper implements Animable, HCS {
 	static float maxWeight = Float.MIN_VALUE;
 	static float maxsize = 0.15f;
 	static float minsize = 0.05f;
+
 	private static float linkWeightTransform(float weight) {
 		minWeight = Math.min(minWeight, weight);
 		maxWeight = Math.max(maxWeight, weight);

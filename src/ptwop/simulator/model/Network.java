@@ -44,9 +44,9 @@ public class Network implements Steppable {
 		loss = null;
 		wrapper = null;
 	}
-	
-	public Clock getClock(){
-		return new Clock(){
+
+	public Clock getClock() {
+		return new Clock() {
 			@Override
 			public long getTime() {
 				return time;
