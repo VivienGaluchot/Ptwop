@@ -36,31 +36,57 @@ public class LogRouter extends DumbRouter {
 
 	@Override
 	public void routeTo(P2PUser dest, Object msg) throws IOException {
-		sendRoutingMessage(new RoutingMessage(null, dest.getAddress(), msg));
-	}
+		// new routing message, sender = null because is me
+		RoutingMessage rm = new RoutingMessage(null, dest.getAddress(), msg);
 
-	private void sendRoutingMessage(RoutingMessage rm) throws IOException {
-		P2PUser next = getRoute(p2p.getUser(rm.destAddress));
+		P2PUser next = getRoute(dest);
 
-		// dest = null if next is dest
+		// destAddress = null if next is dest
 		if (next.getAddress().equals(rm.destAddress))
 			rm.destAddress = null;
 
 		// add record and wait for log
-		addToRecordAndSend(null, rm, next);
-	}
-
-	public void addToRecordAndSend(P2PUser user, RoutingMessage rm, P2PUser next) throws IOException {
 		synchronized (idSendMap) {
-			SendRecord sd = new SendRecord(p2p.getUser(rm.destAddress), user, next, rm.id, clock.getTime());
+			SendRecord sd = new SendRecord(dest, null, next, rm.id, clock.getTime());
 			idSendMap.put(msgCounter, sd);
 			rm.id = msgCounter;
 			msgCounter++;
 		}
+
+		// send routing message
 		next.sendDirectly(rm);
 	}
 
-	public void handleResponseMessage(P2PUser user, RoutingMessage rm) throws IOException {
+	@Override
+	public void processRoutingMessage(P2PUser user, RoutingMessage rm) throws IOException {
+		// replace address if sender is user
+		if (rm.isFromDirectSender())
+			rm.sourceAddress = user.getAddress();
+
+		if (rm.isResponse()) {
+			handleResponseMessage(user, rm);
+		} else if (rm.isToForward()) {
+			// next : user to forward
+			P2PUser next = p2p.getUser(rm.destAddress);
+			if (next != null)
+				routeTo(next, rm.object);
+			else
+				throw new IllegalArgumentException("Didn't find SendRecord with id " + rm.id);
+		} else {
+			// source : sender of routing message
+			P2PUser source = p2p.getUser(rm.sourceAddress);
+			if (source != null) {
+				// handle message
+				handler.incommingMessage(source.getBindedNPair(), rm.object);
+				// send response
+				user.sendDirectly(rm.getResponse());
+			}
+			else
+				throw new IllegalArgumentException("Didn't find source user with address " + rm.sourceAddress);
+		}
+	}
+
+	private void handleResponseMessage(P2PUser user, RoutingMessage rm) throws IOException {
 		synchronized (idSendMap) {
 			SendRecord sd = idSendMap.get(rm.id);
 			if (sd != null) {
@@ -84,49 +110,8 @@ public class LogRouter extends DumbRouter {
 		}
 	}
 
-	@Override
-	public void processRoutingMessage(P2PUser user, RoutingMessage rm) throws IOException {
-		if (rm.isFromDirectSender())
-			rm.sourceAddress = user.getAddress();
-
-		if (rm.isToForward()) {
-			// next : user to forward
-			P2PUser next = p2p.getUser(rm.destAddress);
-			if (next != null)
-				// forward
-				routeTo(next, rm.object);
-			else
-				// return message to sender
-				user.sendDirectly(new RoutingMessage(rm.sourceAddress, rm.destAddress, rm.object));
-		} else {
-			synchronized (idSendMap) {
-				SendRecord sd = idSendMap.get(rm.id);
-				if (sd != null && rm.sourceAddress.equals(sd.destination.getAddress()) && rm.isResponse()) {
-					// ping response from pair
-					idSendMap.remove(sd);
-
-					LatencyRecord lr = new LatencyRecord(sd.route, (int) (clock.getTime() - sd.sendTime));
-					if (!latencyRecords.containsKey(sd.destination))
-						latencyRecords.put(sd.destination, new HashSet<>());
-					latencyRecords.get(sd.destination).add(lr);
-				} else {
-					P2PUser source = p2p.getUser(rm.sourceAddress);
-					if (source != null && rm.object != null) {
-						// handle and respond
-						handler.incommingMessage(source.getBindedNPair(), rm.object);
-						// reply pings
-						sendNewRoutingMessage(source, rm.getResponse());
-					}
-				}
-			}
-		}
-	}
-
-	// Learning
-
 	/**
 	 * Record used to keep track of message sent and learn from them
-	 *
 	 */
 	private class SendRecord {
 		public P2PUser destination;

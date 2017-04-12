@@ -53,19 +53,20 @@ public class RoutingMessage extends P2PMessage {
 
 	@Override
 	public String toString() {
-		String str = "R, ";
-		if (isToForward())
-			str += "Forward to " + destAddress + ", ";
-		else
-			str += "Keep, ";
+		String str = "";
 		if (isFromDirectSender())
-			str += "From me, ";
+			str += "Me -> ";
 		else
-			str += "From " + sourceAddress + ", ";
+			str += sourceAddress + " -> ";
+		if (isToForward())
+			str += destAddress + ", ";
+		else
+			str += "You, ";
 		if (isResponse())
 			str += "Response";
 		else
 			str += "[" + object.toString() + "]";
+		str += " " + id;
 		return str;
 	}
 }
