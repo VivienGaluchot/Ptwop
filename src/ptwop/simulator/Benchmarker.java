@@ -8,11 +8,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
-import ptwop.p2p.P2PUser;
 import ptwop.p2p.flood.*;
-import ptwop.p2p.routing.DumbRouter;
-import ptwop.p2p.routing.StockasticLogRouter;
-import ptwop.p2p.routing.StockasticRouter;
+import ptwop.p2p.routing.*;
 import ptwop.simulator.model.BenchmarkData;
 import ptwop.simulator.model.Link;
 import ptwop.simulator.model.Network;
@@ -210,7 +207,7 @@ public class Benchmarker {
 							n.track = true;
 						Node n0 = net.getNode(0);
 						int n_sent = 0;
-						for (int i = 10; i <= 500; i += i/2) {
+						for (int i = 10; i <= 500; i += i / 2) {
 							n_sent++;
 							net.getP2P(n0).broadcast(new BenchmarkData(i));
 							// attente que tout le monde ait reçus

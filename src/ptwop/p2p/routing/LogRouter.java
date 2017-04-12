@@ -2,9 +2,7 @@ package ptwop.p2p.routing;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import ptwop.common.Clock;
 import ptwop.p2p.P2PUser;
@@ -14,9 +12,9 @@ public class LogRouter extends DumbRouter {
 	private int msgCounter;
 
 	// Learning
-
+	// TODO : empty this map when message are old and have been lost
 	private Map<Integer, SendRecord> idSendMap;
-	private Map<P2PUser, Set<LatencyRecord>> latencyRecords;
+	private Map<P2PUser, Map<P2PUser, Integer>> latencyRecords;
 
 	public LogRouter() {
 		this(null);
@@ -38,7 +36,10 @@ public class LogRouter extends DumbRouter {
 	public void routeTo(P2PUser dest, Object msg) throws IOException {
 		// new routing message, sender = null because is me
 		RoutingMessage rm = new RoutingMessage(null, dest.getAddress(), msg);
+		sendRoutingMessage(dest, null, rm);
+	}
 
+	private void sendRoutingMessage(P2PUser dest, P2PUser prec, RoutingMessage rm) throws IOException {
 		P2PUser next = getRoute(dest);
 
 		// destAddress = null if next is dest
@@ -47,7 +48,7 @@ public class LogRouter extends DumbRouter {
 
 		// add record and wait for log
 		synchronized (idSendMap) {
-			SendRecord sd = new SendRecord(dest, null, next, rm.id, clock.getTime());
+			SendRecord sd = new SendRecord(dest, prec, next, rm.id, clock.getTime());
 			idSendMap.put(msgCounter, sd);
 			rm.id = msgCounter;
 			msgCounter++;
@@ -58,18 +59,18 @@ public class LogRouter extends DumbRouter {
 	}
 
 	@Override
-	public void processRoutingMessage(P2PUser user, RoutingMessage rm) throws IOException {
+	public void processRoutingMessage(P2PUser prec, RoutingMessage rm) throws IOException {
 		// replace address if sender is user
-		if (rm.isFromDirectSender())
-			rm.sourceAddress = user.getAddress();
+		if (!rm.isForwarded())
+			rm.sourceAddress = prec.getAddress();
 
 		if (rm.isResponse()) {
-			handleResponseMessage(user, rm);
+			handleResponseMessage(prec, rm);
 		} else if (rm.isToForward()) {
 			// next : user to forward
 			P2PUser next = p2p.getUser(rm.destAddress);
 			if (next != null)
-				routeTo(next, rm.object);
+				sendRoutingMessage(next, prec, rm);
 			else
 				throw new IllegalArgumentException("Didn't find SendRecord with id " + rm.id);
 		} else {
@@ -79,29 +80,28 @@ public class LogRouter extends DumbRouter {
 				// handle message
 				handler.incommingMessage(source.getBindedNPair(), rm.object);
 				// send response
-				user.sendDirectly(rm.getResponse());
-			}
-			else
+				prec.sendDirectly(rm.getResponse());
+			} else
 				throw new IllegalArgumentException("Didn't find source user with address " + rm.sourceAddress);
 		}
 	}
 
-	private void handleResponseMessage(P2PUser user, RoutingMessage rm) throws IOException {
+	private void handleResponseMessage(P2PUser prec, RoutingMessage rm) throws IOException {
 		synchronized (idSendMap) {
 			SendRecord sd = idSendMap.get(rm.id);
 			if (sd != null) {
 				// remove from send records
 				idSendMap.remove(sd);
 
-				// convert into latency Record
-				LatencyRecord lr = new LatencyRecord(sd.next, (int) (clock.getTime() - sd.sendTime));
-				if (!latencyRecords.containsKey(sd.destination))
-					latencyRecords.put(sd.destination, new HashSet<>());
-				latencyRecords.get(sd.destination).add(lr);
+				// add value to map
+				int latency = (int) (clock.getTime() - sd.sendTime);
+				addObservedLatency(sd.destination, sd.next, latency);
 
 				// forward response back
 				if (sd.prec != null) {
 					rm.id = sd.initId;
+					if (sd.prec.getAddress().equals(rm.destAddress))
+						rm.destAddress = null;
 					sd.prec.sendDirectly(rm);
 				}
 			} else {
@@ -129,17 +129,22 @@ public class LogRouter extends DumbRouter {
 		}
 	}
 
-	public Set<LatencyRecord> getLarencyRecords(P2PUser destination) {
-		return latencyRecords.get(destination);
+	private void addObservedLatency(P2PUser dest, P2PUser next, int latency) {
+		if (!latencyRecords.containsKey(dest))
+			latencyRecords.put(dest, new HashMap<>());
+		Integer nextValue = latencyRecords.get(dest).get(next);
+		if (nextValue != null)
+			nextValue = (int) (nextValue * 0.75 + latency * 0.25);
+		else
+			latencyRecords.get(dest).put(next, new Integer(latency));
 	}
 
-	public int getObservedLatency(P2PUser destination, P2PUser route, int defaultValue) {
-		Set<LatencyRecord> lrs = latencyRecords.get(destination);
-		if (lrs != null) {
-			for (LatencyRecord lr : lrs) {
-				if (lr.route == route)
-					return lr.latency;
-			}
+	public int getObservedLatency(P2PUser dest, P2PUser next, int defaultValue) {
+		Map<P2PUser, Integer> destMap = latencyRecords.get(dest);
+		if (destMap != null) {
+			Integer latency = destMap.get(next);
+			if (latency != null)
+				return latency;
 		}
 		return defaultValue;
 	}

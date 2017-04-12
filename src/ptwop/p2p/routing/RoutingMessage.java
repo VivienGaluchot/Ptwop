@@ -28,8 +28,8 @@ public class RoutingMessage extends P2PMessage {
 		id = 0;
 	}
 
-	public boolean isFromDirectSender() {
-		return sourceAddress == null;
+	public boolean isForwarded() {
+		return sourceAddress != null;
 	}
 
 	public boolean isToForward() {
@@ -54,10 +54,10 @@ public class RoutingMessage extends P2PMessage {
 	@Override
 	public String toString() {
 		String str = "";
-		if (isFromDirectSender())
-			str += "Me -> ";
-		else
+		if (isForwarded())
 			str += sourceAddress + " -> ";
+		else
+			str += "Me -> ";
 		if (isToForward())
 			str += destAddress + ", ";
 		else
