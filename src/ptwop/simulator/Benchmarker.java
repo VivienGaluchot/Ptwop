@@ -52,7 +52,7 @@ public class Benchmarker {
 		if (true) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
 			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
-			// evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
+			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
 			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
 			displayMoyCollections();
@@ -264,10 +264,8 @@ public class Benchmarker {
 						Network net = new Network(p2pcreator);
 						setToInterconnectedNetwork(net, networkSize);
 						Node n0 = net.getNode(0);
-						for (int i = 1; i < networkSize; i++) {
-							Node n = net.getNode(i);
-							n.track = true;
-						}
+						for (int i = 1; i < networkSize; i++)
+							net.getNode(i).track = true;
 						P2P senderP2P = net.getP2P(n0);
 						for (int i = 0; i < 20; i++) {
 							try {
