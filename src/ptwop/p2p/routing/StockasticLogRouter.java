@@ -30,11 +30,14 @@ public class StockasticLogRouter extends LogRouter {
 
 	private double relativeBestUserProbability(P2PUser destination, P2PUser user) {
 		Integer lat = getObservedLatency(destination, user);
-		if (lat == null)
-			lat = user.getBindedNPair().getLatency() * 5;
-		if (user.equals(destination))
-			return 2 / (lat * lat * lat + 1.0);
-		else
-			return 1 / (lat * lat * lat + 1.0);
+		if (lat == null) {
+			lat = user.getBindedNPair().getLatency();
+			if (user.equals(destination))
+				return 2000 / (lat * lat * lat + 1.0);
+			else
+				return 1000 / (lat * lat * lat + 1.0);
+		} else {
+			return 1000 / (lat + 1.0);
+		}
 	}
 }

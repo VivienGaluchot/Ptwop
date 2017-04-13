@@ -33,11 +33,11 @@ public class StockasticLogRouter2 extends LogRouter {
 		if (lat == null) {
 			lat = user.getBindedNPair().getLatency();
 			if (user.equals(destination))
-				return 2 / (lat * lat * lat + 1.0);
+				return 2000 / (lat * lat * lat + 1.0);
 			else
-				return 1 / (lat * lat * lat + 1.0);
+				return 1000 / (lat * lat * lat + 1.0);
 		} else {
-			return 1 / (lat + 1.0);
+			return 1000 / (lat + 1.0);
 		}
 	}
 }

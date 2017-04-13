@@ -28,6 +28,7 @@ public class FloodV0 implements P2P, NPairHandler {
 
 	protected Set<P2PUser> users;
 	protected Map<NPair, P2PUser> pairUserMap;
+	protected Map<NAddress, P2PUser> addressUserMap;
 
 	protected P2PHandler p2pHandler;
 	protected Router router;
@@ -49,6 +50,7 @@ public class FloodV0 implements P2P, NPairHandler {
 		router.setHandler(this);
 		users = new HashSet<>();
 		pairUserMap = new HashMap<>();
+		addressUserMap = new HashMap<>();
 		manager.setHandler(this);
 	}
 
@@ -94,6 +96,7 @@ public class FloodV0 implements P2P, NPairHandler {
 			}
 			users.clear();
 			pairUserMap.clear();
+			addressUserMap.clear();
 		}
 	}
 
@@ -170,6 +173,7 @@ public class FloodV0 implements P2P, NPairHandler {
 
 			users.add(user);
 			pairUserMap.put(pair, user);
+			addressUserMap.put(pair.getAddress(), user);
 		}
 		pair.start();
 		sendUserListTo(user);
@@ -232,6 +236,7 @@ public class FloodV0 implements P2P, NPairHandler {
 		synchronized (users) {
 			users.remove(user);
 			pairUserMap.remove(pair);
+			addressUserMap.remove(pair);
 		}
 		p2pHandler.userDisconnect(user);
 	}

@@ -51,7 +51,7 @@ public class Benchmarker {
 
 		if (true) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
-			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
+			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
 			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
 			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
@@ -129,9 +129,9 @@ public class Benchmarker {
 		XYSeriesCollection bandwith = new XYSeriesCollection();
 		XYSeriesCollection linknumber = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int threadWorkNumber = 10;
-		int threadNumber = 8;
-		int nNode = 50;
+		int threadWorkNumber = 1;
+		int threadNumber = 4;
+		int nNode = 500;
 		for (int t = 0; t < threadNumber; t++) {
 			Thread runner = new Thread() {
 				@Override
@@ -252,9 +252,9 @@ public class Benchmarker {
 	public static void evaluateSendTimeOverTime(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection broadcastTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int threadWorkNumber = 80;
+		int threadWorkNumber = 40;
 		int threadNumber = 4;
-		int networkSize = 15;
+		int networkSize = 9;
 		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {
 				@Override
@@ -267,11 +267,11 @@ public class Benchmarker {
 						for (int i = 1; i < networkSize; i++)
 							net.getNode(i).track = true;
 						P2P senderP2P = net.getP2P(n0);
-						for (int i = 0; i < 20; i++) {
+						for (int i = 0; i < 250; i++) {
 							try {
-								P2PUser receiver = senderP2P.getUser(net.getNode(1).getAddress());
-								senderP2P.sendTo(receiver, new BenchmarkData(64, i));
-								// attente que tout le monde ait reçus
+								P2PUser receiver = senderP2P
+										.getUser(net.getNode(i % (networkSize - 1) + 1).getAddress());
+								senderP2P.sendTo(receiver, new BenchmarkData(15, i));
 								reachStability(net, 10);
 							} catch (IOException e) {
 								e.printStackTrace();
@@ -423,7 +423,7 @@ public class Benchmarker {
 	}
 
 	public static Network setToInterconnectedNetwork(Network net, int nodeNumber) {
-		GaussianRandom linkLatency = new GaussianRandom(5, 2000, 60, 40);
+		GaussianRandom linkLatency = new GaussianRandom(5, 3000, 100, 50);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
 		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);

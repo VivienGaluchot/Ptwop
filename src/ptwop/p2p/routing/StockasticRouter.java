@@ -31,8 +31,8 @@ public class StockasticRouter extends DumbRouter {
 	private double relativeBestUserProbability(P2PUser destination, P2PUser user) {
 		double lat = user.getBindedNPair().getLatency();
 		if (user.equals(destination))
-			return 2 / (lat * lat * lat + 1.0);
+			return 2000 / (lat * lat * lat + 1.0);
 		else
-			return 1 / (lat * lat * lat + 1.0);
+			return 1000 / (lat * lat * lat + 1.0);
 	}
 }

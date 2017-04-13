@@ -84,14 +84,9 @@ public class FloodV1 extends FloodV0 {
 
 	protected void removeFromNeighbours(NAddress a) {
 		synchronized (neighbours) {
-			Set<NAddress> removedFrom = null;
-			for (Set<NAddress> s : neighbours) {
-				s.remove(a);
-				removedFrom = s;
-				break;
-			}
-			if (removedFrom != null && removedFrom.isEmpty())
-				neighbours.remove(removedFrom);
+			for (Set<NAddress> set : neighbours)
+				if (set.remove(a))
+					break;
 		}
 	}
 
@@ -147,5 +142,17 @@ public class FloodV1 extends FloodV0 {
 				System.out.println("Flood>incommingMessage : Unknown message class");
 			}
 		}
+	}
+
+	@Override
+	public void pairQuit(NPair pair) {
+		P2PUser user = pairUserMap.get(pair);
+		synchronized (users) {
+			users.remove(user);
+			pairUserMap.remove(pair);
+			addressUserMap.remove(pair);
+			removeFromNeighbours(pair.getAddress());
+		}
+		p2pHandler.userDisconnect(user);
 	}
 }
