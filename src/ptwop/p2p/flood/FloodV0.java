@@ -139,9 +139,10 @@ public class FloodV0 implements P2P, NPairHandler {
 		p2pHandler = handler;
 	}
 
-	// TODO improve this
 	@Override
 	public P2PUser getUser(NAddress address) {
+		if (address == null)
+			return null;
 		P2PUser user = null;
 		for (P2PUser u : users) {
 			if (u.getAddress().equals(address)) {

@@ -2,6 +2,8 @@ package ptwop.simulator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import org.jfree.data.xy.XYDataItem;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -51,10 +53,10 @@ public class Benchmarker {
 
 		if (true) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
-			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
-			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
+			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
+			// evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
-			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
+			// evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
 			displayMoyCollections();
 		}
 
@@ -252,9 +254,9 @@ public class Benchmarker {
 	public static void evaluateSendTimeOverTime(P2PCreator p2pcreator, String name) {
 		XYSeriesCollection broadcastTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
-		int threadWorkNumber = 40;
-		int threadNumber = 4;
-		int networkSize = 9;
+		int threadWorkNumber = 20;
+		int threadNumber = 8;
+		int networkSize = 12;
 		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {
 				@Override
@@ -267,7 +269,7 @@ public class Benchmarker {
 						for (int i = 1; i < networkSize; i++)
 							net.getNode(i).track = true;
 						P2P senderP2P = net.getP2P(n0);
-						for (int i = 0; i < 250; i++) {
+						for (int i = 0; i < 100; i++) {
 							try {
 								P2PUser receiver = senderP2P
 										.getUser(net.getNode(i % (networkSize - 1) + 1).getAddress());
@@ -278,10 +280,14 @@ public class Benchmarker {
 							}
 						}
 						synchronized (broadcastTime) {
-							for (int i = 1; i < networkSize; i++) {
+							XYSeries serie = net.getNode(1).idVsTimeToReceive.getXYSerie();
+							for (int i = 2; i < networkSize; i++) {
 								Node n = net.getNode(i);
-								broadcastTime.addSeries(n.idVsTimeToReceive.getXYSerie());
+								for(Object o : n.idVsTimeToReceive.getXYSerie().getItems()){
+									serie.add((XYDataItem) o);
+								}
 							}
+							broadcastTime.addSeries(serie);
 						}
 					}
 				}

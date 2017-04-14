@@ -155,7 +155,6 @@ public class NetWorker {
 			GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
 			net.setRandomizers(linkLatency, linkLoss, linkPacketSize);
 			net.addNewNodes(nodeNumber);
-			net.setToFullyInterconnected();
 
 			display(net);
 

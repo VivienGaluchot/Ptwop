@@ -33,7 +33,7 @@ public class P2PUser {
 
 	@Override
 	public int hashCode() {
-		return bindedNPair.hashCode();
+		return (bindedNPair != null) ? bindedNPair.hashCode() : 0;
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class P2PUser {
 	}
 
 	public NAddress getAddress() {
-		return bindedNPair.getAddress();
+		return (bindedNPair != null) ? bindedNPair.getAddress() : null;
 	}
 
 	public NPair getBindedNPair() {
