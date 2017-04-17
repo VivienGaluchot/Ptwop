@@ -40,25 +40,27 @@ public class LogRouter extends DumbRouter {
 		RoutingMessage rm = new RoutingMessage(null, dest.getAddress(), msg);
 		rm.id = msgCounter;
 		msgCounter++;
-		sendRoutingMessage(myselfPLaceOlder, dest, null, rm);
+		sendRoutingMessage(myselfPLaceOlder, null, getRoute(dest), dest, rm);
 	}
 
-	private void sendRoutingMessage(P2PUser source, P2PUser dest, P2PUser prec, RoutingMessage rm) throws IOException {
-		P2PUser next = getRoute(dest);
-		
+	private void sendRoutingMessage(P2PUser source, P2PUser prec, P2PUser next, P2PUser dest, RoutingMessage rm)
+			throws IOException {
 		// sourceAddress = null if i'm source
-		if (source.equals(myselfPLaceOlder))
+		if (source.equals(myselfPLaceOlder)) {
 			rm.sourceAddress = null;
-		
+			rm.forwarded = false;
+		} else if (next.getAddress().equals(rm.sourceAddress)) {
+			rm.sourceAddress = null;
+			rm.forwarded = true;
+		}
+
 		// destAddress = null if next is dest
 		if (next.getAddress().equals(rm.destAddress))
 			rm.destAddress = null;
 
 		// add record and wait for log
-		synchronized (sendRecords) {
-			SendRecord sd = new SendRecord(dest, prec, next, clock.getTime());
-			addToSendRecords(source, rm.id, sd);
-		}
+		SendRecord sd = new SendRecord(dest, prec, next, clock.getTime());
+		addToSendRecords(source, rm.id, sd);
 
 		// send routing message
 		next.sendDirectly(rm);
@@ -66,62 +68,64 @@ public class LogRouter extends DumbRouter {
 
 	@Override
 	public void processRoutingMessage(P2PUser prec, RoutingMessage rm) throws IOException {
-		// source : sender of routing message
-		P2PUser source = null;
-		// replace address if sender is user
-		if (rm.sourceAddress == null) {
-			rm.sourceAddress = prec.getAddress();
-			source = prec;
-		} else {
-			source = p2p.getUser(rm.sourceAddress);
-		}
+		P2PUser source = resolveSource(prec, rm);
+		P2PUser dest = resolveDest(rm);
+		if (source.equals(dest))
+			throw new IllegalArgumentException("Weird message : source is desctination");
+		rm.sourceAddress = source.getAddress();
+		rm.destAddress = dest.getAddress();
 
 		if (rm.isResponse()) {
-			// source is original source, or response's destAddress
-			handleResponseMessage(p2p.getUser(rm.destAddress), prec, rm);
+			SendRecord sd = removeFromSendRecords(dest, rm.id);
+			if (sd == null)
+				throw new IllegalArgumentException("Didn't find SendRecord from " + dest + " with id " + rm.id);
+			// add value to map
+			int latency = (int) (clock.getTime() - sd.sendTime);
+			addObservedLatency(sd.destination, sd.next, latency);
+			if (sd.prec != null)
+				sendRoutingMessage(source, prec, sd.prec, dest, rm);
 		} else if (rm.isToForward()) {
-			// next : user to forward
-			P2PUser next = p2p.getUser(rm.destAddress);
-			if (next != null)
-				sendRoutingMessage(source, next, prec, rm);
-			else
-				throw new IllegalArgumentException("Didn't find user with address " + rm.destAddress);
+			if (dest == myselfPLaceOlder)
+				throw new IllegalArgumentException("Can't forward message to myself");
+			rm.forwarded = true;
+			sendRoutingMessage(source, prec, getRoute(dest), dest, rm);
 		} else {
-			if (source != null) {
-				// handle message
-				handler.incommingMessage(source.getBindedNPair(), rm.object);
-				// send response
-				RoutingMessage rmR = rm.getResponse();
-				if (rmR.destAddress.equals(prec.getAddress()))
-					rmR.destAddress = null;
-				prec.sendDirectly(rmR);
-			} else
-				throw new IllegalArgumentException("Didn't find source user with address " + rm.sourceAddress);
+			// handle message
+			handler.incommingMessage(source.getBindedNPair(), rm.object);
+			// send response
+			RoutingMessage rmR = rm.getResponse();
+			if (rmR.destAddress != null && rmR.destAddress.equals(prec.getAddress()))
+				rmR.destAddress = null;
+			prec.sendDirectly(rmR);
 		}
 	}
 
-	private void handleResponseMessage(P2PUser originalSource, P2PUser prec, RoutingMessage rm) throws IOException {
-		synchronized (sendRecords) {
-			// get and remove from send records
-			SendRecord sd = removeFromSendRecords(originalSource, rm.id);
-			if (sd != null) {
-				// add value to map
-				int latency = (int) (clock.getTime() - sd.sendTime);
-				addObservedLatency(sd.destination, sd.next, latency);
-
-				// forward response back
-				if (sd.prec != null) {
-					if (sd.prec.getAddress().equals(rm.sourceAddress))
-						rm.sourceAddress = null;
-					if (sd.prec.getAddress().equals(rm.destAddress))
-						rm.destAddress = null;
-					sd.prec.sendDirectly(rm);
-				}
-			} else {
-				throw new IllegalArgumentException(
-						"Didn't find SendRecord from " + originalSource + " with id " + rm.id);
-			}
+	private P2PUser resolveSource(P2PUser prec, RoutingMessage rm) {
+		// source : sender of routing message
+		P2PUser source = null;
+		// replace address if sender is user
+		if (!rm.isForwarded() && rm.sourceAddress == null) {
+			source = prec;
+		} else if (rm.isForwarded() && rm.sourceAddress == null) {
+			source = myselfPLaceOlder;
+		} else {
+			source = p2p.getUser(rm.sourceAddress);
+			if (source == null)
+				throw new IllegalArgumentException("Didn't find source user with address " + rm.sourceAddress);
 		}
+		return source;
+	}
+
+	private P2PUser resolveDest(RoutingMessage rm) {
+		P2PUser dest = null;
+		if (rm.destAddress != null) {
+			dest = p2p.getUser(rm.destAddress);
+			if (dest == null)
+				throw new IllegalArgumentException("Didn't find user with address " + rm.destAddress);
+		} else {
+			dest = myselfPLaceOlder;
+		}
+		return dest;
 	}
 
 	/**
@@ -143,7 +147,7 @@ public class LogRouter extends DumbRouter {
 
 	private void addToSendRecords(P2PUser source, Integer id, SendRecord sd) {
 		if (source == null)
-			source = myselfPLaceOlder;
+			throw new IllegalArgumentException("Source can't be null");
 		if (!sendRecords.containsKey(source))
 			sendRecords.put(source, new HashMap<>());
 		// TODO must replace ?
@@ -153,7 +157,7 @@ public class LogRouter extends DumbRouter {
 
 	private SendRecord removeFromSendRecords(P2PUser source, Integer id) {
 		if (source == null)
-			source = myselfPLaceOlder;
+			throw new IllegalArgumentException("Source can't be null");
 		Map<Integer, SendRecord> sourceMap = sendRecords.get(source);
 		if (sourceMap != null) {
 			SendRecord sd = sourceMap.remove(id);

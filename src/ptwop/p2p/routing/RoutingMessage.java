@@ -11,6 +11,7 @@ public class RoutingMessage extends P2PMessage {
 	 * don't knows his address
 	 */
 	public NAddress sourceAddress = null;
+	public boolean forwarded = false;
 
 	/**
 	 * If destAddress == null, the message is for you
@@ -22,14 +23,15 @@ public class RoutingMessage extends P2PMessage {
 	public int id = 0;
 
 	public RoutingMessage(NAddress sender, NAddress dest, Object object) {
-		sourceAddress = sender;
-		destAddress = dest;
+		this.sourceAddress = sender;
+		forwarded = sourceAddress != null;
+		this.destAddress = dest;
 		this.object = object;
 		id = 0;
 	}
 
 	public boolean isForwarded() {
-		return sourceAddress != null;
+		return forwarded;
 	}
 
 	public boolean isToForward() {
@@ -54,8 +56,10 @@ public class RoutingMessage extends P2PMessage {
 	@Override
 	public String toString() {
 		String str = "";
-		if (isForwarded())
+		if (isForwarded() && sourceAddress != null)
 			str += sourceAddress + " -> ";
+		else if(isForwarded() && sourceAddress == null)
+			str += "You -> ";
 		else
 			str += "Me -> ";
 		if (isToForward())

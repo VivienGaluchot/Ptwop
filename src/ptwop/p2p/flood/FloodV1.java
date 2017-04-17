@@ -107,8 +107,10 @@ public class FloodV1 extends FloodV0 {
 	// NPairHandler interface
 
 	@Override
-	public void incommingMessage(NPair npair, Object o) {
-		P2PUser pair = pairUserMap.get(npair);
+	public void incommingMessage(NPair pair, Object o) {
+		P2PUser user = pairUserMap.get(pair);
+		if (user == null)
+			throw new IllegalArgumentException("Unknown pair : " + pair);
 
 		if (!(o instanceof P2PMessage))
 			throw new IllegalArgumentException("Unknown message class");
@@ -116,7 +118,7 @@ public class FloodV1 extends FloodV0 {
 		if (o instanceof RoutingMessage) {
 			// Routing
 			try {
-				router.processRoutingMessage(pair, (RoutingMessage) o);
+				router.processRoutingMessage(user, (RoutingMessage) o);
 			} catch (IOException e) {
 				System.out.println("Error wile processing routing message : " + e.getMessage());
 			}
@@ -124,12 +126,12 @@ public class FloodV1 extends FloodV0 {
 			// Process
 			if (o instanceof MyNameIs) {
 				MyNameIs m = (MyNameIs) o;
-				pair.setName(m.name);
-				p2pHandler.userUpdate(pair);
+				user.setName(m.name);
+				p2pHandler.userUpdate(user);
 			} else if (o instanceof ConnectTo) {
 				ConnectTo m = (ConnectTo) o;
 				try {
-					addNeighbours(npair.getAddress(), m.address);
+					addNeighbours(pair.getAddress(), m.address);
 					manager.connectTo(m.address);
 				} catch (IOException e) {
 					removeFromNeighbours(m.address);
@@ -137,7 +139,7 @@ public class FloodV1 extends FloodV0 {
 				}
 			} else if (o instanceof MessageToApp) {
 				MessageToApp m = (MessageToApp) o;
-				p2pHandler.handleMessage(pair, m.msg);
+				p2pHandler.handleMessage(user, m.msg);
 			} else {
 				System.out.println("Flood>incommingMessage : Unknown message class");
 			}

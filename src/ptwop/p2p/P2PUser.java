@@ -33,12 +33,17 @@ public class P2PUser {
 
 	@Override
 	public int hashCode() {
-		return (bindedNPair != null) ? bindedNPair.hashCode() : 0;
+		return (bindedNPair != null) ? bindedNPair.hashCode() : -1534;
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof P2PUser && getAddress().equals(((P2PUser) o).getAddress());
+		if (o == null || !(o instanceof P2PUser))
+			return false;
+		P2PUser other = (P2PUser) o;
+		if (getAddress() == null)
+			return other.getAddress() == null;
+		return getAddress().equals(other.getAddress());
 	}
 
 	public void sendDirectly(Object o) throws IOException {

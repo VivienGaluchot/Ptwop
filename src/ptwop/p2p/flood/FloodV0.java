@@ -197,7 +197,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	public void incommingMessage(NPair pair, Object o) {
 		P2PUser user = pairUserMap.get(pair);
 		if (user == null)
-			throw new IllegalArgumentException("Unknown pair");
+			throw new IllegalArgumentException("Unknown pair : " + pair);
 
 		if (!(o instanceof P2PMessage))
 			throw new IllegalArgumentException("Unknown message class");
