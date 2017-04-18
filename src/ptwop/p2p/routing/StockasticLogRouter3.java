@@ -4,19 +4,19 @@ import ptwop.common.Clock;
 import ptwop.common.math.RandomCollection;
 import ptwop.p2p.P2PUser;
 
-public class StockasticLogRouter2 extends LogRouter {
+public class StockasticLogRouter3 extends LogRouter {
 
-	public StockasticLogRouter2() {
+	public StockasticLogRouter3() {
 		super();
 	}
 
-	public StockasticLogRouter2(Clock clock) {
+	public StockasticLogRouter3(Clock clock) {
 		super(clock);
 	}
 
 	@Override
 	public String toString() {
-		return "StockasticLogRouter2";
+		return "StockasticLogRouter";
 	}
 
 	@Override
@@ -29,6 +29,7 @@ public class StockasticLogRouter2 extends LogRouter {
 			dests.add(p, u);
 		}
 		// System.out.print("\n");
+		// return dests.next();
 		return dests.next();
 	}
 
@@ -48,7 +49,7 @@ public class StockasticLogRouter2 extends LogRouter {
 			if (recordLat != null)
 				lat += recordLat;
 			// System.out.print(lat);
-			return 1000000 / (lat + 1.0);
+			return 2000000 / (lat + 1.0);
 		}
 	}
 }

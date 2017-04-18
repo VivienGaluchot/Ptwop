@@ -189,7 +189,6 @@ public class LogRouter extends DumbRouter {
 					SendRecord sd = destMap.get(i);
 					if (sd.destination.equals(dest) && sd.next.equals(next)) {
 						Integer lat = (int) (clock.getTime() - destMap.get(i).sendTime);
-						System.out.println("Found value " + lat);
 						return lat;
 					}
 				}

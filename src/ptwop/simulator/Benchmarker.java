@@ -50,14 +50,27 @@ public class Benchmarker {
 				return new FloodV1(n, "", new StockasticLogRouter2());
 			}
 		};
+		P2PCreator StockasticLogRouter3Creator = new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV1(n, "", new StockasticLogRouter3());
+			}
+		};
+		P2PCreator StockasticLogRouter4Creator = new P2PCreator() {
+			@Override
+			public P2P createP2P(NServent n) {
+				return new FloodV1(n, "", new StockasticLogRouter4());
+			}
+		};
 
 		if (true) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
-			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
-			// evaluateSendTimeOverTime(StockasticRouterCreator,
-			// "StockasticRouter");
-			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
+//			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
+//			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
+//			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
 			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
+			evaluateSendTimeOverTime(StockasticLogRouter3Creator, "StockasticLogRouter3");
+			evaluateSendTimeOverTime(StockasticLogRouter4Creator, "StockasticLogRouter4");
 			displayMoyCollections();
 		}
 
@@ -258,6 +271,7 @@ public class Benchmarker {
 		int threadWorkNumber = 20;
 		int threadNumber = 8;
 		int networkSize = 12;
+		int messageSent = 200;
 		for (int essai = 0; essai < threadNumber; essai++) {
 			Thread runner = new Thread() {
 				@Override
@@ -270,7 +284,7 @@ public class Benchmarker {
 						for (int i = 1; i < networkSize; i++)
 							net.getNode(i).track = true;
 						P2P senderP2P = net.getP2P(n0);
-						for (int i = 0; i < 500; i++) {
+						for (int i = 0; i < messageSent; i++) {
 							try {
 								P2PUser receiver = senderP2P.getUser(net.getNode(1).getAddress());
 								senderP2P.sendTo(receiver, new BenchmarkData(15, i));
@@ -429,7 +443,7 @@ public class Benchmarker {
 	}
 
 	public static Network setToInterconnectedNetwork(Network net, int nodeNumber) {
-		GaussianRandom linkLatency = new GaussianRandom(5, 3000, 100, 50);
+		GaussianRandom linkLatency = new GaussianRandom(15, 3000, 150, 100);
 		GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 		GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
 		net.setRandomizers(linkLatency, linkLoss, linkPacketSize);

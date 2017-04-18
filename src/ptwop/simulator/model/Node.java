@@ -79,6 +79,7 @@ public class Node extends NServent implements Steppable {
 		this.id = id;
 	}
 
+	// TODO optimize, hot method according mission control
 	public void handleData(Link emitter, Data data) {
 		if (!linkMap.containsKey(emitter.getSourceNode())) {
 			Link l = new Link(net, emitter, this, emitter.getSourceNode());
