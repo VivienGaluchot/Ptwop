@@ -71,7 +71,7 @@ public class LogRouter extends DumbRouter {
 		P2PUser source = resolveSource(prec, rm);
 		P2PUser dest = resolveDest(rm);
 		if (source.equals(dest))
-			throw new IllegalArgumentException("Weird message : source is desctination");
+			throw new IllegalArgumentException("Weird message : source is destination");
 		rm.sourceAddress = source.getAddress();
 		rm.destAddress = dest.getAddress();
 
@@ -168,19 +168,37 @@ public class LogRouter extends DumbRouter {
 		return null;
 	}
 
+	// TODO how to updtate ?
 	private void addObservedLatency(P2PUser dest, P2PUser next, int latency) {
 		if (!latencyRecords.containsKey(dest))
 			latencyRecords.put(dest, new HashMap<>());
 		Integer nextValue = latencyRecords.get(dest).get(next);
 		if (nextValue != null)
-			nextValue = (int) (nextValue * 0.75 + latency * 0.25);
+			// nextValue = (int) (nextValue * 0.75 + latency * 0.25);
+			nextValue = Math.min(nextValue, latency);
 		else
 			latencyRecords.get(dest).put(next, new Integer(latency));
 	}
 
+	// TODO optimise this
+	public Integer getSendRecordsLatency(P2PUser dest, P2PUser next) {
+		for (P2PUser u : sendRecords.keySet()) {
+			Map<Integer, SendRecord> destMap = sendRecords.get(u);
+			if (destMap != null) {
+				for (Integer i : destMap.keySet()) {
+					SendRecord sd = destMap.get(i);
+					if (sd.equals(dest) && sd.next.equals(next)) {
+						Integer lat = (int) (clock.getTime() - destMap.get(i).sendTime);
+						System.out.println("Found value " + lat);
+						return lat;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public Integer getObservedLatency(P2PUser dest, P2PUser next) {
-		// TODO read records to find if the message have already been sent to
-		// this next and avoid buckle
 		Map<P2PUser, Integer> destMap = latencyRecords.get(dest);
 		if (destMap != null)
 			return destMap.get(next);

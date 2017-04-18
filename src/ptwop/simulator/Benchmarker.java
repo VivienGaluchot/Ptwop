@@ -56,7 +56,7 @@ public class Benchmarker {
 			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
 			// evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
-			// evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
+			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
 			displayMoyCollections();
 		}
 
@@ -252,7 +252,7 @@ public class Benchmarker {
 	}
 
 	public static void evaluateSendTimeOverTime(P2PCreator p2pcreator, String name) {
-		XYSeriesCollection broadcastTime = new XYSeriesCollection();
+		XYSeriesCollection sendTime = new XYSeriesCollection();
 		ArrayList<Thread> runners = new ArrayList<>();
 		int threadWorkNumber = 20;
 		int threadNumber = 8;
@@ -269,17 +269,17 @@ public class Benchmarker {
 						for (int i = 1; i < networkSize; i++)
 							net.getNode(i).track = true;
 						P2P senderP2P = net.getP2P(n0);
-						for (int i = 0; i < 100; i++) {
+						for (int i = 0; i < 500; i++) {
 							try {
 								P2PUser receiver = senderP2P
-										.getUser(net.getNode(i % (networkSize - 1) + 1).getAddress());
+										.getUser(net.getNode(1).getAddress());
 								senderP2P.sendTo(receiver, new BenchmarkData(15, i));
-								reachStability(net, 10);
+								reachStability(net, 5);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
 						}
-						synchronized (broadcastTime) {
+						synchronized (sendTime) {
 							XYSeries serie = net.getNode(1).idVsTimeToReceive.getXYSerie();
 							for (int i = 2; i < networkSize; i++) {
 								Node n = net.getNode(i);
@@ -287,7 +287,7 @@ public class Benchmarker {
 									serie.add((XYDataItem) o);
 								}
 							}
-							broadcastTime.addSeries(serie);
+							sendTime.addSeries(serie);
 						}
 					}
 				}
@@ -301,7 +301,7 @@ public class Benchmarker {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		displayMinMaxMoy(broadcastTime, moyCollection1, name, "Envois d'un message, routeur " + name, "Message envoyés",
+		displayMinMaxMoy(sendTime, moyCollection1, name, "Envois d'un message, routeur " + name, "Message envoyés",
 				"Latence (ms)");
 	}
 
