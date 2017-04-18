@@ -1,6 +1,7 @@
 package ptwop.common.gui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
 
@@ -8,6 +9,8 @@ public class AnimationThread implements Runnable {
 	private boolean runAnimation;
 
 	private AnimationPanel mainPanel;
+
+	private ArrayList<Runnable> scheduledOperations;
 
 	/**
 	 * The thread will try to animate and paint at this rate
@@ -21,6 +24,14 @@ public class AnimationThread implements Runnable {
 
 		thread = new Thread(this);
 		thread.setName("Animation Thread");
+
+		scheduledOperations = new ArrayList<>();
+	}
+
+	public void addScheduledOperation(Runnable operation) {
+		synchronized (scheduledOperations) {
+			scheduledOperations.add(operation);
+		}
 	}
 
 	public void setAnimationPanel(AnimationPanel mainPanel) {
@@ -52,6 +63,13 @@ public class AnimationThread implements Runnable {
 			long now = System.currentTimeMillis();
 
 			try {
+				// Execute scheduledOprations
+				synchronized (scheduledOperations) {
+					for (Runnable op : scheduledOperations)
+						op.run();
+					scheduledOperations.clear();
+				}
+
 				mainPanel.animate(now - lastMs);
 			} catch (Exception e) {
 				e.printStackTrace();

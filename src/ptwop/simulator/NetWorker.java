@@ -83,15 +83,16 @@ public class NetWorker {
 
 		SpaceTransform spaceTransform = new SpaceTransform();
 		AnimationPanel mainPanel = new AnimationPanel(spaceTransform);
-		spaceTransform.setFather(mainPanel);
-
 		NetworkWrapper mainWrapper = new NetworkWrapper(net, spaceTransform);
-		Command command = new Command(mainWrapper);
-		mainWrapper.setCommand(command);
+		AnimationThread thread = new AnimationThread(mainPanel);
+		Command command = new Command(thread, mainWrapper);
+		Frame frame = new Frame(mainPanel, command, "Networker");
+
+		spaceTransform.setFather(mainPanel);
 		spaceTransform.setAnimable(mainWrapper);
 		spaceTransform.setGraphicSize(net.getNodes().size() * 2 + 10);
-
-		mainWrapper.putInCircle();
+		spaceTransform.setDisplayGrid(true);
+		spaceTransform.setGridSize(5);
 
 		mainPanel.setFocusable(true);
 		mainPanel.requestFocus();
@@ -99,13 +100,12 @@ public class NetWorker {
 		mainPanel.addMouseMotionListener(mainWrapper);
 		mainPanel.addMouseWheelListener(mainWrapper);
 
-		spaceTransform.setDisplayGrid(true);
-		spaceTransform.setGridSize(5);
-
-		AnimationThread thread = new AnimationThread(mainPanel);
-		thread.startAnimation();
-		Frame frame = new Frame(mainPanel, command, "Networker");
+		mainWrapper.putInCircle();
+		mainWrapper.setCommand(command);
+		
 		frame.setLocation(frame.getLocation().x - 200, frame.getLocation().y);
+		
+		thread.startAnimation();
 	}
 
 	public static void main(String[] args) {

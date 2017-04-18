@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import ptwop.common.gui.AnimationThread;
 import ptwop.common.gui.Dialog;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
@@ -32,6 +33,7 @@ import ptwop.simulator.model.Node;
 public class Command extends JPanel {
 	private static final long serialVersionUID = 1L;
 
+	private AnimationThread animationThread;
 	private NetworkWrapper wrapper;
 
 	private Network net;
@@ -58,7 +60,8 @@ public class Command extends JPanel {
 	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
 	String[] p2pUsersColumnNames = { "Name", "Address" };
 
-	public Command(NetworkWrapper wrapper) {
+	public Command(AnimationThread thread, NetworkWrapper wrapper) {
+		this.animationThread = thread;
 		this.wrapper = wrapper;
 		this.net = wrapper.getNetwork();
 
@@ -68,8 +71,12 @@ public class Command extends JPanel {
 		play.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				wrapper.setAnimated(!wrapper.isAnimated());
-				update();
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						wrapper.setAnimated(!wrapper.isAnimated());
+						update();
+					}
+				});
 			}
 		});
 
@@ -97,8 +104,12 @@ public class Command extends JPanel {
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				net.doTimeStep();
-				update();
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						net.doTimeStep();
+						update();
+					}
+				});
 			}
 		});
 		subPanel.add(button, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
@@ -108,9 +119,13 @@ public class Command extends JPanel {
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				for (int i = 0; i < 10; i++)
-					net.doTimeStep();
-				update();
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						for (int i = 0; i < 10; i++)
+							net.doTimeStep();
+						update();
+					}
+				});
 			}
 		});
 		subPanel.add(button, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
@@ -120,9 +135,13 @@ public class Command extends JPanel {
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				for (int i = 0; i < 100; i++)
-					net.doTimeStep();
-				update();
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						for (int i = 0; i < 100; i++)
+							net.doTimeStep();
+						update();
+					}
+				});
 			}
 		});
 		subPanel.add(button, new GridBagConstraints(2, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
@@ -138,14 +157,18 @@ public class Command extends JPanel {
 		connectTo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					Node n = (Node) pairComboBox.getSelectedItem();
-					if (n != null)
-						node.connectTo(new NetworkerNAddress(n));
-					update();
-				} catch (IOException ex) {
-					Dialog.displayError(null, ex.getMessage());
-				}
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						try {
+							Node n = (Node) pairComboBox.getSelectedItem();
+							if (n != null)
+								node.connectTo(new NetworkerNAddress(n));
+							update();
+						} catch (IOException ex) {
+							Dialog.displayError(null, ex.getMessage());
+						}
+					}
+				});
 			}
 		});
 		connectTo.setEnabled(false);
@@ -154,8 +177,12 @@ public class Command extends JPanel {
 		disconnect.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				node.disconnect();
-				update();
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						node.disconnect();
+						update();
+					}
+				});
 			}
 		});
 		disconnect.setEnabled(false);
@@ -214,13 +241,17 @@ public class Command extends JPanel {
 		sendTo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					P2PUser user = (P2PUser) p2pPairComboBox.getSelectedItem();
-					net.getP2P(node).sendTo(user, new String("Hello world"));
-					update();
-				} catch (IOException ex) {
-					Dialog.displayError(null, ex.getMessage());
-				}
+				animationThread.addScheduledOperation(new Runnable() {
+					public void run() {
+						try {
+							P2PUser user = (P2PUser) p2pPairComboBox.getSelectedItem();
+							net.getP2P(node).sendTo(user, new String("Hello world"));
+							update();
+						} catch (IOException ex) {
+							Dialog.displayError(null, ex.getMessage());
+						}
+					}
+				});
 			}
 		});
 		sendTo.setEnabled(false);

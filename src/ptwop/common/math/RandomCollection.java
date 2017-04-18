@@ -41,8 +41,11 @@ public class RandomCollection<E> {
 	public E nextDialog(String text) {
 		DialObject<E>[] objects = new DialObject[map.size()];
 		int i = 0;
-		for (Double v : map.keySet())
-			objects[i++] = new DialObject<E>(map.get(v), v);
+		double c = 0;
+		for (Double v : map.keySet()) {
+			objects[i++] = new DialObject<E>(map.get(v), v - c);
+			c = v;
+		}
 		return ((DialObject<E>) Dialog.JListDialog(null, text, objects)).object;
 	}
 
@@ -56,7 +59,7 @@ public class RandomCollection<E> {
 		}
 
 		public String toString() {
-			return p + " " + object.toString();
+			return String.format("%.2f", p) + " " + object.toString();
 		}
 	}
 }

@@ -168,7 +168,7 @@ public class LogRouter extends DumbRouter {
 		return null;
 	}
 
-	// TODO how to updtate ?
+	// TODO how to update ?
 	private void addObservedLatency(P2PUser dest, P2PUser next, int latency) {
 		if (!latencyRecords.containsKey(dest))
 			latencyRecords.put(dest, new HashMap<>());
@@ -180,14 +180,14 @@ public class LogRouter extends DumbRouter {
 			latencyRecords.get(dest).put(next, new Integer(latency));
 	}
 
-	// TODO optimise this
+	// TODO optimize this
 	public Integer getSendRecordsLatency(P2PUser dest, P2PUser next) {
 		for (P2PUser u : sendRecords.keySet()) {
 			Map<Integer, SendRecord> destMap = sendRecords.get(u);
 			if (destMap != null) {
 				for (Integer i : destMap.keySet()) {
 					SendRecord sd = destMap.get(i);
-					if (sd.equals(dest) && sd.next.equals(next)) {
+					if (sd.destination.equals(dest) && sd.next.equals(next)) {
 						Integer lat = (int) (clock.getTime() - destMap.get(i).sendTime);
 						System.out.println("Found value " + lat);
 						return lat;
