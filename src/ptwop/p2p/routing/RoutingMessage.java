@@ -58,7 +58,7 @@ public class RoutingMessage extends P2PMessage {
 		String str = "";
 		if (isForwarded() && sourceAddress != null)
 			str += sourceAddress + " -> ";
-		else if(isForwarded() && sourceAddress == null)
+		else if (isForwarded() && sourceAddress == null)
 			str += "You -> ";
 		else
 			str += "Me -> ";

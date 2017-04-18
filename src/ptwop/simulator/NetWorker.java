@@ -102,9 +102,9 @@ public class NetWorker {
 
 		mainWrapper.putInCircle();
 		mainWrapper.setCommand(command);
-		
+
 		frame.setLocation(frame.getLocation().x - 200, frame.getLocation().y);
-		
+
 		thread.startAnimation();
 	}
 

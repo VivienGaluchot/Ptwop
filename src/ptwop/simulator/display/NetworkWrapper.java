@@ -56,7 +56,7 @@ public class NetworkWrapper implements Animable, MouseListener, MouseMotionListe
 		datas = new HashMap<>();
 		for (Node n : network.getNodes()) {
 			addNode(n);
-			for(Link l : n.getLinks())
+			for (Link l : n.getLinks())
 				addLink(l);
 		}
 		lastMousePos = null;

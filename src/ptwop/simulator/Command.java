@@ -72,6 +72,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						wrapper.setAnimated(!wrapper.isAnimated());
 						update();
@@ -105,6 +106,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						net.doTimeStep();
 						update();
@@ -120,6 +122,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						for (int i = 0; i < 10; i++)
 							net.doTimeStep();
@@ -136,6 +139,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						for (int i = 0; i < 100; i++)
 							net.doTimeStep();
@@ -158,6 +162,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						try {
 							Node n = (Node) pairComboBox.getSelectedItem();
@@ -178,6 +183,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						node.disconnect();
 						update();
@@ -242,6 +248,7 @@ public class Command extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				animationThread.addScheduledOperation(new Runnable() {
+					@Override
 					public void run() {
 						try {
 							P2PUser user = (P2PUser) p2pPairComboBox.getSelectedItem();

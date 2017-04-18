@@ -54,7 +54,8 @@ public class Benchmarker {
 		if (true) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
 			// evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
-			// evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
+			// evaluateSendTimeOverTime(StockasticRouterCreator,
+			// "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
 			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
 			displayMoyCollections();
@@ -271,8 +272,7 @@ public class Benchmarker {
 						P2P senderP2P = net.getP2P(n0);
 						for (int i = 0; i < 500; i++) {
 							try {
-								P2PUser receiver = senderP2P
-										.getUser(net.getNode(1).getAddress());
+								P2PUser receiver = senderP2P.getUser(net.getNode(1).getAddress());
 								senderP2P.sendTo(receiver, new BenchmarkData(15, i));
 								reachStability(net, 5);
 							} catch (IOException e) {
@@ -283,7 +283,7 @@ public class Benchmarker {
 							XYSeries serie = net.getNode(1).idVsTimeToReceive.getXYSerie();
 							for (int i = 2; i < networkSize; i++) {
 								Node n = net.getNode(i);
-								for(Object o : n.idVsTimeToReceive.getXYSerie().getItems()){
+								for (Object o : n.idVsTimeToReceive.getXYSerie().getItems()) {
 									serie.add((XYDataItem) o);
 								}
 							}
