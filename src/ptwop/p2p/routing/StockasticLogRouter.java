@@ -30,7 +30,7 @@ public class StockasticLogRouter extends LogRouter {
 		}
 		// System.out.print("\n");
 		// return dests.next();
-		return dests.nextDialog("");
+		return dests.next();
 	}
 
 	private double relativeBestUserProbability(P2PUser dest, P2PUser next) {
