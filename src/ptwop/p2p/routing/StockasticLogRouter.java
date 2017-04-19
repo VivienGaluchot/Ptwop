@@ -49,7 +49,7 @@ public class StockasticLogRouter extends LogRouter {
 			if (recordLat != null)
 				lat += recordLat;
 			// System.out.print(lat);
-			return 2000000 / (lat * lat * lat + 1.0);
+			return 10000000 / (lat * lat * lat + 1.0);
 		}
 	}
 }

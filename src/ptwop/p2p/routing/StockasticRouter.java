@@ -33,6 +33,6 @@ public class StockasticRouter extends DumbRouter {
 		if (user.equals(destination))
 			return 2000000 / (double) (lat * lat * lat + 1);
 		else
-			return 12000 / (double) (lat * lat * lat + 1);
+			return 1000000 / (double) (lat * lat * lat + 1);
 	}
 }

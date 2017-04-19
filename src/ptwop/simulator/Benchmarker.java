@@ -65,12 +65,12 @@ public class Benchmarker {
 
 		if (true) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
-//			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
-//			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
-//			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
-			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
-			evaluateSendTimeOverTime(StockasticLogRouter3Creator, "StockasticLogRouter3");
-			evaluateSendTimeOverTime(StockasticLogRouter4Creator, "StockasticLogRouter4");
+			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
+			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
+			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
+//			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
+//			evaluateSendTimeOverTime(StockasticLogRouter3Creator, "StockasticLogRouter3");
+//			evaluateSendTimeOverTime(StockasticLogRouter4Creator, "StockasticLogRouter4");
 			displayMoyCollections();
 		}
 
