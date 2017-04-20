@@ -31,7 +31,7 @@ public interface NPairHandler {
 	 * @param o
 	 *            message received
 	 */
-	void handleIncommingMessage(NPair npair, Object o);
+	void handleIncomingMessage(NPair npair, Object o);
 
 	/**
 	 * A network connection have been closed or lost. The NPair returned won't

@@ -278,26 +278,26 @@ public class DemoApp {
 		}
 
 		@Override
-		public void userConnect(P2PUser user) {
+		public void handleConnection(P2PUser user) {
 			stream.println(user + " connected");
 		}
 
 		@Override
-		public void userDisconnect(P2PUser user) {
+		public void handleUserDisconnect(P2PUser user) {
 			stream.println(user + " disconnected");
 		}
 
 		@Override
-		public void userUpdate(P2PUser user) {
+		public void handleUserUpdate(P2PUser user) {
 			stream.println("update of " + user);
 		}
 	}
 
 	public static void main(String[] args) {
 		new DemoApp(0);
-		new DemoApp(1);
-		new DemoApp(2);
-		new DemoApp(3);
+//		new DemoApp(1);
+//		new DemoApp(2);
+//		new DemoApp(3);
 	}
 
 }

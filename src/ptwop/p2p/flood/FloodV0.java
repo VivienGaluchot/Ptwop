@@ -167,7 +167,7 @@ public class FloodV0 implements P2P, NPairHandler {
 		pair.start();
 		sendUserListTo(user);
 
-		p2pHandler.userConnect(user);
+		p2pHandler.handleConnection(user);
 
 		try {
 			user.sendDirectly(new MyNameIs(myName));
@@ -182,7 +182,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void handleIncommingMessage(NPair pair, Object o) {
+	public void handleIncomingMessage(NPair pair, Object o) {
 		P2PUser user = pairUserMap.get(pair);
 		if (user == null)
 			throw new IllegalArgumentException("Unknown pair : " + pair);
@@ -202,7 +202,7 @@ public class FloodV0 implements P2P, NPairHandler {
 			if (o instanceof MyNameIs) {
 				MyNameIs m = (MyNameIs) o;
 				user.setName(m.name);
-				p2pHandler.userUpdate(user);
+				p2pHandler.handleUserUpdate(user);
 			} else if (o instanceof ConnectTo) {
 				ConnectTo m = (ConnectTo) o;
 				try {
@@ -226,7 +226,7 @@ public class FloodV0 implements P2P, NPairHandler {
 			users.remove(user);
 			pairUserMap.remove(pair);
 		}
-		p2pHandler.userDisconnect(user);
+		p2pHandler.handleUserDisconnect(user);
 	}
 
 	@Override

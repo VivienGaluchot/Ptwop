@@ -107,7 +107,7 @@ public class FloodV1 extends FloodV0 {
 	// NPairHandler interface
 
 	@Override
-	public void handleIncommingMessage(NPair pair, Object o) {
+	public void handleIncomingMessage(NPair pair, Object o) {
 		P2PUser user = pairUserMap.get(pair);
 		if (user == null)
 			throw new IllegalArgumentException("Unknown pair : " + pair);
@@ -127,7 +127,7 @@ public class FloodV1 extends FloodV0 {
 			if (o instanceof MyNameIs) {
 				MyNameIs m = (MyNameIs) o;
 				user.setName(m.name);
-				p2pHandler.userUpdate(user);
+				p2pHandler.handleUserUpdate(user);
 			} else if (o instanceof ConnectTo) {
 				ConnectTo m = (ConnectTo) o;
 				try {
@@ -154,6 +154,6 @@ public class FloodV1 extends FloodV0 {
 			pairUserMap.remove(pair);
 			removeFromNeighbours(pair.getAddress());
 		}
-		p2pHandler.userDisconnect(user);
+		p2pHandler.handleUserDisconnect(user);
 	}
 }

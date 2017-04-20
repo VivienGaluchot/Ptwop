@@ -13,9 +13,9 @@ public interface P2PHandler {
 	 */
 	void handleMessage(P2PUser sender, Object o);
 
-	void userConnect(P2PUser user);
+	void handleConnection(P2PUser user);
 
-	void userUpdate(P2PUser user);
+	void handleUserUpdate(P2PUser user);
 
 	/**
 	 * Function called by the P2P system when a user is disconnected from the
@@ -23,5 +23,5 @@ public interface P2PHandler {
 	 * 
 	 * @param user
 	 */
-	void userDisconnect(P2PUser user);
+	void handleUserDisconnect(P2PUser user);
 }

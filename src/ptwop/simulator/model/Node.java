@@ -95,7 +95,7 @@ public class Node extends NServent implements Steppable {
 			idVsTimeToReceive.addData(data.benchmarkData.id, data.getEllapsedTime(net.getTime()));
 		}
 
-		handleIncommingMessage(emitter.getPairLink(), data.object);
+		handleIncomingMessage(emitter.getPairLink(), data.object);
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class Node extends NServent implements Steppable {
 	}
 
 	@Override
-	public void handleIncommingMessage(NPair user, Object o) {
+	public void handleIncomingMessage(NPair user, Object o) {
 		Link l = (Link) user;
 
 		if (o instanceof DataTCP) {
@@ -161,7 +161,7 @@ public class Node extends NServent implements Steppable {
 					super.handleConnectionFrom(user);
 			}
 		} else {
-			super.handleIncommingMessage(l, o);
+			super.handleIncomingMessage(l, o);
 		}
 	}
 

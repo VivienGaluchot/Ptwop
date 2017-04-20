@@ -122,7 +122,7 @@ public class TcpNPair implements NPair, Runnable {
 						}
 					}
 				} else {
-					handler.handleIncommingMessage(this, o);
+					handler.handleIncomingMessage(this, o);
 				}
 			} catch (IOException e) {
 				disconnect();

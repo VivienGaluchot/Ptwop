@@ -103,17 +103,17 @@ public class Network implements Steppable {
 			}
 
 			@Override
-			public void userConnect(P2PUser user) {
+			public void handleConnection(P2PUser user) {
 				// System.out.println("Node " + n + " | connected to " + user);
 			}
 
 			@Override
-			public void userUpdate(P2PUser user) {
+			public void handleUserUpdate(P2PUser user) {
 				// System.out.println("Node " + n + " | update from " + user);
 			}
 
 			@Override
-			public void userDisconnect(P2PUser user) {
+			public void handleUserDisconnect(P2PUser user) {
 				// System.out.println("Node " + n + " | disconnected from " +
 				// user);
 			}

@@ -91,7 +91,7 @@ public class LogRouter extends DumbRouter {
 			sendRoutingMessage(source, prec, getRoute(dest), dest, rm);
 		} else {
 			// handle message
-			handler.handleIncommingMessage(source.getBindedNPair(), rm.object);
+			handler.handleIncomingMessage(source.getBindedNPair(), rm.object);
 			// send response
 			RoutingMessage rmR = rm.getResponse();
 			if (rmR.destAddress != null && rmR.destAddress.equals(prec.getAddress()))
