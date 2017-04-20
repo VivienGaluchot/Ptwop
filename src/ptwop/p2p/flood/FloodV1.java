@@ -107,7 +107,7 @@ public class FloodV1 extends FloodV0 {
 	// NPairHandler interface
 
 	@Override
-	public void incommingMessage(NPair pair, Object o) {
+	public void handleIncommingMessage(NPair pair, Object o) {
 		P2PUser user = pairUserMap.get(pair);
 		if (user == null)
 			throw new IllegalArgumentException("Unknown pair : " + pair);
@@ -147,12 +147,11 @@ public class FloodV1 extends FloodV0 {
 	}
 
 	@Override
-	public void pairQuit(NPair pair) {
+	public void handleConnectionClosed(NPair pair) {
 		P2PUser user = pairUserMap.get(pair);
 		synchronized (users) {
 			users.remove(user);
 			pairUserMap.remove(pair);
-			addressUserMap.remove(pair);
 			removeFromNeighbours(pair.getAddress());
 		}
 		p2pHandler.userDisconnect(user);

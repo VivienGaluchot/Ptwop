@@ -2,6 +2,11 @@ package ptwop.network;
 
 import java.io.IOException;
 
+/**
+ * NPair for Network Pair. Will be returned by the NServent when a network
+ * connection is established and can be used to communicate with pair over the
+ * network
+ */
 public interface NPair {
 
 	/**
@@ -10,18 +15,13 @@ public interface NPair {
 	public void start();
 
 	/**
-	 * Send objet to the pair
+	 * Send object to the pair
 	 * 
 	 * @param o
 	 *            object to send
 	 * @throws IOException
 	 */
 	public void send(Object o) throws IOException;
-
-	/**
-	 * Disconnect from pair
-	 */
-	public void disconnect();
 
 	/**
 	 * Return the pair's network address
@@ -36,4 +36,9 @@ public interface NPair {
 	 * @return latency time in ms
 	 */
 	public int getLatency();
+
+	/**
+	 * Disconnect from pair
+	 */
+	public void disconnect();
 }

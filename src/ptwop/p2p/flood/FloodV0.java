@@ -28,7 +28,6 @@ public class FloodV0 implements P2P, NPairHandler {
 
 	protected Set<P2PUser> users;
 	protected Map<NPair, P2PUser> pairUserMap;
-	protected Map<NAddress, P2PUser> addressUserMap;
 
 	protected P2PHandler p2pHandler;
 	protected Router router;
@@ -50,7 +49,6 @@ public class FloodV0 implements P2P, NPairHandler {
 		router.setHandler(this);
 		users = new HashSet<>();
 		pairUserMap = new HashMap<>();
-		addressUserMap = new HashMap<>();
 		manager.setHandler(this);
 	}
 
@@ -96,7 +94,6 @@ public class FloodV0 implements P2P, NPairHandler {
 			}
 			users.clear();
 			pairUserMap.clear();
-			addressUserMap.clear();
 		}
 	}
 
@@ -141,15 +138,7 @@ public class FloodV0 implements P2P, NPairHandler {
 
 	@Override
 	public P2PUser getUser(NAddress address) {
-		if (address == null)
-			return null;
-		P2PUser user = null;
-		for (P2PUser u : users) {
-			if (u.getAddress().equals(address)) {
-				user = u;
-				break;
-			}
-		}
+		P2PUser user = pairUserMap.get(manager.getUser(address));
 		if (user == null)
 			System.out.println("Warning, didn't find user with address " + address);
 		return user;
@@ -163,7 +152,7 @@ public class FloodV0 implements P2P, NPairHandler {
 	// NPairHandler interface
 
 	@Override
-	public void incommingConnectionFrom(NPair pair) {
+	public void handleConnectionFrom(NPair pair) {
 		P2PUser user = new P2PUser(pair);
 
 		synchronized (users) {
@@ -174,7 +163,6 @@ public class FloodV0 implements P2P, NPairHandler {
 
 			users.add(user);
 			pairUserMap.put(pair, user);
-			addressUserMap.put(pair.getAddress(), user);
 		}
 		pair.start();
 		sendUserListTo(user);
@@ -189,12 +177,12 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void connectedTo(NPair pair) {
-		incommingConnectionFrom(pair);
+	public void handleConnectionTo(NPair pair) {
+		handleConnectionFrom(pair);
 	}
 
 	@Override
-	public void incommingMessage(NPair pair, Object o) {
+	public void handleIncommingMessage(NPair pair, Object o) {
 		P2PUser user = pairUserMap.get(pair);
 		if (user == null)
 			throw new IllegalArgumentException("Unknown pair : " + pair);
@@ -232,12 +220,11 @@ public class FloodV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void pairQuit(NPair pair) {
+	public void handleConnectionClosed(NPair pair) {
 		P2PUser user = pairUserMap.get(pair);
 		synchronized (users) {
 			users.remove(user);
 			pairUserMap.remove(pair);
-			addressUserMap.remove(pair);
 		}
 		p2pHandler.userDisconnect(user);
 	}

@@ -213,8 +213,8 @@ public class Network implements Steppable {
 				li.setPairLink(lj);
 				lj.setEstablished(true);
 				nj.addLink(lj);
-				ni.incommingConnectionFrom(li);
-				nj.connectedTo(lj);
+				ni.handleConnectionFrom(li);
+				nj.handleConnectionTo(lj);
 
 				for (Link l : nj.getLinks())
 					l.clearBuffers();

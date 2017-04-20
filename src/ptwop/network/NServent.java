@@ -1,16 +1,16 @@
 package ptwop.network;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class NServent implements NPairHandler {
 	private NPairHandler handler;
-	private Set<NPair> pairs;
+	private Map<NAddress, NPair> pairs;
 	private boolean stopping;
 
 	public NServent() {
-		pairs = new HashSet<>();
+		pairs = new HashMap<>();
 		stopping = false;
 	}
 
@@ -24,51 +24,57 @@ public abstract class NServent implements NPairHandler {
 
 	public abstract void connectTo(NAddress address) throws IOException;
 
+	public void sendTo(NAddress address, Object o) throws IOException {
+		NPair pair = pairs.get(address);
+		if (pair == null)
+			throw new IllegalArgumentException("Unknown address");
+		pairs.get(address).send(o);
+	}
+
 	public boolean isConnectedTo(NAddress address) {
-		for (NPair u : pairs) {
-			if (u.getAddress().equals(address)) {
-				return true;
-			}
-		}
-		return false;
+		return pairs.keySet().contains(address);
+	}
+
+	public NPair getUser(NAddress address) {
+		return pairs.get(address);
 	}
 
 	@Override
-	public void incommingConnectionFrom(NPair user) {
+	public void handleConnectionFrom(NPair user) {
 		synchronized (pairs) {
-			pairs.add(user);
+			pairs.put(user.getAddress(), user);
 		}
-		handler.incommingConnectionFrom(user);
+		handler.handleConnectionFrom(user);
 	}
 
 	@Override
-	public void connectedTo(NPair user) {
+	public void handleConnectionTo(NPair user) {
 		synchronized (pairs) {
-			pairs.add(user);
+			pairs.put(user.getAddress(), user);
 		}
-		handler.connectedTo(user);
+		handler.handleConnectionTo(user);
 	}
 
 	@Override
-	public void pairQuit(NPair user) {
+	public void handleConnectionClosed(NPair user) {
 		if (!stopping) {
 			synchronized (pairs) {
-				pairs.remove(user);
+				pairs.remove(user.getAddress());
 			}
 		}
-		handler.pairQuit(user);
+		handler.handleConnectionClosed(user);
 	}
 
 	@Override
-	public void incommingMessage(NPair user, Object o) {
-		handler.incommingMessage(user, o);
+	public void handleIncommingMessage(NPair user, Object o) {
+		handler.handleIncommingMessage(user, o);
 	}
 
 	public void disconnect() {
 		stopping = true;
 		synchronized (pairs) {
-			for (NPair user : pairs) {
-				user.disconnect();
+			for (NAddress a : pairs.keySet()) {
+				pairs.get(a).disconnect();
 			}
 			pairs.clear();
 		}

@@ -63,7 +63,7 @@ public class DumbRouter extends Router {
 			P2PUser source = p2p.getUser(rm.sourceAddress);
 			if (source != null)
 				// handle message
-				handler.incommingMessage(source.getBindedNPair(), rm.object);
+				handler.handleIncommingMessage(source.getBindedNPair(), rm.object);
 			else
 				throw new IllegalArgumentException("Didn't find source user with address " + rm.sourceAddress);
 		}

@@ -52,7 +52,7 @@ public class TcpNPair implements NPair, Runnable {
 			runner.setName("TcpNetworkUser runner " + getAddress().toString());
 		} catch (ClassNotFoundException e) {
 			socket.close();
-			handler.pairQuit(this);
+			handler.handleConnectionClosed(this);
 			throw new IOException("Cant get pair's listening port");
 		}
 	}
@@ -122,7 +122,7 @@ public class TcpNPair implements NPair, Runnable {
 						}
 					}
 				} else {
-					handler.incommingMessage(this, o);
+					handler.handleIncommingMessage(this, o);
 				}
 			} catch (IOException e) {
 				disconnect();
@@ -130,7 +130,7 @@ public class TcpNPair implements NPair, Runnable {
 				e.printStackTrace();
 			}
 		}
-		handler.pairQuit(this);
+		handler.handleConnectionClosed(this);
 	}
 
 	@Override
