@@ -18,10 +18,22 @@ public abstract class NServent implements NPairHandler {
 		this.handler = handler;
 	}
 
+	/**
+	 * Start listening new pair connections
+	 */
 	public abstract void start();
 
 	public abstract NAddress getAddress();
 
+	/**
+	 * Try to connect to the pair with address given. Handler's
+	 * handleConnectionTo is called when successfully connected.
+	 * 
+	 * @param address
+	 *            pair's address
+	 * @throws IOException
+	 *             connection error eventually returned
+	 */
 	public abstract void connectTo(NAddress address) throws IOException;
 
 	public void sendTo(NAddress address, Object o) throws IOException {
@@ -35,7 +47,14 @@ public abstract class NServent implements NPairHandler {
 		return pairs.keySet().contains(address);
 	}
 
-	public NPair getUser(NAddress address) {
+	/**
+	 * Get pair with corresponding network address
+	 * 
+	 * @param address
+	 *            pair's network address
+	 * @return NPair such as pair.getAddress().equals(address) == true
+	 */
+	public NPair getPair(NAddress address) {
 		return pairs.get(address);
 	}
 
@@ -70,6 +89,9 @@ public abstract class NServent implements NPairHandler {
 		handler.handleIncomingMessage(user, o);
 	}
 
+	/**
+	 * Disconnect from all users and stop some listener thread
+	 */
 	public void disconnect() {
 		stopping = true;
 		synchronized (pairs) {

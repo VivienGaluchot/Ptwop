@@ -138,7 +138,7 @@ public class CoreV0 implements P2P, NPairHandler {
 
 	@Override
 	public P2PUser getUser(NAddress address) {
-		P2PUser user = pairUserMap.get(manager.getUser(address));
+		P2PUser user = pairUserMap.get(manager.getPair(address));
 		if (user == null)
 			System.out.println("Warning, didn't find user with address " + address);
 		return user;
