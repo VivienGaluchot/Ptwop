@@ -11,7 +11,7 @@ import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.flood.*;
+import ptwop.p2p.core.*;
 import ptwop.p2p.routing.*;
 import ptwop.simulator.model.BenchmarkData;
 import ptwop.simulator.model.Link;
@@ -29,37 +29,37 @@ public class Benchmarker {
 		P2PCreator DumbRouterCreator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new DumbRouter());
+				return new CoreV1(n, "", new DumbRouter());
 			}
 		};
 		P2PCreator StockasticRouterCreator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new StockasticRouter());
+				return new CoreV1(n, "", new StockasticRouter());
 			}
 		};
 		P2PCreator StockasticLogRouterCreator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new StockasticLogRouter());
+				return new CoreV1(n, "", new StockasticLogRouter());
 			}
 		};
 		P2PCreator StockasticLogRouter2Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new StockasticLogRouter2());
+				return new CoreV1(n, "", new StockasticLogRouter2());
 			}
 		};
 		P2PCreator StockasticLogRouter3Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new StockasticLogRouter3());
+				return new CoreV1(n, "", new StockasticLogRouter3());
 			}
 		};
 		P2PCreator StockasticLogRouter4Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new StockasticLogRouter4());
+				return new CoreV1(n, "", new StockasticLogRouter4());
 			}
 		};
 
@@ -83,37 +83,37 @@ public class Benchmarker {
 		}
 
 		// Interconnection
-		P2PCreator floodV0Creator = new P2PCreator() {
+		P2PCreator coreV0Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV0(n, "", new DumbRouter());
+				return new CoreV0(n, "", new DumbRouter());
 			}
 		};
-		P2PCreator floodV1Creator = new P2PCreator() {
+		P2PCreator coreV1Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV1(n, "", new DumbRouter());
+				return new CoreV1(n, "", new DumbRouter());
 			}
 		};
-		P2PCreator floodV2Creator = new P2PCreator() {
+		P2PCreator coreV2Creator = new P2PCreator() {
 			@Override
 			public P2P createP2P(NServent n) {
-				return new FloodV2(n, "", new DumbRouter());
+				return new CoreV2(n, "", new DumbRouter());
 			}
 		};
 		if (false) {
 			initMoyCollections("Connection d'un noeud", "t (ms)", "Nombre de messages", "Connection d'un noeud",
 					"t (ms)", "Nombre de liens");
-			evaluateOneConnectionOverTime(floodV0Creator, "FloodV0");
-			evaluateOneConnectionOverTime(floodV1Creator, "FloodV1");
-			evaluateOneConnectionOverTime(floodV2Creator, "FloodV2");
+			evaluateOneConnectionOverTime(coreV0Creator, "CoreV0");
+			evaluateOneConnectionOverTime(coreV1Creator, "CoreV1");
+			evaluateOneConnectionOverTime(coreV2Creator, "CoreV2");
 			displayMoyCollections();
 
 			initMoyCollections("Temps de connexion d'un noeud au réseau", "Nombre de noeuds", "t (ms)", null, null,
 					null);
-			evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV0Creator, "FloodV0");
-			evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV1Creator, "FloodV1");
-			evaluateOneNodeConnexionTimeOverNumberOfNodes(floodV2Creator, "FloodV2");
+			evaluateOneNodeConnexionTimeOverNumberOfNodes(coreV0Creator, "CoreV0");
+			evaluateOneNodeConnexionTimeOverNumberOfNodes(coreV1Creator, "CoreV1");
+			evaluateOneNodeConnexionTimeOverNumberOfNodes(coreV2Creator, "CoreV2");
 			displayMoyCollections();
 		}
 	}

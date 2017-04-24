@@ -1,4 +1,4 @@
-package ptwop.p2p.flood;
+package ptwop.p2p.core;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -16,26 +16,26 @@ import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.RoutingMessage;
 
-public class FloodV1 extends FloodV0 {
+public class CoreV1 extends CoreV0 {
 
 	protected Set<Set<NAddress>> neighbours;
 
-	public FloodV1(NServent manager) {
+	public CoreV1(NServent manager) {
 		this(manager, "unamed", new DumbRouter());
 	}
 
-	public FloodV1(NServent manager, Router router) {
+	public CoreV1(NServent manager, Router router) {
 		this(manager, "unamed", router);
 	}
 
-	public FloodV1(NServent manager, String myName, Router router) {
+	public CoreV1(NServent manager, String myName, Router router) {
 		super(manager, myName, router);
 		neighbours = new HashSet<>();
 	}
 
 	@Override
 	public String toString() {
-		return "FloodV1 P2P";
+		return "CoreV1 P2P";
 	}
 
 	// System

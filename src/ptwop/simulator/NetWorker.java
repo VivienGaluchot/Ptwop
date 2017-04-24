@@ -23,9 +23,9 @@ import ptwop.common.gui.SpaceTransform;
 import ptwop.common.math.GaussianRandom;
 import ptwop.network.NServent;
 import ptwop.p2p.P2P;
-import ptwop.p2p.flood.FloodV0;
-import ptwop.p2p.flood.FloodV1;
-import ptwop.p2p.flood.FloodV2;
+import ptwop.p2p.core.CoreV0;
+import ptwop.p2p.core.CoreV1;
+import ptwop.p2p.core.CoreV2;
 import ptwop.p2p.routing.BayesianRouter;
 import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.LogRouter;
@@ -111,12 +111,12 @@ public class NetWorker {
 	public static void main(String[] args) {
 		WordGenerator nameGenerator = new WordGenerator();
 
-		P2P[] p2ps = { new FloodV0(new Node(null), "", new DumbRouter()),
-				new FloodV1(new Node(null), "", new DumbRouter()), new FloodV2(new Node(null), "", new DumbRouter()) };
+		P2P[] p2ps = { new CoreV0(new Node(null), "", new DumbRouter()),
+				new CoreV1(new Node(null), "", new DumbRouter()), new CoreV2(new Node(null), "", new DumbRouter()) };
 		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(), new StockasticLogRouter(),
 				new BayesianRouter() };
 
-		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un système P2P", p2ps);
+		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un noyaux P2P", p2ps);
 		if (p2p == null)
 			return;
 		Router router = (Router) Dialog.JListDialog(null, "Selectionner un routeur", routers);

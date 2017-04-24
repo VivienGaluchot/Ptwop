@@ -32,7 +32,7 @@ import ptwop.network.tcp.TcpNServent;
 import ptwop.p2p.P2P;
 import ptwop.p2p.P2PHandler;
 import ptwop.p2p.P2PUser;
-import ptwop.p2p.flood.*;
+import ptwop.p2p.core.*;
 import ptwop.p2p.routing.*;
 
 public class DemoApp {
@@ -133,7 +133,7 @@ public class DemoApp {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					NServent manager = new TcpNServent(Integer.parseInt(listenPort.getText()));
-					p2p = new FloodV1(manager, name.getText(), new StockasticRouter());
+					p2p = new CoreV1(manager, name.getText(), new StockasticRouter());
 					p2p.setMessageHandler(new Handler());
 					p2p.start();
 					listenPort.setEditable(false);

@@ -1,4 +1,4 @@
-package ptwop.p2p.flood.messages;
+package ptwop.p2p.core.messages;
 
 import ptwop.network.NAddress;
 import ptwop.p2p.base.P2PMessage;

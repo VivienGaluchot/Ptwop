@@ -1,4 +1,4 @@
-package ptwop.p2p.flood;
+package ptwop.p2p.core;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.RoutingMessage;
 
-public class FloodV0 implements P2P, NPairHandler {
+public class CoreV0 implements P2P, NPairHandler {
 
 	protected NServent manager;
 
@@ -33,15 +33,15 @@ public class FloodV0 implements P2P, NPairHandler {
 	protected Router router;
 	protected String myName;
 
-	public FloodV0(NServent manager) {
+	public CoreV0(NServent manager) {
 		this(manager, "unamed", new DumbRouter());
 	}
 
-	public FloodV0(NServent manager, Router router) {
+	public CoreV0(NServent manager, Router router) {
 		this(manager, "unamed", router);
 	}
 
-	public FloodV0(NServent manager, String myName, Router router) {
+	public CoreV0(NServent manager, String myName, Router router) {
 		this.manager = manager;
 		this.myName = myName;
 		this.router = router;
@@ -54,7 +54,7 @@ public class FloodV0 implements P2P, NPairHandler {
 
 	@Override
 	public String toString() {
-		return "FloodV0 P2P : " + myName;
+		return "CoreV0 P2P : " + myName;
 	}
 
 	// System

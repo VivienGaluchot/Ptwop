@@ -1,4 +1,4 @@
-package ptwop.p2p.flood;
+package ptwop.p2p.core;
 
 import java.io.IOException;
 
@@ -8,23 +8,23 @@ import ptwop.p2p.base.ConnectTo;
 import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 
-public class FloodV2 extends FloodV1 {
+public class CoreV2 extends CoreV1 {
 
-	public FloodV2(NServent manager) {
+	public CoreV2(NServent manager) {
 		this(manager, "unamed", new DumbRouter());
 	}
 
-	public FloodV2(NServent manager, Router router) {
+	public CoreV2(NServent manager, Router router) {
 		this(manager, "unamed", router);
 	}
 
-	public FloodV2(NServent manager, String myName, Router router) {
+	public CoreV2(NServent manager, String myName, Router router) {
 		super(manager, myName, router);
 	}
 
 	@Override
 	public String toString() {
-		return "FloodV2 P2P";
+		return "CoreV2 P2P";
 	}
 
 	// System
