@@ -233,7 +233,7 @@ public class DemoApp {
 
 		Frame frame = new Frame(mainPanel);
 		frame.pack();
-		frame.setBounds(frame.getWidth() * id, frame.getY(), frame.getWidth(), frame.getHeight());
+		// frame.setBounds(frame.getWidth() * id, frame.getY(), frame.getWidth(), frame.getHeight());
 	}
 
 	public class ConsoleOutputStream extends OutputStream {
