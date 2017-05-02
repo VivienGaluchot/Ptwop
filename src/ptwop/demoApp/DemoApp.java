@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities;
 
 import ptwop.common.gui.Dialog;
 import ptwop.common.gui.Frame;
+import ptwop.common.gui.Notification;
 import ptwop.network.NServent;
 import ptwop.network.tcp.TcpNAddress;
 import ptwop.network.tcp.TcpNServent;
@@ -41,6 +42,7 @@ public class DemoApp {
 	private JTextPane console;
 	private JScrollPane scrollSole;
 	private PrintStream stream;
+	private Frame frame;
 
 	public DemoApp(int id) {
 		JPanel mainPanel = new JPanel();
@@ -231,7 +233,7 @@ public class DemoApp {
 
 		// Window
 
-		Frame frame = new Frame(mainPanel);
+		frame = new Frame(mainPanel);
 		frame.pack();
 		// frame.setBounds(frame.getWidth() * id, frame.getY(), frame.getWidth(), frame.getHeight());
 	}
@@ -275,6 +277,8 @@ public class DemoApp {
 		@Override
 		public void handleMessage(P2PUser sender, Object o) {
 			stream.println(sender.getName() + " : " + o.toString());
+			frame.toFront();
+			Notification.displayNotif("\"" + sender.getName() + "\" à ecrit", o.toString());
 		}
 
 		@Override
