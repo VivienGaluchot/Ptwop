@@ -16,8 +16,10 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -26,7 +28,6 @@ import javax.swing.SwingUtilities;
 
 import ptwop.common.gui.Dialog;
 import ptwop.common.gui.Frame;
-import ptwop.common.gui.Notification;
 import ptwop.network.NServent;
 import ptwop.network.tcp.TcpNAddress;
 import ptwop.network.tcp.TcpNServent;
@@ -43,6 +44,8 @@ public class DemoApp {
 	private JScrollPane scrollSole;
 	private PrintStream stream;
 	private Frame frame;
+	private DefaultListModel<P2PUser> userListModel;
+	private JList<P2PUser> userList;
 
 	public DemoApp(int id) {
 		JPanel mainPanel = new JPanel();
@@ -231,9 +234,22 @@ public class DemoApp {
 		mainPanel.add(subPanel, new GridBagConstraints(0, 3, 1, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
-		// Window
+		JPanel sidePanel = new JPanel();
+		sidePanel.setBorder(BorderFactory.createTitledBorder("Utilisateurs"));
+		sidePanel.setLayout(new GridBagLayout());
+		sidePanel.setOpaque(false);
+		
+		userList = new JList<>();
+		userList.setMinimumSize(new Dimension(150,150));
+		userList.setPreferredSize(new Dimension(150,150));
+		userList.setOpaque(false);
+		userListModel = new DefaultListModel<>();
+		userList.setModel(userListModel);
+		sidePanel.add(userList, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
 
-		frame = new Frame(mainPanel);
+		// Window
+		frame = new Frame(mainPanel, sidePanel);
 		frame.pack();
 		// frame.setBounds(frame.getWidth() * id, frame.getY(), frame.getWidth(), frame.getHeight());
 	}
@@ -278,22 +294,24 @@ public class DemoApp {
 		public void handleMessage(P2PUser sender, Object o) {
 			stream.println(sender.getName() + " : " + o.toString());
 			frame.toFront();
-			Notification.displayNotif("\"" + sender.getName() + "\" à ecrit", o.toString());
 		}
 
 		@Override
 		public void handleConnection(P2PUser user) {
 			stream.println(user + " connected");
+			userListModel.addElement(user);
 		}
 
 		@Override
 		public void handleUserDisconnect(P2PUser user) {
 			stream.println(user + " disconnected");
+			userListModel.removeElement(user);
 		}
 
 		@Override
 		public void handleUserUpdate(P2PUser user) {
 			stream.println("update of " + user);
+			userList.repaint();
 		}
 	}
 

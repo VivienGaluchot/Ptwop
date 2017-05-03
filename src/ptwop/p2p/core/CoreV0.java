@@ -77,6 +77,8 @@ public class CoreV0 implements P2P, NPairHandler {
 
 	@Override
 	public void start() {
+		users.clear();
+		pairUserMap.clear();
 		manager.start();
 	}
 
@@ -92,8 +94,6 @@ public class CoreV0 implements P2P, NPairHandler {
 			for (P2PUser u : users) {
 				u.getBindedNPair().disconnect();
 			}
-			users.clear();
-			pairUserMap.clear();
 		}
 	}
 
