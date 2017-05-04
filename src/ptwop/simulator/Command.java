@@ -273,10 +273,10 @@ public class Command extends JPanel {
 				new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(listScroller, new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(p2pPairComboBox, new GridBagConstraints(0, 3, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(sendTo, new GridBagConstraints(1, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
+		subPanel.add(sendTo, new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
 				new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(p2pPairComboBox, new GridBagConstraints(1, 3, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 1, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
