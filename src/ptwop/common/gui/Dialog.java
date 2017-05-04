@@ -16,7 +16,8 @@ public class Dialog {
 	}
 
 	public static String IPDialog(Component frame, String msg, String defaultIp) {
-		return (String) JOptionPane.showInputDialog(frame, msg, "Ip address", JOptionPane.PLAIN_MESSAGE, null, null, defaultIp);
+		return (String) JOptionPane.showInputDialog(frame, msg, "Ip address", JOptionPane.PLAIN_MESSAGE, null, null,
+				defaultIp);
 	}
 
 	public static Integer PortDialog(Component frame, String msg) {
@@ -25,11 +26,11 @@ public class Dialog {
 
 	public static Integer PortDialog(Component frame, String msg, String defaultPort) {
 		try {
-			Integer p = Integer.parseInt((String) JOptionPane.showInputDialog(frame, msg, "Port", JOptionPane.PLAIN_MESSAGE, null,
-					null, defaultPort));
-			if(p < 0)
+			Integer p = Integer.parseInt((String) JOptionPane.showInputDialog(frame, msg, "Port",
+					JOptionPane.PLAIN_MESSAGE, null, null, defaultPort));
+			if (p < 0)
 				throw new NumberFormatException();
-			if(p > Short.MAX_VALUE)
+			if (p > Short.MAX_VALUE)
 				throw new NumberFormatException();
 			return p;
 		} catch (NumberFormatException e) {

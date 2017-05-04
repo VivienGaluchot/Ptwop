@@ -43,7 +43,7 @@ public class Frame extends JFrame {
 		if (sideBar != null)
 			contentPane.add(sideBar, new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.CENTER,
 					GridBagConstraints.VERTICAL, new Insets(0, 0, 0, 0), 0, 0));
-		
+
 		Image image = Toolkit.getDefaultToolkit().createImage("icon.png");
 		setIconImage(image);
 

@@ -93,7 +93,7 @@ public interface P2P {
 	 * @return
 	 */
 	public Router getRouter();
-	
+
 	/**
 	 * Return the NServent currently used by P2P the system
 	 * 

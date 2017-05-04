@@ -10,7 +10,7 @@ public class CoreV2 extends CoreV1 {
 	public CoreV2() {
 		this("unamed");
 	}
-	
+
 	public CoreV2(String myName) {
 		super(myName);
 	}
