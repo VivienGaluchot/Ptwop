@@ -46,21 +46,37 @@ public class DemoApp {
 	private Frame frame;
 	private DefaultListModel<P2PUser> userListModel;
 	private JList<P2PUser> userList;
+	private JLabel infoP2P;
+	private JTextField listenPort;
+	private String defaultIp;
+	private String defaultPort;
+	private JTextField name;
+	private JTextPane message;
+	private JButton start;
+	private JButton join;
+	private JButton stop;
 
 	public DemoApp(int id) {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
+		mainPanel.setBackground(Color.white);
 
 		p2p = null;
 		stream = new PrintStream(new ConsoleOutputStream());
 
 		// Fields
-		JTextField listenPort = new JTextField(Integer.toString(919 + id), 4);
-		JTextField name = new JTextField("Patrick " + id, 6);
-		JTextField pairIp = new JTextField("127.0.0.1", 6);
-		JTextField pairPort = new JTextField("919", 4);
-		JTextPane message = new JTextPane();
+		listenPort = new JTextField(Integer.toString(919 + id), 4);
+		name = new JTextField("Patrick " + id, 6);
+		defaultIp = "127.0.0.1";
+		defaultPort = "919";
+
+		infoP2P = new JLabel("disconnected");
+		infoP2P.setFont(new Font("default", Font.PLAIN, 12));
+
+		message = new JTextPane();
 		message.setFont(new Font("Consolas", Font.PLAIN, 12));
+		message.setBorder(BorderFactory.createLineBorder(Color.darkGray));
+		// message.setPreferredSize(new Dimension(200,20));
 		message.setBackground(Color.black);
 		message.setForeground(Color.white);
 		message.setCaretColor(Color.lightGray);
@@ -72,42 +88,12 @@ public class DemoApp {
 					public void run() {
 						if (e.getKeyChar() == '\n') {
 							String msg = message.getText();
-
-							if (msg.endsWith("\n")) {
-								msg = msg.substring(0, msg.length() - 1);
-							}
-
 							if (e.isShiftDown()) {
 								message.setText(msg + '\n');
 							} else {
-								if (msg.startsWith("-ls")) {
-									if (p2p != null) {
-										stream.println("Utilisateurs");
-										for (P2PUser u : p2p.getUsers()) {
-											stream.println("- " + u.toString());
-										}
-									} else {
-										stream.println("p2p not initialized");
-									}
-								} else if (msg.startsWith("-ping")) {
-									stream.println("me : " + msg);
-									if (p2p != null) {
-										stream.println("Latence");
-										for (P2PUser u : p2p.getUsers()) {
-											stream.println("- " + u.toString() + " " + u.getBindedNPair().getLatency()
-													+ " ms");
-										}
-									} else {
-										stream.println("p2p not initialized");
-									}
-								} else {
-									stream.println("me : " + msg);
-									if (p2p != null)
-										p2p.broadcast(msg);
-									else {
-										stream.println("p2p not initialized");
-									}
-								}
+								if (msg.endsWith("\n"))
+									msg = msg.substring(0, msg.length() - 1);
+								processText(msg);
 								message.setText("");
 							}
 						}
@@ -124,14 +110,15 @@ public class DemoApp {
 		console.setCaretColor(Color.lightGray);
 		scrollSole = new JScrollPane(console);
 		scrollSole.setMinimumSize(new Dimension(100, 100));
-		scrollSole.setPreferredSize(new Dimension(300, 200));
+		scrollSole.setPreferredSize(new Dimension(300, 300));
+		scrollSole.setBorder(BorderFactory.createLineBorder(Color.black));
 
 		// Buttons
-		JButton start = new JButton("Demarrer");
-		JButton join = new JButton("Joindre");
-		JButton disconnect = new JButton("Deconnexion");
+		start = new JButton(".start()");
+		join = new JButton(".connectTo()");
+		stop = new JButton(".stop()");
 		join.setEnabled(false);
-		disconnect.setEnabled(false);
+		stop.setEnabled(false);
 
 		start.addActionListener(new ActionListener() {
 			@Override
@@ -141,9 +128,10 @@ public class DemoApp {
 					p2p = new CoreV1(manager, name.getText(), new StockasticRouter());
 					p2p.setMessageHandler(new Handler());
 					p2p.start();
+					infoP2P.setText(p2p + ", listenning...");
 					listenPort.setEditable(false);
 					name.setEditable(false);
-					disconnect.setEnabled(true);
+					stop.setEnabled(true);
 					join.setEnabled(true);
 					start.setEnabled(false);
 				} catch (NumberFormatException | IOException e) {
@@ -156,102 +144,157 @@ public class DemoApp {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					p2p.connectTo(new TcpNAddress(InetAddress.getByName(pairIp.getText()),
-							Integer.parseInt(pairPort.getText())));
-					disconnect.setEnabled(true);
-				} catch (NumberFormatException | IOException e) {
+					String ip = Dialog.IPDialog(frame, "Enter pair's ip address", defaultIp);
+					if (ip == null)
+						return;
+					Integer port = Dialog.PortDialog(frame, "Enter pair's listen port", defaultPort);
+					if (port == null)
+						return;
+					p2p.connectTo(new TcpNAddress(InetAddress.getByName(ip), port));
+					stop.setEnabled(true);
+				} catch (Exception e) {
 					Dialog.displayError(mainPanel, e.getMessage());
 				}
 			}
 		});
 
-		disconnect.addActionListener(new ActionListener() {
+		stop.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (p2p != null)
 					p2p.stop();
+				infoP2P.setText("disconnected");
 				listenPort.setEditable(true);
 				name.setEditable(true);
 				join.setEnabled(false);
 				start.setEnabled(true);
-				disconnect.setEnabled(false);
+				stop.setEnabled(false);
 			}
 		});
 
 		// Layout
+		int line = 0;
+		int subLine = 0;
 
+		/* P2P */
 		JPanel subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Local"));
+		subPanel.setBorder(BorderFactory.createTitledBorder("P2P"));
+		subLine = 0;
+		subPanel.add(new JLabel("Info"), new GridBagConstraints(0, subLine, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+		subPanel.add(infoP2P, new GridBagConstraints(1, subLine, 3, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+		subLine++;
+		subPanel.add(new JLabel("Name"), new GridBagConstraints(0, subLine, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+		subPanel.add(name, new GridBagConstraints(1, subLine, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
+		subPanel.add(new JLabel("Port"), new GridBagConstraints(2, subLine, 1, 1, 0, 0, GridBagConstraints.WEST,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+		subPanel.add(listenPort, new GridBagConstraints(3, subLine, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.HORIZONTAL, new Insets(4, 4, 4, 4), 0, 0));
 
-		subPanel.add(new JLabel("nom"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(name, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-				new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(new JLabel("port"), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(listenPort, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(start, new GridBagConstraints(4, 0, 1, 1, 1, 0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-				new Insets(2, 2, 2, 2), 0, 0));
+		mainPanel.add(subPanel, new GridBagConstraints(0, line, 1, 1, 1, 0, GridBagConstraints.WEST,
+				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
-		mainPanel.add(subPanel, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-
+		/* Command */
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Pair"));
+		subPanel.setBorder(BorderFactory.createTitledBorder("Command"));
+		subLine = 0;
+		subPanel.add(start, new GridBagConstraints(0, subLine, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+		subPanel.add(join, new GridBagConstraints(1, subLine, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
+		subPanel.add(stop, new GridBagConstraints(2, subLine, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.NONE, new Insets(4, 4, 4, 4), 0, 0));
 
-		subPanel.add(new JLabel("ip"), new GridBagConstraints(2, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(pairIp, new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.NONE,
-				new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(new JLabel("port"), new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(pairPort, new GridBagConstraints(5, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(join, new GridBagConstraints(6, 0, 2, 1, 1, 0, GridBagConstraints.EAST, GridBagConstraints.NONE,
-				new Insets(2, 2, 2, 2), 0, 0));
-		subPanel.add(disconnect, new GridBagConstraints(8, 0, 1, 1, 1, 0, GridBagConstraints.EAST,
-				GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0));
+		mainPanel.add(subPanel, new GridBagConstraints(1, line++, 1, 1, 0, 0, GridBagConstraints.EAST,
+				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
-		mainPanel.add(subPanel, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-
+		/* Messages */
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
 		subPanel.setBorder(BorderFactory.createTitledBorder("Messages"));
+		subLine = 0;
+		subPanel.add(scrollSole, new GridBagConstraints(0, subLine, 1, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+		subLine++;
+		subPanel.add(message, new GridBagConstraints(0, subLine, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
-		subPanel.add(scrollSole, new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		mainPanel.add(subPanel, new GridBagConstraints(0, line++, 2, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(0, 4, 4, 4), 0, 0));
 
-		subPanel.add(message, new GridBagConstraints(0, 2, 1, 1, 1, 0, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-
-		mainPanel.add(subPanel, new GridBagConstraints(0, 3, 1, 1, 1, 1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
-
+		/* Sidepanel */
 		JPanel sidePanel = new JPanel();
-		sidePanel.setBorder(BorderFactory.createTitledBorder("Utilisateurs"));
+		sidePanel.setBackground(Color.white);
 		sidePanel.setLayout(new GridBagLayout());
-		sidePanel.setOpaque(false);
-		
+		line = 0;
+
+		/* Users */
+		subPanel = new JPanel();
+		subPanel.setOpaque(false);
+		subPanel.setLayout(new GridBagLayout());
+		subPanel.setBorder(BorderFactory.createTitledBorder("Users"));
+
 		userList = new JList<>();
-		userList.setMinimumSize(new Dimension(150,150));
-		userList.setPreferredSize(new Dimension(150,150));
+		userList.setMinimumSize(new Dimension(150, 150));
+		userList.setPreferredSize(new Dimension(150, 150));
 		userList.setOpaque(false);
 		userListModel = new DefaultListModel<>();
 		userList.setModel(userListModel);
-		sidePanel.add(userList, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER,
-				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		subPanel.add(userList, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
+
+		sidePanel.add(subPanel, new GridBagConstraints(0, line++, 2, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 
 		// Window
 		frame = new Frame(mainPanel, sidePanel);
+		frame.setTitle("PtwoP - Demo App");
 		frame.pack();
-		// frame.setBounds(frame.getWidth() * id, frame.getY(), frame.getWidth(), frame.getHeight());
+		frame.setMinimumSize(frame.getSize());
+		// frame.setBounds(frame.getWidth() * id, frame.getY(),
+		// frame.getWidth(), frame.getHeight());
+	}
+
+	private void processText(String msg) {
+		if (msg.startsWith("-h")) {
+			stream.println("-h    : avialable commands");
+			stream.println("-ls   : list connected users");
+			stream.println("-ping : show ping with each users");
+		} else if (msg.startsWith("-ls")) {
+			if (p2p != null) {
+				stream.println("Utilisateurs");
+				for (P2PUser u : p2p.getUsers()) {
+					stream.println("- " + u.toString());
+				}
+			} else {
+				stream.println("WARNING : p2p not initialized");
+			}
+		} else if (msg.startsWith("-ping")) {
+			stream.println("me : " + msg);
+			if (p2p != null) {
+				stream.println("Latence");
+				for (P2PUser u : p2p.getUsers()) {
+					stream.println("- " + u.toString() + " " + u.getBindedNPair().getLatency() + " ms");
+				}
+			} else {
+				stream.println("WARNING : p2p not initialized");
+			}
+		} else {
+			stream.println("me : " + msg);
+			if (p2p != null)
+				p2p.broadcast(msg);
+			else {
+				stream.println("WARNING : p2p not initialized");
+			}
+		}
 	}
 
 	public class ConsoleOutputStream extends OutputStream {
@@ -317,9 +360,9 @@ public class DemoApp {
 
 	public static void main(String[] args) {
 		new DemoApp(0);
-//		new DemoApp(1);
-//		new DemoApp(2);
-//		new DemoApp(3);
+		// new DemoApp(1);
+		// new DemoApp(2);
+		// new DemoApp(3);
 	}
 
 }
