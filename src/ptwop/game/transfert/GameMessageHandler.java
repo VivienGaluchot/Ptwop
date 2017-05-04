@@ -33,8 +33,7 @@ public class GameMessageHandler implements P2PHandler {
 		this.p2p = p2p;
 		this.pseudo = pseudo;
 
-		p2p.setMessageHandler(this);
-		p2p.start();
+		p2p.setP2PHandler(this);
 
 		// send name & ask for party parameters
 		if (!p2p.getUsers().isEmpty()) {

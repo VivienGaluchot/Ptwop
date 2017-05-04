@@ -5,14 +5,23 @@ import java.util.Set;
 
 import ptwop.network.NAddress;
 import ptwop.network.NPair;
+import ptwop.network.NServent;
 import ptwop.p2p.routing.Router;
 
+/**
+ * This interface lists the core functions of a P2P system. P2P objects should
+ * be designed to execute them on any network given.
+ *
+ */
 public interface P2P {
 
 	/**
-	 * start P2P system
+	 * Start the P2P system with given servent and router system
+	 * 
+	 * @param servent
+	 * @param router
 	 */
-	public void start();
+	public void start(NServent servent, Router router);
 
 	/**
 	 * disconnect from the p2p network
@@ -32,20 +41,20 @@ public interface P2P {
 	public void broadcast(Object msg);
 
 	/**
-	 * send the message msg to user dest
+	 * send msg to some users contained in dests set
+	 * 
+	 * @param msg
+	 */
+	public void anycast(Set<P2PUser> dests, Object msg);
+
+	/**
+	 * send the message msg to user dest, the routing system will be used
 	 * 
 	 * @param dest
 	 * @param msg
 	 * @throws IOException
 	 */
 	public void sendTo(P2PUser dest, Object msg) throws IOException;
-
-	/**
-	 * send msg to some users contained in dests set
-	 * 
-	 * @param msg
-	 */
-	public void anycast(Set<P2PUser> dests, Object msg);
 
 	/**
 	 * get the p2p network user set
@@ -71,13 +80,24 @@ public interface P2P {
 	public P2PUser getUser(NPair pair);
 
 	/**
-	 * set the message handler, it will be used when a message is received
+	 * Set the handler, its functions will be called when a corresponding event
+	 * will occur
 	 * 
 	 * @param handler
 	 */
-	public void setMessageHandler(P2PHandler handler);
+	public void setP2PHandler(P2PHandler handler);
 
-	public void setRouter(Router router);
-
+	/**
+	 * Return the Router currently used by the P2P system
+	 * 
+	 * @return
+	 */
 	public Router getRouter();
+	
+	/**
+	 * Return the NServent currently used by P2P the system
+	 * 
+	 * @return
+	 */
+	public NServent getNServent();
 }

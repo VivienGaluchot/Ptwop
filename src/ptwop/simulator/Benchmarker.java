@@ -28,38 +28,50 @@ public class Benchmarker {
 		// Routing
 		P2PCreator DumbRouterCreator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new DumbRouter());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new DumbRouter());
+				return p2p;
 			}
 		};
 		P2PCreator StockasticRouterCreator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new StockasticRouter());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new StockasticRouter());
+				return p2p;
 			}
 		};
 		P2PCreator StockasticLogRouterCreator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new StockasticLogRouter());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new StockasticLogRouter());
+				return p2p;
 			}
 		};
 		P2PCreator StockasticLogRouter2Creator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new StockasticLogRouter2());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new StockasticLogRouter2());
+				return p2p;
 			}
 		};
 		P2PCreator StockasticLogRouter3Creator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new StockasticLogRouter3());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new StockasticLogRouter3());
+				return p2p;
 			}
 		};
 		P2PCreator StockasticLogRouter4Creator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new StockasticLogRouter4());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new StockasticLogRouter4());
+				return p2p;
 			}
 		};
 
@@ -68,9 +80,12 @@ public class Benchmarker {
 			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
 			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
-//			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
-//			evaluateSendTimeOverTime(StockasticLogRouter3Creator, "StockasticLogRouter3");
-//			evaluateSendTimeOverTime(StockasticLogRouter4Creator, "StockasticLogRouter4");
+			// evaluateSendTimeOverTime(StockasticLogRouter2Creator,
+			// "StockasticLogRouter2");
+			// evaluateSendTimeOverTime(StockasticLogRouter3Creator,
+			// "StockasticLogRouter3");
+			// evaluateSendTimeOverTime(StockasticLogRouter4Creator,
+			// "StockasticLogRouter4");
 			displayMoyCollections();
 		}
 
@@ -85,20 +100,26 @@ public class Benchmarker {
 		// Interconnection
 		P2PCreator coreV0Creator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV0(n, "", new DumbRouter());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV0();
+				p2p.start(n, new DumbRouter());
+				return p2p;
 			}
 		};
 		P2PCreator coreV1Creator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV1(n, "", new DumbRouter());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV1();
+				p2p.start(n, new DumbRouter());
+				return p2p;
 			}
 		};
 		P2PCreator coreV2Creator = new P2PCreator() {
 			@Override
-			public P2P createP2P(NServent n) {
-				return new CoreV2(n, "", new DumbRouter());
+			public P2P createAndStartP2P(NServent n) {
+				P2P p2p = new CoreV2();
+				p2p.start(n, new DumbRouter());
+				return p2p;
 			}
 		};
 		if (false) {

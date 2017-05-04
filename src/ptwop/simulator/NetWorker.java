@@ -34,7 +34,6 @@ import ptwop.p2p.routing.StockasticLogRouter;
 import ptwop.p2p.routing.StockasticRouter;
 import ptwop.simulator.display.NetworkWrapper;
 import ptwop.simulator.model.Network;
-import ptwop.simulator.model.Node;
 import ptwop.simulator.model.P2PCreator;
 
 public class NetWorker {
@@ -111,8 +110,7 @@ public class NetWorker {
 	public static void main(String[] args) {
 		WordGenerator nameGenerator = new WordGenerator();
 
-		P2P[] p2ps = { new CoreV0(new Node(null), "", new DumbRouter()),
-				new CoreV1(new Node(null), "", new DumbRouter()), new CoreV2(new Node(null), "", new DumbRouter()) };
+		P2P[] p2ps = { new CoreV0(), new CoreV1(), new CoreV2() };
 		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(), new StockasticLogRouter(),
 				new BayesianRouter() };
 
@@ -127,18 +125,18 @@ public class NetWorker {
 
 		try {
 			@SuppressWarnings("unchecked")
-			Constructor<P2P> p2pConstructor = (Constructor<P2P>) p2p.getClass().getConstructor(NServent.class,
-					String.class, Router.class);
+			Constructor<P2P> p2pConstructor = (Constructor<P2P>) p2p.getClass().getConstructor(String.class);
 			@SuppressWarnings("unchecked")
 			Constructor<Router> routerConstructor = (Constructor<Router>) router.getClass().getConstructor();
 
 			P2PCreator pcreator = new P2PCreator() {
 				@Override
-				public P2P createP2P(NServent n) {
+				public P2P createAndStartP2P(NServent n) {
 					try {
 						Router router = routerConstructor.newInstance();
 						router.setClock(new SystemClock());
-						P2P p2p = p2pConstructor.newInstance(n, nameGenerator.getWord(5), router);
+						P2P p2p = p2pConstructor.newInstance(nameGenerator.getWord(5));
+						p2p.start(n, router);
 						return p2p;
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException e) {

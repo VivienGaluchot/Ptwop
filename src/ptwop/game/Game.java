@@ -19,6 +19,7 @@ import ptwop.game.model.Party;
 import ptwop.game.model.Player;
 import ptwop.game.transfert.GameMessageHandler;
 import ptwop.network.tcp.TcpNServent;
+import ptwop.p2p.P2P;
 import ptwop.p2p.core.CoreV0;
 import ptwop.p2p.routing.DumbRouter;
 
@@ -141,7 +142,9 @@ public class Game {
 				return;
 			try {
 				// Client connection
-				client = new GameMessageHandler(new CoreV0(new TcpNServent(919), name, new DumbRouter()), name);
+				P2P p2p = new CoreV0(name);
+				p2p.start(new TcpNServent(919), new DumbRouter());
+				client = new GameMessageHandler(p2p, name);
 				Party party = client.getJoinedParty();
 				playParty(party, client);
 

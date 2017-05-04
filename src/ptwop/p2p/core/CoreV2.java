@@ -2,24 +2,17 @@ package ptwop.p2p.core;
 
 import java.io.IOException;
 
-import ptwop.network.NServent;
 import ptwop.p2p.P2PUser;
 import ptwop.p2p.base.ConnectTo;
-import ptwop.p2p.routing.DumbRouter;
-import ptwop.p2p.routing.Router;
 
 public class CoreV2 extends CoreV1 {
 
-	public CoreV2(NServent manager) {
-		this(manager, "unamed", new DumbRouter());
+	public CoreV2() {
+		this("unamed");
 	}
-
-	public CoreV2(NServent manager, Router router) {
-		this(manager, "unamed", router);
-	}
-
-	public CoreV2(NServent manager, String myName, Router router) {
-		super(manager, myName, router);
+	
+	public CoreV2(String myName) {
+		super(myName);
 	}
 
 	@Override

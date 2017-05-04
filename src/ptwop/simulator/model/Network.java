@@ -92,10 +92,10 @@ public class Network implements Steppable {
 		n.setId(nodes.size());
 		nodes.add(n);
 
-		P2P p2p = creator.createP2P(n);
+		P2P p2p = creator.createAndStartP2P(n);
 		p2p.getRouter().setClock(getClock());
 		p2ps.put(n, p2p);
-		p2p.setMessageHandler(new P2PHandler() {
+		p2p.setP2PHandler(new P2PHandler() {
 			@Override
 			public void handleMessage(P2PUser sender, Object o) {
 				// System.out.println("Node " + n + " | received from " + sender
@@ -118,7 +118,6 @@ public class Network implements Steppable {
 				// user);
 			}
 		});
-		p2p.start();
 	}
 
 	public Node getNode(int i) {

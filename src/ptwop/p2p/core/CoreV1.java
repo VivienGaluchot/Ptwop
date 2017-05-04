@@ -5,31 +5,24 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ptwop.network.NAddress;
-import ptwop.network.NServent;
 import ptwop.network.NPair;
 import ptwop.p2p.P2PUser;
 import ptwop.p2p.base.ConnectTo;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.base.MyNameIs;
 import ptwop.p2p.base.P2PMessage;
-import ptwop.p2p.routing.DumbRouter;
-import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.RoutingMessage;
 
 public class CoreV1 extends CoreV0 {
 
 	protected Set<Set<NAddress>> neighbours;
 
-	public CoreV1(NServent manager) {
-		this(manager, "unamed", new DumbRouter());
+	public CoreV1() {
+		this("unamed");
 	}
 
-	public CoreV1(NServent manager, Router router) {
-		this(manager, "unamed", router);
-	}
-
-	public CoreV1(NServent manager, String myName, Router router) {
-		super(manager, myName, router);
+	public CoreV1(String myName) {
+		super(myName);
 		neighbours = new HashSet<>();
 	}
 
@@ -132,7 +125,7 @@ public class CoreV1 extends CoreV0 {
 				ConnectTo m = (ConnectTo) o;
 				try {
 					addNeighbours(pair.getAddress(), m.address);
-					manager.connectTo(m.address);
+					servent.connectTo(m.address);
 				} catch (IOException e) {
 					removeFromNeighbours(m.address);
 					System.out.println("Impossible to connect to " + m.address + " : " + e.getMessage());

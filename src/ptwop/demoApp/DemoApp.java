@@ -125,9 +125,9 @@ public class DemoApp {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					NServent manager = new TcpNServent(Integer.parseInt(listenPort.getText()));
-					p2p = new CoreV1(manager, name.getText(), new StockasticRouter());
-					p2p.setMessageHandler(new Handler());
-					p2p.start();
+					p2p = new CoreV1(name.getText());
+					p2p.setP2PHandler(new Handler());
+					p2p.start(manager, new StockasticRouter());
 					infoP2P.setText(p2p + ", listenning...");
 					listenPort.setEditable(false);
 					name.setEditable(false);

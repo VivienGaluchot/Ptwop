@@ -18,13 +18,12 @@ import ptwop.p2p.base.ConnectTo;
 import ptwop.p2p.base.MessageToApp;
 import ptwop.p2p.base.MyNameIs;
 import ptwop.p2p.base.P2PMessage;
-import ptwop.p2p.routing.DumbRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.RoutingMessage;
 
 public class CoreV0 implements P2P, NPairHandler {
 
-	protected NServent manager;
+	protected NServent servent;
 
 	protected Set<P2PUser> users;
 	protected Map<NPair, P2PUser> pairUserMap;
@@ -33,28 +32,19 @@ public class CoreV0 implements P2P, NPairHandler {
 	protected Router router;
 	protected String myName;
 
-	public CoreV0(NServent manager) {
-		this(manager, "unamed", new DumbRouter());
+	public CoreV0() {
+		this("unamed");
 	}
 
-	public CoreV0(NServent manager, Router router) {
-		this(manager, "unamed", router);
-	}
-
-	public CoreV0(NServent manager, String myName, Router router) {
-		this.manager = manager;
+	public CoreV0(String myName) {
 		this.myName = myName;
-		this.router = router;
-		router.setP2P(this);
-		router.setHandler(this);
 		users = new HashSet<>();
 		pairUserMap = new HashMap<>();
-		manager.setHandler(this);
 	}
 
 	@Override
 	public String toString() {
-		return "CoreV0 P2P : " + myName;
+		return "CoreV0 P2P";
 	}
 
 	// System
@@ -76,20 +66,28 @@ public class CoreV0 implements P2P, NPairHandler {
 	// P2P Interface
 
 	@Override
-	public void start() {
+	public void start(NServent servent, Router router) {
+		this.servent = servent;
+		this.servent.setHandler(this);
+
+		this.router = router;
+		this.router.setP2P(this);
+		this.router.setHandler(this);
+
 		users.clear();
 		pairUserMap.clear();
-		manager.start();
+
+		servent.start();
 	}
 
 	@Override
 	public void connectTo(NAddress address) throws IOException {
-		manager.connectTo(address);
+		servent.connectTo(address);
 	}
 
 	@Override
 	public void stop() {
-		manager.disconnect();
+		servent.disconnect();
 		synchronized (users) {
 			for (P2PUser u : users) {
 				u.getBindedNPair().disconnect();
@@ -132,13 +130,13 @@ public class CoreV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void setMessageHandler(P2PHandler handler) {
+	public void setP2PHandler(P2PHandler handler) {
 		p2pHandler = handler;
 	}
 
 	@Override
 	public P2PUser getUser(NAddress address) {
-		P2PUser user = pairUserMap.get(manager.getPair(address));
+		P2PUser user = pairUserMap.get(servent.getPair(address));
 		if (user == null)
 			System.out.println("Warning, didn't find user with address " + address);
 		return user;
@@ -206,7 +204,7 @@ public class CoreV0 implements P2P, NPairHandler {
 			} else if (o instanceof ConnectTo) {
 				ConnectTo m = (ConnectTo) o;
 				try {
-					manager.connectTo(m.address);
+					servent.connectTo(m.address);
 				} catch (IOException e) {
 					System.out.println("Impossible to connect to " + m.address + " : " + e.getMessage());
 				}
@@ -230,12 +228,12 @@ public class CoreV0 implements P2P, NPairHandler {
 	}
 
 	@Override
-	public void setRouter(Router router) {
-		this.router = router;
+	public Router getRouter() {
+		return router;
 	}
 
 	@Override
-	public Router getRouter() {
-		return router;
+	public NServent getNServent() {
+		return servent;
 	}
 }
