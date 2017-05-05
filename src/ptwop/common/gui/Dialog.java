@@ -14,6 +14,11 @@ public class Dialog {
 	public static String IPDialog(Component frame, String msg) {
 		return IPDialog(frame, msg, "127.0.0.1");
 	}
+	
+	public static boolean YesNoDialog(Component frame, String question){
+		int res = JOptionPane.showConfirmDialog(frame, question);
+		return res == JOptionPane.OK_OPTION;
+	}
 
 	public static String IPDialog(Component frame, String msg, String defaultIp) {
 		return (String) JOptionPane.showInputDialog(frame, msg, "Ip address", JOptionPane.PLAIN_MESSAGE, null, null,
