@@ -57,7 +57,7 @@ public class Command extends JPanel {
 	private JComboBox<P2PUser> p2pPairComboBox;
 	private JButton sendTo;
 
-	String[] linksColumnNames = { "Dest", "Charge", "Perte", "Latence", "Poids" };
+	String[] linksColumnNames = { "Dest", "Charge", "Loss", "Latency", "Weight" };
 	String[] p2pUsersColumnNames = { "Name", "Address" };
 
 	public Command(AnimationThread thread, NetworkWrapper wrapper) {
@@ -92,7 +92,7 @@ public class Command extends JPanel {
 		JPanel subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Reseau"));
+		subPanel.setBorder(BorderFactory.createTitledBorder("Network"));
 
 		subPanel.add(new JLabel("time : "), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
@@ -157,7 +157,7 @@ public class Command extends JPanel {
 
 		// Node info
 		pairComboBox = new JComboBox<>();
-		connectTo = new JButton("Connexion");
+		connectTo = new JButton("Connect");
 		connectTo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -178,7 +178,7 @@ public class Command extends JPanel {
 		});
 		connectTo.setEnabled(false);
 
-		disconnect = new JButton("Deconnexion");
+		disconnect = new JButton("Disconnect");
 		disconnect.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -196,7 +196,7 @@ public class Command extends JPanel {
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Noeud"));
+		subPanel.setBorder(BorderFactory.createTitledBorder("Node"));
 
 		subPanel.add(new JLabel("nom : "), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.WEST,
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
@@ -204,10 +204,10 @@ public class Command extends JPanel {
 				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
 		subPanel.add(pairComboBox, new GridBagConstraints(0, 1, 2, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(connectTo, new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
-		subPanel.add(disconnect, new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.WEST,
-				GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(connectTo, new GridBagConstraints(0, 2, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		subPanel.add(disconnect, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.CENTER,
+				GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 		line++;
 		add(subPanel, new GridBagConstraints(0, line, 2, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
@@ -216,7 +216,7 @@ public class Command extends JPanel {
 		subPanel = new JPanel();
 		subPanel.setOpaque(false);
 		subPanel.setLayout(new GridBagLayout());
-		subPanel.setBorder(BorderFactory.createTitledBorder("Liens"));
+		subPanel.setBorder(BorderFactory.createTitledBorder("Links"));
 
 		JTable linksInfo = new JTable();
 		linksInfo.setFillsViewportHeight(true);

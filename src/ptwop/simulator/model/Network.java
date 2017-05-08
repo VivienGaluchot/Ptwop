@@ -58,6 +58,16 @@ public class Network implements Steppable {
 	public void setWrapper(NetworkWrapper wrapper) {
 		this.wrapper = wrapper;
 	}
+	
+	public void signalNewNode(Node n) {
+		if (wrapper != null)
+			wrapper.addNode(n);
+	}
+	
+	public void signalRemovedNode(Node n) {
+		if (wrapper != null)
+			wrapper.removeNode(n);
+	}
 
 	public void signalNewLink(Link l) {
 		if (wrapper != null)
@@ -84,13 +94,14 @@ public class Network implements Steppable {
 		return time;
 	}
 
-	public int numberOfNodes() {
+	public synchronized int numberOfNodes() {
 		return nodes.size();
 	}
 
-	public void addNode(Node n) {
+	public synchronized void addNode(Node n) {
 		n.setId(nodes.size());
 		nodes.add(n);
+		signalNewNode(n);
 
 		P2P p2p = creator.createAndStartP2P(n);
 		p2p.getRouter().setClock(getClock());
@@ -120,7 +131,7 @@ public class Network implements Steppable {
 		});
 	}
 
-	public Node getNode(int i) {
+	public synchronized Node getNode(int i) {
 		return nodes.get(i);
 	}
 
@@ -128,7 +139,7 @@ public class Network implements Steppable {
 		return getNode(address.id);
 	}
 
-	public List<Node> getNodes() {
+	public synchronized List<Node> getNodes() {
 		return Collections.unmodifiableList(nodes);
 	}
 
@@ -137,7 +148,7 @@ public class Network implements Steppable {
 	}
 
 	@Override
-	public void doTimeStep() {
+	public synchronized void doTimeStep() {
 		time++;
 		for (Node n : nodes) {
 			n.doTimeStep();
@@ -199,7 +210,7 @@ public class Network implements Steppable {
 		return node;
 	}
 
-	public void setToFullyInterconnected() {
+	public synchronized void setToFullyInterconnected() {
 		for (int i = 0; i < nodes.size(); i++) {
 			Node ni = getNode(i);
 			for (int j = i + 1; j < nodes.size(); j++) {

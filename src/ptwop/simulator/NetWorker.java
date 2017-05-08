@@ -114,14 +114,14 @@ public class NetWorker {
 		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(), new StockasticLogRouter(),
 				new BayesianRouter() };
 
-		P2P p2p = (P2P) Dialog.JListDialog(null, "Selectionner un noyaux P2P", p2ps);
+		P2P p2p = (P2P) Dialog.JListDialog(null, "Select a P2P kernel", p2ps);
 		if (p2p == null)
 			return;
-		Router router = (Router) Dialog.JListDialog(null, "Selectionner un routeur", routers);
+		Router router = (Router) Dialog.JListDialog(null, "Select a router system", routers);
 		if (router == null)
 			return;
-
-		System.out.println("Networker with " + router + " " + p2p);
+		
+		int numberOfNodes = Dialog.NumberDialog(null, "Number of nodes in the network", "Info");
 
 		try {
 			@SuppressWarnings("unchecked")
@@ -147,7 +147,7 @@ public class NetWorker {
 			};
 
 			Network net = new Network(pcreator);
-			int nodeNumber = 10;
+			int nodeNumber = numberOfNodes;
 			GaussianRandom linkLatency = new GaussianRandom(5, 1000, 50, 40);
 			GaussianRandom linkLoss = new GaussianRandom(0, 0, 0, 1); // no-loss
 			GaussianRandom linkPacketSize = new GaussianRandom(1, 20, 12, 5);
@@ -155,7 +155,7 @@ public class NetWorker {
 			net.addNewNodes(nodeNumber);
 
 			display(net);
-
+			
 		} catch (NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 		}

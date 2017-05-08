@@ -118,9 +118,11 @@ public class CoreV0 implements P2P, NPairHandler {
 			}
 		}
 	}
-
+	
 	@Override
 	public void sendTo(P2PUser dest, Object msg) throws IOException {
+		if(! users.contains(dest))
+			throw new IOException("Unknown destination");
 		router.routeTo(dest, new MessageToApp(msg));
 	}
 
@@ -138,7 +140,7 @@ public class CoreV0 implements P2P, NPairHandler {
 	public P2PUser getUser(NAddress address) {
 		P2PUser user = pairUserMap.get(servent.getPair(address));
 		if (user == null)
-			System.out.println("Warning, didn't find user with address " + address);
+			throw new IllegalArgumentException("Can't find any user with address " + address);
 		return user;
 	}
 
@@ -193,7 +195,7 @@ public class CoreV0 implements P2P, NPairHandler {
 			try {
 				router.processRoutingMessage(user, (RoutingMessage) o);
 			} catch (IOException e) {
-				System.out.println("Error wile processing routing message : " + e.getMessage());
+				System.out.println("Error while processing routing message : " + e.getMessage());
 			}
 		} else {
 			// Process

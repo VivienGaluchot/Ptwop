@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 
 public class Dialog {
 	public static void displayError(Component frame, String message) {
-		JOptionPane.showMessageDialog(frame, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(frame, message, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	public static String IPDialog(Component frame, String msg) {
@@ -39,13 +39,24 @@ public class Dialog {
 				throw new NumberFormatException();
 			return p;
 		} catch (NumberFormatException e) {
-			displayError(frame, "Le port doit être un entier compris entre 0 et " + Short.MAX_VALUE);
+			displayError(frame, "Input value should be an integer between 0 and " + Short.MAX_VALUE);
+			return null;
+		}
+	}
+	
+	public static Integer NumberDialog(Component frame, String msg, String title){
+		try {
+			Integer p = Integer.parseInt((String) JOptionPane.showInputDialog(frame, msg, title,
+					JOptionPane.PLAIN_MESSAGE, null, null, "0"));
+			return p;
+		} catch (NumberFormatException e) {
+			displayError(frame, "Input value should be an integer");
 			return null;
 		}
 	}
 
 	public static String NameDialog(Component frame) {
-		return (String) JOptionPane.showInputDialog(frame, "Entrer votre nom :", "Nom", JOptionPane.PLAIN_MESSAGE, null,
+		return (String) JOptionPane.showInputDialog(frame, "Type your name :", "Name", JOptionPane.PLAIN_MESSAGE, null,
 				null, "patrick");
 	}
 
