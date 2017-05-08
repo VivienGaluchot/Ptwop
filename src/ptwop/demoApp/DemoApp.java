@@ -62,12 +62,16 @@ public class DemoApp {
 	private JButton stop;
 	private JPanel userInfo;
 
+	private boolean isDefaultMessage;
+	private static String defaultMessage = "Type your message here";
+
 	private static Color backgroundColor = Color.white;
 	private static Color msgBackgroundColor = new Color(230, 240, 245);
 	private static Color msgForegroundColor = new Color(20, 50, 150);
 	private static Color msgCaretColor = new Color(20, 30, 50);
 	private static Color msgBorderColor = new Color(150, 200, 230);
 	private static Font defaultFont = new Font("default", Font.PLAIN, 12);
+	private static Font defaultMessageFont = new Font("default", Font.ITALIC, 12);
 
 	public DemoApp(int id) {
 		JPanel mainPanel = new JPanel();
@@ -87,18 +91,22 @@ public class DemoApp {
 		infoP2P.setFont(defaultFont);
 
 		message = new JTextPane();
-		message.setFont(new Font("Consolas", Font.PLAIN, 12));
-		message.setBorder(BorderFactory.createLineBorder(msgBorderColor));
-		message.setBackground(msgBackgroundColor);
+		message.setFont(defaultFont);
 		message.setForeground(msgForegroundColor);
 		message.setCaretColor(msgCaretColor);
+		message.setOpaque(false);
+
+		isDefaultMessage = true;
+		message.setText(defaultMessage);
+		message.setFont(defaultMessageFont);
+
 		message.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						if (e.getKeyChar() == '\n') {
+						if (e.getKeyChar() == '\n' && !isDefaultMessage) {
 							String msg = message.getText();
 							if (e.isShiftDown()) {
 								message.setText(msg + '\n');
@@ -114,6 +122,26 @@ public class DemoApp {
 			}
 		});
 
+		message.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				if (isDefaultMessage) {
+					message.setFont(defaultFont);
+					message.setText("");
+				}
+				isDefaultMessage = false;
+			}
+
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				isDefaultMessage = message.getText().length() == 0;
+				if (isDefaultMessage) {
+					message.setFont(defaultMessageFont);
+					message.setText(defaultMessage);
+				}
+			}
+		});
+
 		console = new JTextPane();
 		console.setEditable(false);
 		console.setFont(new Font("Consolas", Font.PLAIN, 12));
@@ -123,7 +151,7 @@ public class DemoApp {
 		scrollSole = new JScrollPane(console);
 		scrollSole.setMinimumSize(new Dimension(100, 100));
 		scrollSole.setPreferredSize(new Dimension(100, 100));
-		scrollSole.setBorder(BorderFactory.createLineBorder(msgBorderColor));
+		scrollSole.setBorder(BorderFactory.createEmptyBorder());
 
 		// Buttons
 		start = new JButton("start()");
@@ -245,10 +273,26 @@ public class DemoApp {
 		subPanel.add(new JLabel("Messages"), new GridBagConstraints(0, subLine, 1, 1, 0, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.NONE, new Insets(4, 4, 0, 4), 0, 0));
 		subLine++;
-		subPanel.add(scrollSole, new GridBagConstraints(0, subLine, 1, 1, 1, 1, GridBagConstraints.CENTER,
+		
+		JPanel subSubPanel = new JPanel();
+		subSubPanel.setOpaque(true);
+		subSubPanel.setLayout(new GridBagLayout());
+		subSubPanel.setBorder(BorderFactory.createLineBorder(msgBorderColor));
+		subSubPanel.setBackground(msgBackgroundColor);
+		subSubPanel.add(scrollSole, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		subPanel.add(subSubPanel, new GridBagConstraints(0, subLine, 1, 1, 1, 1, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(4, 4, 4, 4), 0, 0));
 		subLine++;
-		subPanel.add(message, new GridBagConstraints(0, subLine, 1, 1, 1, 0, GridBagConstraints.CENTER,
+
+		subSubPanel = new JPanel();
+		subSubPanel.setOpaque(true);
+		subSubPanel.setLayout(new GridBagLayout());
+		subSubPanel.setBorder(BorderFactory.createLineBorder(msgBorderColor));
+		subSubPanel.setBackground(msgBackgroundColor);
+		subSubPanel.add(message, new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.CENTER,
+				GridBagConstraints.BOTH, new Insets(2, 2, 2, 2), 0, 0));
+		subPanel.add(subSubPanel, new GridBagConstraints(0, subLine, 1, 1, 1, 0, GridBagConstraints.CENTER,
 				GridBagConstraints.BOTH, new Insets(0, 4, 4, 4), 0, 0));
 
 		mainPanel.add(subPanel, new GridBagConstraints(0, line++, 2, 1, 1, 1, GridBagConstraints.CENTER,
