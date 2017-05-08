@@ -1,6 +1,7 @@
 package ptwop.p2p.routing;
 
 import ptwop.common.Clock;
+import ptwop.common.math.RandomCollection;
 import ptwop.p2p.P2PUser;
 
 public class BayesianRouter extends LogRouter {
@@ -20,20 +21,12 @@ public class BayesianRouter extends LogRouter {
 
 	@Override
 	public P2PUser getRoute(P2PUser destination) {
-		double totalProb = 0;
+		RandomCollection<P2PUser> dests = new RandomCollection<>();
 		for (P2PUser u : p2p.getUsers()) {
-			totalProb += relativeBestUserProbability(destination, u);
+			double p = relativeBestUserProbability(destination, u);
+			dests.add(p, u);
 		}
-
-		double p = Math.random() * totalProb;
-		double cumulativeProbability = 0;
-		for (P2PUser u : p2p.getUsers()) {
-			cumulativeProbability += relativeBestUserProbability(destination, u);
-			if (p <= cumulativeProbability) {
-				return u;
-			}
-		}
-		return destination;
+		return dests.next();
 	}
 
 	private double relativeBestUserProbability(P2PUser destination, P2PUser route) {
@@ -45,17 +38,14 @@ public class BayesianRouter extends LogRouter {
 	}
 
 	private double probabilityBestRouteWithLatency(P2PUser destination, P2PUser route, int latency) {
-		// TODO
-		return 1;
+		return 1.0 / latency;
 	}
 
 	private double probabilityGettingLatency(P2PUser destination, P2PUser route, int latency) {
-		// TODO
-		return 1;
+		return latency;
 	}
 
 	private double probabilityGettingLatencyWhileBeeingBestRoute(P2PUser destination, P2PUser route, int latency) {
-		// TODO
-		return 1;
+		return 1.0 / latency;
 	}
 }

@@ -62,18 +62,19 @@ public class AnimationThread implements Runnable {
 		while (runAnimation) {
 			long now = System.currentTimeMillis();
 
-			try {
-				// Execute scheduledOprations
-				synchronized (scheduledOperations) {
-					for (Runnable op : scheduledOperations)
+			// Execute scheduledOprations
+			synchronized (scheduledOperations) {
+				for (Runnable op : scheduledOperations) {
+					try {
 						op.run();
-					scheduledOperations.clear();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
-
-				mainPanel.animate(now - lastMs);
-			} catch (Exception e) {
-				e.printStackTrace();
+				scheduledOperations.clear();
 			}
+
+			mainPanel.animate(now - lastMs);
 
 			lastMs = now;
 			try {
