@@ -49,7 +49,7 @@ public class CoreV0 implements P2P, NPairHandler {
 
 	// System
 
-	private void sendUserListTo(P2PUser user) {
+	protected void sendUserListTo(P2PUser user) {
 		synchronized (users) {
 			for (P2PUser u : users) {
 				if (!u.equals(user)) {

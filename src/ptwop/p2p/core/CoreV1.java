@@ -83,6 +83,7 @@ public class CoreV1 extends CoreV0 {
 		}
 	}
 
+	@Override
 	protected void sendUserListTo(P2PUser user) {
 		synchronized (users) {
 			for (P2PUser u : users) {

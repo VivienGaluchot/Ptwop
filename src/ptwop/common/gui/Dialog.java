@@ -45,9 +45,13 @@ public class Dialog {
 	}
 	
 	public static Integer NumberDialog(Component frame, String msg, String title){
+		return NumberDialog(frame, msg, title, "0");
+	}
+	
+	public static Integer NumberDialog(Component frame, String msg, String title, String def_value){
 		try {
 			Integer p = Integer.parseInt((String) JOptionPane.showInputDialog(frame, msg, title,
-					JOptionPane.PLAIN_MESSAGE, null, null, "0"));
+					JOptionPane.PLAIN_MESSAGE, null, null, def_value));
 			return p;
 		} catch (NumberFormatException e) {
 			displayError(frame, "Input value should be an integer");

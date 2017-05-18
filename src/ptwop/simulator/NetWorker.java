@@ -121,7 +121,7 @@ public class NetWorker {
 		if (router == null)
 			return;
 		
-		int numberOfNodes = Dialog.NumberDialog(null, "Number of nodes in the network", "Info");
+		int numberOfNodes = Dialog.NumberDialog(null, "Number of nodes in the network", "Info", "10");
 
 		try {
 			@SuppressWarnings("unchecked")

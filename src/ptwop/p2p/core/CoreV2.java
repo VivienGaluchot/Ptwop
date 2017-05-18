@@ -28,8 +28,8 @@ public class CoreV2 extends CoreV1 {
 			for (P2PUser u : users) {
 				try {
 					if (u != user && !areNeighbours(user.getAddress(), u.getAddress())) {
-						sendTo(user, new ConnectTo(u.getAddress()));
-						sendTo(u, new ConnectTo(user.getAddress()));
+						user.sendDirectly(new ConnectTo(u.getAddress()));
+						u.sendDirectly(new ConnectTo(user.getAddress()));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
