@@ -75,21 +75,18 @@ public class Benchmarker {
 			}
 		};
 
-		if (true) {
+		if (false) {
 			initMoyCollections("Envois d'un message", "Message envoyés", "Latence (ms)", null, null, null);
 			evaluateSendTimeOverTime(DumbRouterCreator, "DumbRouter");
 			evaluateSendTimeOverTime(StockasticRouterCreator, "StockasticRouter");
 			evaluateSendTimeOverTime(StockasticLogRouterCreator, "StockasticLogRouter");
-			// evaluateSendTimeOverTime(StockasticLogRouter2Creator,
-			// "StockasticLogRouter2");
-			// evaluateSendTimeOverTime(StockasticLogRouter3Creator,
-			// "StockasticLogRouter3");
-			// evaluateSendTimeOverTime(StockasticLogRouter4Creator,
-			// "StockasticLogRouter4");
+			evaluateSendTimeOverTime(StockasticLogRouter2Creator, "StockasticLogRouter2");
+			evaluateSendTimeOverTime(StockasticLogRouter3Creator, "StockasticLogRouter3");
+			evaluateSendTimeOverTime(StockasticLogRouter4Creator, "StockasticLogRouter4");
 			displayMoyCollections();
 		}
 
-		if (false) {
+		if (true) {
 			initMoyCollections("Broadcast", "Taille de message (octets)", "Latence (ms)", null, null, null);
 			evaluateBroadcastTimeOverMessageSize(DumbRouterCreator, "DumbRouter");
 			evaluateBroadcastTimeOverMessageSize(StockasticRouterCreator, "StockasticRouter");
