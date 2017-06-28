@@ -26,9 +26,7 @@ import ptwop.p2p.P2P;
 import ptwop.p2p.core.CoreV0;
 import ptwop.p2p.core.CoreV1;
 import ptwop.p2p.core.CoreV2;
-import ptwop.p2p.routing.BayesianRouter;
 import ptwop.p2p.routing.DumbRouter;
-import ptwop.p2p.routing.LogRouter;
 import ptwop.p2p.routing.Router;
 import ptwop.p2p.routing.StockasticLogRouter;
 import ptwop.p2p.routing.StockasticRouter;
@@ -111,8 +109,7 @@ public class NetWorker {
 		WordGenerator nameGenerator = new WordGenerator();
 
 		P2P[] p2ps = { new CoreV0(), new CoreV1(), new CoreV2() };
-		Router[] routers = { new DumbRouter(), new StockasticRouter(), new LogRouter(), new StockasticLogRouter(),
-				new BayesianRouter() };
+		Router[] routers = { new DumbRouter(), new StockasticRouter(), new StockasticLogRouter()};
 
 		P2P p2p = (P2P) Dialog.JListDialog(null, "Select a P2P kernel", p2ps);
 		if (p2p == null)

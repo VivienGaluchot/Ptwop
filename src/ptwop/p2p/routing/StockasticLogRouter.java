@@ -16,7 +16,7 @@ public class StockasticLogRouter extends LogRouter {
 
 	@Override
 	public String toString() {
-		return "StockasticLogRouter";
+		return "StockasticRouter2";
 	}
 
 	@Override

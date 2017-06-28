@@ -28,7 +28,7 @@ public class CoreV1 extends CoreV0 {
 
 	@Override
 	public String toString() {
-		return "CoreV1 P2P";
+		return "CoreV1";
 	}
 
 	// System

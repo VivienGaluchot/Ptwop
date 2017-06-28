@@ -17,7 +17,7 @@ public class DumbRouter extends Router {
 
 	@Override
 	public String toString() {
-		return "DumbRouter";
+		return "DirectRouter";
 	}
 
 	@Override

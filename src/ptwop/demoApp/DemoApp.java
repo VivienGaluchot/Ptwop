@@ -154,9 +154,9 @@ public class DemoApp {
 		scrollSole.setBorder(BorderFactory.createEmptyBorder());
 
 		// Buttons
-		start = new JButton("start()");
-		join = new JButton("connectTo()");
-		stop = new JButton("stop()");
+		start = new JButton("Start");
+		join = new JButton("Connect");
+		stop = new JButton("Stop");
 		join.setEnabled(false);
 		stop.setEnabled(false);
 

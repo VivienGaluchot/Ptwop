@@ -44,7 +44,7 @@ public class CoreV0 implements P2P, NPairHandler {
 
 	@Override
 	public String toString() {
-		return "CoreV0 P2P";
+		return "CoreV0";
 	}
 
 	// System
